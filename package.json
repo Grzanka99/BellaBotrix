@@ -1,0 +1,26 @@
+{
+  "name": "bellatrix",
+  "module": "index.ts",
+  "type": "module",
+  "scripts": {
+    "start": "bun run ./src/index.ts",
+    "dev": "bun --watch ./src/index.ts",
+    "build": "bun build --target=bun ./src/index.ts --outdir ./dist",
+    "compile": "bun build --compile ./src/index.ts --outfile ./bin/bellatrix",
+    "db:migrate": "prisma migrate dev --name",
+    "db:studio": "prisma studio"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "1.1.2",
+    "@types/tmi.js": "^1.8.3",
+    "bun-types": "latest",
+    "prisma": "^5.2.0"
+  },
+  "peerDependencies": {
+    "typescript": "^5.0.0"
+  },
+  "dependencies": {
+    "@prisma/client": "5.2.0",
+    "tmi.js": "^1.8.5"
+  }
+}
