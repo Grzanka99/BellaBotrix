@@ -1,5 +1,5 @@
 import { getChatHandler } from "handlers";
-import tmi, { Events } from "tmi.js";
+import tmi from "tmi.js";
 
 const client = new tmi.Client({
   options: { debug: true },
@@ -13,19 +13,19 @@ const client = new tmi.Client({
 client.connect();
 
 client.on("message", async (channel, tags, message, self) => {
-// Ignore echoed messages.
-if (self) {
-return;
-}
+  // Ignore echoed messages.
+  if (self) {
+    return;
+  }
 
-const handler = await getChatHandler(channel, tags, message);
+  const handler = await getChatHandler(channel, tags, message);
 
-handler.forEach((handler) => {
-  handler.useHandler({
-    channel,
-    tags,
-    message,
-    client,
+  handler.forEach((handler) => {
+    handler.useHandler({
+      channel,
+      tags,
+      message,
+      client,
+    });
   });
-});
 });
