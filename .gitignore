@@ -3,4 +3,4 @@ bin/
 node_modules/
 .env
 prisma/dev.db
-prisma/migrations
+prisma/migrations/*/
