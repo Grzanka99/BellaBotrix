@@ -1,4 +1,5 @@
 import { getChatHandler } from "handlers";
+import { getOAuthToken, getTwitchApiUser, getChatters } from "services/api";
 import tmi from "tmi.js";
 
 const client = new tmi.Client({
@@ -29,3 +30,26 @@ client.on("message", async (channel, tags, message, self) => {
     });
   });
 });
+
+let auth_token: string | undefined = undefined;
+
+setInterval(async () => {
+  if (!auth_token) {
+    const newToken = await getOAuthToken();
+    auth_token = newToken;
+  }
+
+  const channels = client.getChannels();
+
+  const viewers = await Promise.all(
+    channels.map(async (ch) => {
+      const res = await getChatters(ch.replace("#", ""), auth_token || "");
+
+      return {
+        [ch]: res?.data,
+      };
+    }),
+  );
+
+  console.log(viewers);
+}, 10 * 1000);

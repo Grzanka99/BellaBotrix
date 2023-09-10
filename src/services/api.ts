@@ -59,7 +59,7 @@ export async function getTwitchApiUser(
 //   }
 // }
 
-export async function getUsersList(
+export async function getChatters(
   broadcaster: string,
   token: string,
 ): Promise<TOption<TTwitchApiResponse<TTwitchApiChatter[]>>> {
