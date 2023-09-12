@@ -12,12 +12,26 @@ export type TTwitchApiUser = {
 };
 
 export type TTwitchApiChatter = {
-  user_id: string,
-  user_login: string,
-  user_name: string,
-}
+  user_id: string;
+  user_login: string;
+  user_name: string;
+};
 
 export type TTwitchApiResponse<T> = {
   data: T;
   pagination: Record<string, string>;
+};
+
+export type TTwitchApiUnauthorized = {
+  error: string;
+  status: 401;
+  message: string;
+};
+
+export type TTwitchOAuthRefresh = {
+  access_token: string;
+  expires_in: number;
+  refresh_token: string;
+  scope: string[];
+  token_type: string;
 };

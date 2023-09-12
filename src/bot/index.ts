@@ -1,5 +1,6 @@
 import { getChatHandler } from "handlers";
-import { getOAuthToken, getTwitchApiUser, getChatters } from "services/api";
+import { TwitchApi } from "services/twitch-api";
+import { getOAuthToken } from "services/twitch-api/api-connector";
 import tmi from "tmi.js";
 
 const client = new tmi.Client({
@@ -31,25 +32,35 @@ client.on("message", async (channel, tags, message, self) => {
   });
 });
 
-let auth_token: string | undefined = undefined;
+async function chatters() {
+  let auth_token: string | undefined = undefined;
+  const channels: Record<string, TwitchApi> = {};
 
-setInterval(async () => {
   if (!auth_token) {
     const newToken = await getOAuthToken();
     auth_token = newToken;
   }
 
-  const channels = client.getChannels();
+  const channelsNames = client.getChannels();
 
-  const viewers = await Promise.all(
-    channels.map(async (ch) => {
-      const res = await getChatters(ch.replace("#", ""), auth_token || "");
+  console.log(channelsNames);
+  channelsNames.forEach((ch) => {
+    if (channels[ch] || !auth_token) {
+      return;
+    }
 
-      return {
-        [ch]: res?.data,
-      };
-    }),
-  );
+    channels[ch] = new TwitchApi(ch, auth_token);
+    channels[ch].startChattersAutorefresh(2000);
+  });
 
-  console.log(viewers);
-}, 10 * 1000);
+  setInterval(() => {
+
+  Object.keys(channels).forEach((ch) => {
+    console.log(channels[ch].chatters);
+  });
+  }, 2000);
+}
+
+client.on("connected", () => {
+  chatters();
+});
