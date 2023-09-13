@@ -2,8 +2,8 @@ import { logger } from "@cgsh/utils";
 import { prisma } from "services/db";
 import {
   getChatters,
+  getModerators,
   getNewToken,
-  getOAuthToken,
   getTwitchApiUser,
 } from "./api-connector";
 import { TTwitchApiChatter } from "services/types";
@@ -13,6 +13,7 @@ export class TwitchApi {
   private globalToken: string;
   private channelName: string;
   private userId: string | undefined = undefined;
+  private moderators: TTwitchApiChatter[] = [];
 
   constructor(channel: string, token: string) {
     logger.info("Creating new api connector");
@@ -72,6 +73,28 @@ export class TwitchApi {
     return newTokens.access_token;
   }
 
+  public async getChannleModerators(): Promise<TTwitchApiChatter[]> {
+    if (!this.userId || !this.channelToken) {
+      logger.info(`Using cash for moderators on channel ${this.channelName}`);
+      return this.moderators;
+    }
+
+    try {
+      logger.info(`Fetching list of moderators on channel ${this.channelName}`);
+      const res = await getModerators(this.userId, this.channelToken);
+
+      if (!res) {
+        return this.moderators;
+      }
+
+      this.moderators = res.data;
+
+      return res.data;
+    } catch {
+      return this.moderators;
+    }
+  }
+
   public async getChannelChattersList(): Promise<TTwitchApiChatter[]> {
     if (!this.userId || !this.channelToken) {
       return [];
@@ -90,6 +113,7 @@ export class TwitchApi {
 
         return [];
       }
+
       return res.data;
     } catch {
       logger.error(`Failed to get chatters for channel ${this.channelName}`);
@@ -101,7 +125,9 @@ export class TwitchApi {
   private chattersList: TTwitchApiChatter[] = [];
 
   public startChattersAutorefresh(timeout: number): boolean {
-    logger.info(`Setting timer for channel: ${this.channelName} each ${timeout}ms`)
+    logger.info(
+      `Setting timer for channel: ${this.channelName} each ${timeout}ms`,
+    );
     this.refreshInterval = setInterval(async () => {
       const res = await this.getChannelChattersList();
       this.chattersList = res;

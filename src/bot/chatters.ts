@@ -1,9 +1,13 @@
 import { chatterTimeHandler } from "handlers/activity-handler/chatters-time";
 import { TwitchApi } from "services/twitch-api";
+import { TOption } from "types";
 
 const channels: string[] = [];
 
-export async function chatters(channelName: string, authToken: string) {
+export async function chatters(
+  channelName: string,
+  authToken: string,
+): Promise<TOption<TwitchApi>> {
   if (channels.includes(channelName)) {
     return;
   }
@@ -16,4 +20,6 @@ export async function chatters(channelName: string, authToken: string) {
   setInterval(async () => {
     await chatterTimeHandler(channelName, channel.chatters);
   }, 30000);
+
+  return channel;
 }

@@ -1,7 +1,6 @@
 import {
   TTwitchApiChatter,
   TTwitchApiResponse,
-  TTwitchApiUnauthorized,
   TTwitchApiUser,
   TTwitchOAuthRefresh,
 } from "services/types";
@@ -98,5 +97,27 @@ export async function getChatters(
 
   const json = await res.json<TTwitchApiResponse<TTwitchApiChatter[]>>();
 
+  return json;
+}
+
+export async function getModerators(
+  userid: string,
+  token: string,
+): Promise<TOption<TTwitchApiResponse<TTwitchApiChatter[]>>> {
+  const url = `https://api.twitch.tv/helix/moderation/moderators?broadcaster_id=${userid}`;
+
+  const res = await fetch(url, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+      "Client-Id": API_CLIENT_ID,
+    } as HeadersInit,
+  });
+
+  if (res.status !== 200) {
+    console.log(await res.json());
+    return undefined;
+  }
+
+  const json = await res.json<TTwitchApiResponse<TTwitchApiChatter[]>>();
   return json;
 }

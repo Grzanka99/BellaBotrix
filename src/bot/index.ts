@@ -2,6 +2,7 @@ import { getChatHandler } from "handlers";
 import { getOAuthToken } from "services/twitch-api/api-connector";
 import tmi from "tmi.js";
 import { chatters } from "./chatters";
+import { TwitchApi } from "services/twitch-api";
 
 const client = new tmi.Client({
   options: { debug: true },
@@ -14,13 +15,15 @@ const client = new tmi.Client({
 
 client.connect();
 
+const apis: Record<string, TwitchApi> = {};
+
 client.on("message", async (channel, tags, message, self) => {
   // Ignore echoed messages.
   if (self) {
     return;
   }
 
-  const handler = await getChatHandler(channel, tags, message);
+  const handler = await getChatHandler(channel, tags, message, apis[channel]);
 
   handler.forEach(async (handler) => {
     await handler.useHandler({
@@ -37,7 +40,10 @@ getOAuthToken().then((res) => {
     return;
   }
 
-  client.on("join", (channel) => {
-    chatters(channel, res);
+  client.on("join", async (channel) => {
+    const api = await chatters(channel, res);
+    if (api) {
+      apis[channel] = api;
+    }
   });
 });

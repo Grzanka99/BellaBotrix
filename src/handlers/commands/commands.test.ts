@@ -3,11 +3,13 @@ import { identifyIsBotCommand } from "./identify-message";
 
 describe("identify is command", () => {
   test("should identify as command", async () => {
-    const res = await identifyIsBotCommand("!add @WannaCry_TM 100");
+    const res = await identifyIsBotCommand("!addpoints @WannaCry_TM 100");
 
-    expect(res?.original).toBe("!add @WannaCry_TM 100");
-    expect(res?.action).toBe("add");
-    expect(res?.actionMessage).toBe("$username get $points points");
+    expect(res?.original).toBe("!addpoints @WannaCry_TM 100");
+    expect(res?.action).toBe("addpoints");
+    expect(res?.actionMessage).toBe(
+      "User $username received $points points, and now has more points! Kappa",
+    );
   });
 
   test("should not identify as command", async () => {

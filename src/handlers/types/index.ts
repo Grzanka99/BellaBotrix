@@ -29,3 +29,10 @@ export type TUseHandler = (args: THandlerArgs) => Promise<void>;
 export type THandler = {
   useHandler: TUseHandler;
 };
+
+export enum EWonLost {
+  Won = "Won",
+  Lost = "Lost",
+  SuperWon = "SuperWon",
+  ExtremeWon = "ExtremeWon",
+}

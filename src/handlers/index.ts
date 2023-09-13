@@ -5,11 +5,13 @@ import { createTaxHandler } from "./tax-handler";
 import { identifyIsBotCommand } from "./commands/identify-message";
 import { createCommandHandler } from "./commands";
 import { createActivityHandler } from "./activity-handler";
+import { TwitchApi } from "services/twitch-api";
 
 export async function getChatHandler(
   _channel: string,
   tags: ChatUserstate,
   message: string,
+  api?: TwitchApi,
 ): Promise<THandler[]> {
   const handlers: THandler[] = [{ useHandler: createActivityHandler() }];
 
@@ -29,7 +31,7 @@ export async function getChatHandler(
 
   const isCommand = await identifyIsBotCommand(chatMessage.content);
   if (isCommand) {
-    handlers.push({ useHandler: createCommandHandler(isCommand) });
+    handlers.push({ useHandler: createCommandHandler(isCommand, api) });
   }
 
   return handlers;

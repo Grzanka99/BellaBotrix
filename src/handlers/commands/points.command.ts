@@ -4,23 +4,8 @@ import { prisma, prismaQueue } from "services/db";
 import { ChatUserstate } from "tmi.js";
 import { TOption } from "types";
 import { interpolate } from "utils/interpolate-string";
-
-export function getUsername(
-  original: string,
-  sender: string,
-): [string, string] {
-  let resUsername: string = sender;
-  let formattedUsername: string = sender;
-
-  const username = original.match(/\@\S+/);
-
-  if (username?.length && username[0]) {
-    formattedUsername = username[0].replace("@", "").toLowerCase().trim();
-    resUsername = username[0].replace("@", "");
-  }
-
-  return [resUsername, formattedUsername];
-}
+import { getUsername } from "./utils/get-username";
+import { TTwitchApiChatter } from "services/types";
 
 export async function getUserPoints(
   { original, actionMessage }: TCommand,
@@ -77,7 +62,7 @@ export async function addPoints(
   }
 
   const user = await prismaQueue.enqueue(() =>
-    prisma.user.findFirst({
+    prisma.user.findUnique({
       where: {
         userid: `${tags["user-id"]}@${channel}`,
         channel,
@@ -89,12 +74,11 @@ export async function addPoints(
     prismaQueue.enqueue(() =>
       prisma.user.create({
         data: {
-
-        username: formattedUsername,
-        userid: `${tags["user-id"]}@${channel}`,
-        points,
-        channel,
-        }
+          username: formattedUsername,
+          userid: `${tags["user-id"]}@${channel}`,
+          points,
+          channel,
+        },
       }),
     );
   } else {
@@ -135,7 +119,7 @@ export async function removePoints(
   }
 
   const user = await prismaQueue.enqueue(() =>
-    prisma.user.findFirst({
+    prisma.user.findUnique({
       where: {
         userid: `${tags["user-id"]}@${channel}`,
         channel,
