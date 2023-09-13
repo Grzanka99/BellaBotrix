@@ -1,7 +1,7 @@
 import { getChatHandler } from "handlers";
-import { TwitchApi } from "services/twitch-api";
 import { getOAuthToken } from "services/twitch-api/api-connector";
 import tmi from "tmi.js";
+import { chatters } from "./chatters";
 
 const client = new tmi.Client({
   options: { debug: true },
@@ -9,7 +9,7 @@ const client = new tmi.Client({
     username: Bun.env.CLIENT_ID,
     password: Bun.env.PASSWORD,
   },
-  channels: ["wannacry_tm"],
+  channels: ["wannacry_tm", "trejekk"],
 });
 
 client.connect();
@@ -32,35 +32,12 @@ client.on("message", async (channel, tags, message, self) => {
   });
 });
 
-async function chatters() {
-  let auth_token: string | undefined = undefined;
-  const channels: Record<string, TwitchApi> = {};
-
-  if (!auth_token) {
-    const newToken = await getOAuthToken();
-    auth_token = newToken;
+getOAuthToken().then((res) => {
+  if (!res) {
+    return;
   }
 
-  const channelsNames = client.getChannels();
-
-  console.log(channelsNames);
-  channelsNames.forEach((ch) => {
-    if (channels[ch] || !auth_token) {
-      return;
-    }
-
-    channels[ch] = new TwitchApi(ch, auth_token);
-    channels[ch].startChattersAutorefresh(2000);
+  client.on("join", (channel) => {
+    chatters(channel, res);
   });
-
-  setInterval(() => {
-
-  Object.keys(channels).forEach((ch) => {
-    console.log(channels[ch].chatters);
-  });
-  }, 2000);
-}
-
-client.on("connected", () => {
-  chatters();
 });

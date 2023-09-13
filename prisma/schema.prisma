@@ -19,7 +19,9 @@ model Commands {
 
 model User {
   id           Int    @id @default(autoincrement())
-  username     String @unique
+  userid       String @unique
+  username     String
+  channel String
   sentMessages Int    @default(0)
   points       Int    @default(0)
 }

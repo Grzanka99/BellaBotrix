@@ -100,7 +100,7 @@ export class TwitchApi {
   private refreshInterval: Timer | undefined = undefined;
   private chattersList: TTwitchApiChatter[] = [];
 
-  public startChattersAutorefresh(timeout: 2000): boolean {
+  public startChattersAutorefresh(timeout: number): boolean {
     logger.info(`Setting timer for channel: ${this.channelName} each ${timeout}ms`)
     this.refreshInterval = setInterval(async () => {
       const res = await this.getChannelChattersList();
