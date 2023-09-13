@@ -1,5 +1,5 @@
 import { TUseHandler } from "handlers/types";
-import { prisma } from "services/db";
+import { prisma, prismaQueue } from "services/db";
 
 export function createActivityHandler(): TUseHandler {
   return async function ({ tags, channel }) {
@@ -7,34 +7,40 @@ export function createActivityHandler(): TUseHandler {
       return;
     }
 
-    const user = await prisma.user.findUnique({
-      where: {
-        channel,
-        userid: `${tags["user-id"]}@${channel}`,
-      },
-    });
+    const { username } = tags;
+    const user = await prismaQueue.enqueue(() =>
+      prisma.user.findUnique({
+        where: {
+          channel,
+          userid: `${tags["user-id"]}@${channel}`,
+        },
+      }),
+    );
 
     if (!user) {
-      await prisma.user.create({
-        data: {
-          username: tags.username,
-          userid: `${tags["user-id"]}@${channel}`,
-          channel,
-          sentMessages: 1,
-          points: 10,
-        },
-      });
+      prismaQueue.enqueue(() =>
+        prisma.user.create({
+          data: {
+            username: username.toLowerCase().trim(),
+            userid: `${tags["user-id"]}@${channel}`,
+            channel,
+            sentMessages: 1,
+            points: 10,
+          },
+        }),
+      );
     } else {
-      await prisma.user.update({
-        where: {
-          id: user.id,
-        },
-        data: {
-          ...user,
-          sentMessages: user.sentMessages + 1,
-          points: user.sentMessages ? user.points + 1 : user.points + 10,
-        },
-      });
+      prismaQueue.enqueue(() =>
+        prisma.user.update({
+          where: {
+            id: user.id
+          },
+          data: {
+            sentMessages: user?.sentMessages || 0 + 1,
+            points: user?.sentMessages ? user.points + 1 : 10,
+          },
+        }),
+      );
     }
   };
 }

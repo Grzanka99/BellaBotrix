@@ -22,8 +22,8 @@ client.on("message", async (channel, tags, message, self) => {
 
   const handler = await getChatHandler(channel, tags, message);
 
-  handler.forEach((handler) => {
-    handler.useHandler({
+  handler.forEach(async (handler) => {
+    await handler.useHandler({
       channel,
       tags,
       message,

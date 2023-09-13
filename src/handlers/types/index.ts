@@ -24,7 +24,7 @@ export type THandlerArgs = {
   channel: string;
 };
 
-export type TUseHandler = (args: THandlerArgs) => void;
+export type TUseHandler = (args: THandlerArgs) => Promise<void>;
 
 export type THandler = {
   useHandler: TUseHandler;

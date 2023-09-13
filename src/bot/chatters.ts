@@ -15,5 +15,5 @@ export async function chatters(channelName: string, authToken: string) {
 
   setInterval(async () => {
     await chatterTimeHandler(channelName, channel.chatters);
-  }, 10000);
+  }, 30000);
 }
