@@ -7,7 +7,7 @@ import { prisma } from "services/db";
 import { logger } from "@cgsh/utils";
 
 export async function bootstrap(): Promise<void> {
-  console.time('bootstrap');
+  console.time("bootstrap");
   const apis: Record<string, TwitchApi> = {};
 
   logger.info("Bootstrap");
@@ -46,7 +46,7 @@ export async function bootstrap(): Promise<void> {
       return;
     }
 
-    logger.info(`Creating Twitch API connector for channel: ${channel}`)
+    logger.info(`Creating Twitch API connector for channel: ${channel}`);
     const api = await chatters(channel, mainOAuthToken);
     if (api) {
       apis[channel] = api;
@@ -69,5 +69,5 @@ export async function bootstrap(): Promise<void> {
       });
     });
   });
-  console.timeEnd('bootstrap');
+  console.timeEnd("bootstrap");
 }
