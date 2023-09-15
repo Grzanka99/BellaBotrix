@@ -1,1 +1,3 @@
-import './bot';
+import { bootstrap } from "bot";
+
+bootstrap();
