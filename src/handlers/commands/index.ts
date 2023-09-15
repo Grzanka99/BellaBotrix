@@ -11,6 +11,8 @@ export  function createCommandHandler(
 ): TUseHandler {
 
   return async function ({ client, channel, tags }): Promise<void> {
+
+
   let mods: TTwitchApiChatter[] = [];
   if (api) {
     const res = await api.getChannleModerators();

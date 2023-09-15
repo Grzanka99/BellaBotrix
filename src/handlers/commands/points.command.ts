@@ -5,7 +5,6 @@ import { ChatUserstate } from "tmi.js";
 import { TOption } from "types";
 import { interpolate } from "utils/interpolate-string";
 import { getUsername } from "./utils/get-username";
-import { TTwitchApiChatter } from "services/types";
 
 export async function getUserPoints(
   { original, actionMessage }: TCommand,

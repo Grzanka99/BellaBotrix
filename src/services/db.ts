@@ -21,6 +21,6 @@ if (prisma) {
 // NOTE: remove later
 setInterval(() => {
   if (prismaQueue.enqueued) {
-    logger.info(`PRISMA CURRENTLY ENQUEUED: ${prismaQueue.enqueued}`);
+    logger.warning(`PRISMA CURRENTLY ENQUEUED: ${prismaQueue.enqueued}`);
   }
 }, 100);

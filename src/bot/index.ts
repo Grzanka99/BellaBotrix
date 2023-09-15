@@ -7,6 +7,7 @@ import { prisma } from "services/db";
 import { logger } from "@cgsh/utils";
 
 export async function bootstrap(): Promise<void> {
+  console.time('bootstrap');
   const apis: Record<string, TwitchApi> = {};
 
   logger.info("Bootstrap");
@@ -68,4 +69,5 @@ export async function bootstrap(): Promise<void> {
       });
     });
   });
+  console.timeEnd('bootstrap');
 }

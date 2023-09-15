@@ -21,29 +21,27 @@ async function handleSingleChatter(
       }),
     );
 
-
-    if(!user) {
-      await prismaQueue.enqueue(() => prisma.user.create({
-        data: {
-
-          username: chatter.user_name.toLowerCase().trim(),
-          userid: `${chatter.user_id}@${channel}`,
-          channel,
-        }
-      })) 
+    if (!user) {
+      await prismaQueue.enqueue(() =>
+        prisma.user.create({
+          data: {
+            username: chatter.user_name.toLowerCase().trim(),
+            userid: `${chatter.user_id}@${channel}`,
+            channel,
+          },
+        }),
+      );
     } else {
-
-
-    await prismaQueue.enqueue(() =>
-      prisma.user.update({
-        where: {
-          id: user.id,
-        },
-        data: {
-          points: user.points + 1,
-        },
-      }),
-    );
+      await prismaQueue.enqueue(() =>
+        prisma.user.update({
+          where: {
+            id: user.id,
+          },
+          data: {
+            points: user.points + 1,
+          },
+        }),
+      );
     }
 
     return true;
@@ -57,12 +55,8 @@ export async function chatterTimeHandler(
   channel: string,
   chatters: TTwitchApiChatter[],
 ): Promise<void> {
-  logger.info(
-    `Creating async pipe ${chatters.length} for chatters on channel ${channel}`,
-  );
 
-  const args = chatters.map((chatter) => [chatter, channel]);
-  const pipe = new AsyncPipe(handleSingleChatter, args);
-
-  pipe.start();
+  chatters.forEach((chatter) => {
+    handleSingleChatter(chatter, channel);
+  });
 }
