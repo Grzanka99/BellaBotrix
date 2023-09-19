@@ -1,6 +1,9 @@
 import { bootstrap } from "bot";
 import { prisma } from "services/db";
-import { getChannelRefreshKey } from "services/twitch-api/api-connector";
+import {
+  getChannelRefreshKey,
+  validateToken,
+} from "services/twitch-api/api-connector";
 
 bootstrap();
 
@@ -20,7 +23,6 @@ function getAuthFormXd() {
   form += `<input name="response_type" value="${responseType}" type="hidden" />`;
   form += `<input name="scope" value="${scope}" type="hidden" />`;
   form += `<input name="scope" value="${scope2}" type="hidden" />`;
-  form += `<input name="channel" type="text" />`;
   form += `<button type="submit">authorize</button>`;
   form += "</form>";
 
@@ -51,9 +53,16 @@ Bun.serve({
         return new Response("Something went wrong");
       }
 
-      const newChannel = await prisma.channel.create({
+      const validated = await validateToken(res.access_token);
+
+      if (!validated) {
+        return new Response("Something went wrong");
+      }
+
+      await prisma.channel.create({
         data: {
-          name: "asd",
+          name: validated.login,
+          channel_id: validated.user_id,
           token: res.refresh_token,
           enabled: true,
         },

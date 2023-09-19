@@ -3,6 +3,7 @@ import {
   TTwitchApiResponse,
   TTwitchApiUser,
   TTwitchOAuthRefresh,
+  TTwitchValidateToken,
 } from "services/types";
 import { TOption } from "types";
 import { interpolate } from "utils/interpolate-string";
@@ -33,7 +34,27 @@ export async function getChannelRefreshKey(
     const res = await fetch(url, { method: "POST" });
     const json = await res.json<TTwitchOAuthRefresh>();
 
-    return json
+    return json;
+  } catch {
+    return undefined;
+  }
+}
+
+export async function validateToken(
+  token: string,
+): Promise<TOption<TTwitchValidateToken>> {
+  try {
+    const url = "https://id.twitch.tv/oauth2/validate";
+
+    const res = await fetch(url, {
+      headers: {
+        Authorization: `OAuth ${token}`,
+      },
+    });
+
+    const json = await res.json<TTwitchValidateToken>();
+
+    return json;
   } catch {
     return undefined;
   }
@@ -132,7 +153,6 @@ export async function getModerators(
   });
 
   if (res.status !== 200) {
-    console.log(await res.json());
     return undefined;
   }
 

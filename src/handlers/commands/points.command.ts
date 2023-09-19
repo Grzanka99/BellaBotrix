@@ -60,38 +60,38 @@ export async function addPoints(
     return undefined;
   }
 
-  const user = await prismaQueue.enqueue(() =>
-    prisma.user.findUnique({
+  await prismaQueue.enqueue(async () => {
+    const user = await prisma.user.findUnique({
       where: {
         userid: `${tags["user-id"]}@${channel}`,
         channel,
       },
-    }),
-  );
+    });
 
-  if (!user) {
-    prismaQueue.enqueue(() =>
-      prisma.user.create({
-        data: {
-          username: formattedUsername,
-          userid: `${tags["user-id"]}@${channel}`,
-          points,
-          channel,
-        },
-      }),
-    );
-  } else {
-    prismaQueue.enqueue(() =>
-      prisma.user.update({
-        where: {
-          userid: user?.userid,
-        },
-        data: {
-          points: (user?.points || 0) + points,
-        },
-      }),
-    );
-  }
+    if (!user) {
+      prismaQueue.enqueue(() =>
+        prisma.user.create({
+          data: {
+            username: formattedUsername,
+            userid: `${tags["user-id"]}@${channel}`,
+            points,
+            channel,
+          },
+        }),
+      );
+    } else {
+      prismaQueue.enqueue(() =>
+        prisma.user.update({
+          where: {
+            userid: user?.userid,
+          },
+          data: {
+            points: (user?.points || 0) + points,
+          },
+        }),
+      );
+    }
+  });
 
   return interpolate(actionMessage, {
     username: `@${resUsername}`,
@@ -117,35 +117,35 @@ export async function removePoints(
     return undefined;
   }
 
-  const user = await prismaQueue.enqueue(() =>
-    prisma.user.findUnique({
+  const finalPoints = await prismaQueue.enqueue(async () => {
+    const user = await prisma.user.findUnique({
       where: {
         userid: `${tags["user-id"]}@${channel}`,
         channel,
       },
-    }),
-  );
-
-  if (!user) {
-    return interpolate(actionMessage, {
-      username: `@${resUsername}`,
-      points: 0,
     });
-  }
 
-  let finalPoints = user.points - points;
-  finalPoints = finalPoints < 0 ? 0 : finalPoints;
+    if (!user) {
+      return interpolate(actionMessage, {
+        username: `@${resUsername}`,
+        points: 0,
+      });
+    }
 
-  await prismaQueue.enqueue(() =>
-    prisma.user.update({
+    let finalPoints = user.points - points;
+    finalPoints = finalPoints < 0 ? 0 : finalPoints;
+
+    await prisma.user.update({
       where: {
-        userid: user?.userid,
+        userid: user.userid,
       },
       data: {
         points: finalPoints,
       },
-    }),
-  );
+    });
+
+    return finalPoints;
+  });
 
   return interpolate(actionMessage, {
     username: `@${resUsername}`,

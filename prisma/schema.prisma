@@ -21,14 +21,15 @@ model User {
   id           Int    @id @default(autoincrement())
   userid       String @unique
   username     String
-  channel String
+  channel      String
   sentMessages Int    @default(0)
   points       Int    @default(0)
 }
 
 model Channel {
-  id    Int    @id @default(autoincrement())
-  name  String @unique
-  enabled Boolean @default(false)
-  token String @unique
+  id         Int     @id @default(autoincrement())
+  name       String  @unique
+  channel_id String  @unique
+  enabled    Boolean @default(false)
+  token      String  @unique
 }

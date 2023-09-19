@@ -35,3 +35,11 @@ export type TTwitchOAuthRefresh = {
   scope: string[];
   token_type: string;
 };
+
+export type TTwitchValidateToken = {
+  client_id:string;
+  login: string;
+  scopes: string[];
+  user_id: string;
+  expires_in: number;
+};
