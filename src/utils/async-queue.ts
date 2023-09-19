@@ -1,3 +1,5 @@
+import { logger } from "@cgsh/utils";
+
 export class AsyncQueue {
   private queue: Array<
     // biome-ignore lint/suspicious/noExplicitAny: <explanation>
@@ -34,7 +36,6 @@ export class AsyncQueue {
         this.run();
       })
       .catch((e) => {
-        console.log('asdlkhjasdlkjasdlkjasdkljasdlkjasdlkj');
         curr[2](e);
         this.rejecter(e);
       });
