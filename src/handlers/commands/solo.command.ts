@@ -226,8 +226,6 @@ export async function soloYes(
     return undefined;
   });
 
-  console.log(res);
-
   if (res) {
     return res;
   }
