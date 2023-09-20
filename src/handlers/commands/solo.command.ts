@@ -4,7 +4,6 @@ import { prisma, prismaQueue } from "services/db";
 import { ChatUserstate } from "tmi.js";
 import { TOption } from "types";
 import { interpolate } from "utils/interpolate-string";
-import { addPoints, removePoints } from "./points.command";
 
 function getUsername(original: string): TOption<[string, string]> {
   const username = original.match(/\@\S+/);
