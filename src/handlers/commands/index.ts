@@ -4,6 +4,28 @@ import { interpolate } from "utils/interpolate-string";
 import { gamble } from "./gamble.command";
 import { TwitchApi } from "services/twitch-api";
 import { TTwitchApiChatter } from "services/types";
+import { soloNope, soloYes, startSolo } from "./solo.command";
+import { ChatUserstate } from "tmi.js";
+
+export function getCanRun (
+  mods: TTwitchApiChatter[],
+  channel: string,
+  tags: ChatUserstate,
+): boolean {
+  if (!tags["user-id"] || !tags.username) {
+    return false;
+  }
+
+  const inModsList = mods.find((m) => m.user_id === tags["user-id"]);
+
+  if (!inModsList) {
+    const isItStreamerItself = channel === `#${tags.username}`;
+
+    return isItStreamerItself;
+  }
+
+  return true;
+};
 
 export function createCommandHandler(
   command: TCommand,
@@ -16,7 +38,7 @@ export function createCommandHandler(
       mods = res;
     }
 
-    const canRun = (userid: string) => !!mods.find((m) => m.user_id === userid);
+    const canRun = getCanRun(mods, channel, tags);
     switch (command.action) {
       case "addpoints": {
         if (!canRun) {
@@ -47,6 +69,27 @@ export function createCommandHandler(
       }
       case "gamble": {
         const res = await gamble(command, channel, tags);
+        if (res) {
+          client.say(channel, res);
+        }
+        return;
+      }
+      case "solo": {
+        const res = await startSolo(command, channel, tags);
+        if (res) {
+          client.say(channel, res);
+        }
+        return;
+      }
+      case "nope": {
+        const res = await soloNope(command, channel, tags);
+        if (res) {
+          client.say(channel, res);
+        }
+        return;
+      }
+      case "yes": {
+        const res = await soloYes(command, channel, tags);
         if (res) {
           client.say(channel, res);
         }

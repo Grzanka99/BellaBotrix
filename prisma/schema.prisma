@@ -33,3 +33,13 @@ model Channel {
   enabled    Boolean @default(false)
   token      String  @unique
 }
+
+model Solo {
+  id         Int     @id @default(autoincrement())
+  user1 String
+  user2 String
+  channel String
+  inProgress Boolean
+  points Int
+  winner String?
+}

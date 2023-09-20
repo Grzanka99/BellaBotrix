@@ -27,6 +27,23 @@ const BASE_COMMANDS: TCommand[] = [
     message:
       "$username rolled $rolled and $result $points points and now have $total points DinoDance",
   },
+  {
+    name: "solo",
+    message:
+      "Hey, $username1, $username2 want's to fight with you for $points points, will you accept the challenge with !yes, or run away like little cat with !nope?",
+  },
+  {
+    name: "yes",
+    message:
+      "Leeeet's gooom, $winner beat up $looser and won $points points! LEPSZY!",
+  },
+  {
+    name: "nope",
+    message: "Hahahaha, $username runaway like a little kitty Kippa",
+  },{
+    name: "avadakedavra",
+    message: "Sirius Black says goodbay!"
+  }
 ];
 
 if (prisma) {

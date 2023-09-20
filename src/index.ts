@@ -17,14 +17,13 @@ function getAuthFormXd() {
   const scope = "moderator:read:chatters";
   const scope2 = "moderation:read";
 
-  let form = `<form action="${base}" method="get">`;
-  form += `<input name="client_id" value="${clientId}" type="hidden" />`;
-  form += `<input name="redirect_uri" value="${redirectUri}" type="hidden" />`;
-  form += `<input name="response_type" value="${responseType}" type="hidden" />`;
-  form += `<input name="scope" value="${scope}" type="hidden" />`;
-  form += `<input name="scope" value="${scope2}" type="hidden" />`;
-  form += `<button type="submit">authorize</button>`;
-  form += "</form>";
+  const form = `<form action="${base}" method="get">
+                  <input name="client_id" value="${clientId}" type="hidden" />
+                  <input name="redirect_uri" value="${redirectUri}" type="hidden" />
+                  <input name="response_type" value="${responseType}" type="hidden" />
+                  <input name="scope" value="${scope} ${scope2}" type="hidden" />
+                  <button type="submit">authorize</button>
+                </form>`;
 
   return form;
 }
@@ -59,8 +58,14 @@ Bun.serve({
         return new Response("Something went wrong");
       }
 
-      await prisma.channel.create({
-        data: {
+      await prisma.channel.upsert({
+        where: {
+          channel_id: validated.user_id,
+        },
+        update: {
+          token: res.refresh_token,
+        },
+        create: {
           name: validated.login,
           channel_id: validated.user_id,
           token: res.refresh_token,

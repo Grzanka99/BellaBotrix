@@ -8,18 +8,16 @@ export function createActivityHandler(): TUseHandler {
     }
 
     const { username } = tags;
-    const user = await prismaQueue.enqueue(() =>
-      prisma.user.findUnique({
+    prismaQueue.enqueue(async () => {
+      const user = await prisma.user.findUnique({
         where: {
           channel,
           userid: `${tags["user-id"]}@${channel}`,
         },
-      }),
-    );
+      });
 
-    if (!user) {
-      prismaQueue.enqueue(() =>
-        prisma.user.create({
+      if (!user) {
+        await prisma.user.create({
           data: {
             username: username.toLowerCase().trim(),
             userid: `${tags["user-id"]}@${channel}`,
@@ -27,20 +25,16 @@ export function createActivityHandler(): TUseHandler {
             sentMessages: 1,
             points: 10,
           },
-        }),
-      );
-    } else {
-      prismaQueue.enqueue(() =>
-        prisma.user.update({
-          where: {
-            id: user.id
-          },
+        });
+      } else {
+        await prisma.user.update({
+          where: { id: user.id },
           data: {
-            sentMessages: user?.sentMessages || 0 + 1,
-            points: user?.sentMessages ? user.points + 1 : 10,
+            sentMessages: user.sentMessages + 1,
+            points: user.sentMessages ? user.points + 1 : 10,
           },
-        }),
-      );
-    }
+        });
+      }
+    });
   };
 }
