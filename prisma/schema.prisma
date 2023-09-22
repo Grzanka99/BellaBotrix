@@ -15,6 +15,7 @@ model Commands {
   name    String  @unique
   enabled Boolean
   message String?
+  alias   String @default("")
 }
 
 model User {
@@ -36,10 +37,10 @@ model Channel {
 
 model Solo {
   id         Int     @id @default(autoincrement())
-  user1 String
-  user2 String
-  channel String
+  user1      String
+  user2      String
+  channel    String
   inProgress Boolean
-  points Int
-  winner String?
+  points     Int
+  winner     String?
 }

@@ -3,42 +3,22 @@ import { addPoints, getUserPoints, removePoints } from "./points.command";
 import { interpolate } from "utils/interpolate-string";
 import { gamble } from "./gamble.command";
 import { TwitchApi } from "services/twitch-api";
-import { TTwitchApiChatter } from "services/types";
 import { soloNope, soloYes, startSolo } from "./solo.command";
-import { ChatUserstate } from "tmi.js";
-
-export function getCanRun(
-  mods: TTwitchApiChatter[],
-  channel: string,
-  tags: ChatUserstate,
-): boolean {
-  if (!tags["user-id"] || !tags.username) {
-    return false;
-  }
-
-  const inModsList = mods.find((m) => m.user_id === tags["user-id"]);
-
-  if (!inModsList) {
-    const isItStreamerItself = channel === `#${tags.username}`;
-
-    return isItStreamerItself;
-  }
-
-  return true;
-}
+import { TOption } from "types";
+import { getCanRun } from "./utils/can-run";
 
 export function createCommandHandler(
   command: TCommand,
   api?: TwitchApi,
-): TUseHandler {
+): TOption<TUseHandler> {
+  if (!api) {
+    return undefined;
+  }
   return async function ({ client, channel, tags }): Promise<void> {
-    let mods: TTwitchApiChatter[] = [];
-    if (api) {
-      const res = await api.getChannleModerators();
-      mods = res;
-    }
-
+    const mods = await api.getChannleModerators();
     const canRun = getCanRun(mods, channel, tags);
+
+
     switch (command.action) {
       case "addpoints": {
         if (!canRun || !api) {
