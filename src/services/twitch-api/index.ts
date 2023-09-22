@@ -1,4 +1,3 @@
-import { logger } from "@cgsh/utils";
 import { prisma } from "services/db";
 import { TTwitchApiChatter } from "services/types";
 import { TOption } from "types";
@@ -8,6 +7,7 @@ import {
   getNewToken,
   getTwitchApiUser,
 } from "./api-connector";
+import { logger } from "utils/logger";
 
 export class TwitchApi {
   private channelToken: string | undefined = undefined;

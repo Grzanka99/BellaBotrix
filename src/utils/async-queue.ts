@@ -1,5 +1,3 @@
-import { logger } from "@cgsh/utils";
-
 export class AsyncQueue {
   private queue: Array<
     // biome-ignore lint/suspicious/noExplicitAny: <explanation>

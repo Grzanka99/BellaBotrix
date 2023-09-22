@@ -1,4 +1,4 @@
-import { logger } from "@cgsh/utils";
+import { logger } from "./logger";
 
 export class AsyncPipe<T extends Array<unknown> = [], R = void> {
   private fn: Array<() => Promise<R>> = [];

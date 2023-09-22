@@ -1,11 +1,11 @@
-import { logger } from "@cgsh/utils";
 import { TCommand } from "handlers/types";
 import { prisma, prismaQueue } from "services/db";
+import { TwitchApi } from "services/twitch-api";
 import { ChatUserstate } from "tmi.js";
 import { TOption } from "types";
 import { interpolate } from "utils/interpolate-string";
+import { logger } from "utils/logger";
 import { getUsername } from "./utils/get-username";
-import { TwitchApi } from "services/twitch-api";
 
 export async function getUserPoints(
   { original, actionMessage }: TCommand,

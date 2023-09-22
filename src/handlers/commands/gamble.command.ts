@@ -2,9 +2,9 @@ import { EWonLost, TCommand } from "handlers/types";
 import { ChatUserstate } from "tmi.js";
 import { TOption } from "types";
 import { getUsername } from "./utils/get-username";
-import { logger } from "@cgsh/utils";
 import { prisma, prismaQueue } from "services/db";
 import { interpolate } from "utils/interpolate-string";
+import { logger } from "utils/logger";
 
 export function getResult(totalPoints: number): [EWonLost, number] {
   const chances = 50 - (totalPoints % 50);

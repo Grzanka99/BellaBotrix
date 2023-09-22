@@ -4,7 +4,7 @@ import tmi from "tmi.js";
 import { chatters } from "./chatters";
 import { TwitchApi } from "services/twitch-api";
 import { prisma } from "services/db";
-import { logger } from "@cgsh/utils";
+import { logger } from "utils/logger";
 
 export async function bootstrap(): Promise<void> {
   console.time("bootstrap");

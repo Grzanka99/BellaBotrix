@@ -1,6 +1,6 @@
-import { logger } from "@cgsh/utils";
 import { prisma, prismaQueue } from "services/db";
 import { TTwitchApiChatter } from "services/types";
+import { logger } from "utils/logger";
 
 async function handleSingleChatter(
   chatter: TTwitchApiChatter,

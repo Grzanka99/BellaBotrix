@@ -1,9 +1,9 @@
-import { logger } from "@cgsh/utils";
 import { TCommand } from "handlers/types";
 import { prisma, prismaQueue } from "services/db";
 import { ChatUserstate } from "tmi.js";
 import { TOption } from "types";
 import { interpolate } from "utils/interpolate-string";
+import { logger } from "utils/logger";
 
 function getUsername(original: string): TOption<[string, string]> {
   const username = original.match(/\@\S+/);
@@ -57,7 +57,7 @@ export async function startSolo(
 
   if (existingSolo) {
     return interpolate(
-      "Hey, @$username1, you already in solow with @$username2, if you wan't to cancel, write !nope",
+      "Hey, @$username1, you already in solo with @$username2, if you wan't to cancel, write !nope",
       {
         username1,
         username2,
@@ -108,7 +108,10 @@ export async function soloNope(
   const foundSolo = await prismaQueue.enqueue(() =>
     prisma.solo.findFirst({
       where: {
-        user2: tags.username,
+        OR: [
+          { user1: tags.username },
+          { user2: tags.username},
+        ],
         channel,
         inProgress: true,
         winner: null,

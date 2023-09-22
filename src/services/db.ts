@@ -1,6 +1,6 @@
-import { logger } from "@cgsh/utils";
 import { PrismaClient } from "@prisma/client";
 import { AsyncQueue } from "utils/async-queue";
+import { logger } from "utils/logger";
 
 export const prisma = new PrismaClient();
 export const prismaQueue = new AsyncQueue();
@@ -40,10 +40,11 @@ const BASE_COMMANDS: TCommand[] = [
   {
     name: "nope",
     message: "Hahahaha, $username runaway like a little kitty Kippa",
-  },{
+  },
+  {
     name: "avadakedavra",
-    message: "Sirius Black says goodbay!"
-  }
+    message: "Sirius Black says goodbay!",
+  },
 ];
 
 if (prisma) {
