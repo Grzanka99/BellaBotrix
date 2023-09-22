@@ -1,12 +1,13 @@
 import { logger } from "@cgsh/utils";
 import { prisma } from "services/db";
+import { TTwitchApiChatter } from "services/types";
+import { TOption } from "types";
 import {
   getChatters,
   getModerators,
   getNewToken,
   getTwitchApiUser,
 } from "./api-connector";
-import { TTwitchApiChatter } from "services/types";
 
 export class TwitchApi {
   private channelToken: string | undefined = undefined;
@@ -93,6 +94,16 @@ export class TwitchApi {
     } catch {
       return this.moderators;
     }
+  }
+
+  public async getUserId(username: string): Promise<TOption<string>> {
+    const res = await getTwitchApiUser(username, this.globalToken);
+
+    if (!res || !res.data.length) {
+      return undefined;
+    }
+
+    return res.data[0].id;
   }
 
   public async getChannelChattersList(): Promise<TTwitchApiChatter[]> {

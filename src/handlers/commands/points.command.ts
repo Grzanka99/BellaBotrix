@@ -5,6 +5,7 @@ import { ChatUserstate } from "tmi.js";
 import { TOption } from "types";
 import { interpolate } from "utils/interpolate-string";
 import { getUsername } from "./utils/get-username";
+import { TwitchApi } from "services/twitch-api";
 
 export async function getUserPoints(
   { original, actionMessage }: TCommand,
@@ -45,12 +46,18 @@ export async function addPoints(
   { original, actionMessage }: TCommand,
   channel: string,
   tags: ChatUserstate,
+  api: TwitchApi,
 ): Promise<TOption<string>> {
   if (!original || !actionMessage || !tags.username || !tags["user-id"]) {
     return undefined;
   }
 
   const [resUsername, formattedUsername] = getUsername(original, tags.username);
+
+  const targetUserId = await api.getUserId(formattedUsername);
+  if (!targetUserId) {
+    return undefined;
+  }
 
   const startPosition = original.indexOf(resUsername) + resUsername.length;
   const points = parseInt(original.substring(startPosition));
@@ -61,35 +68,31 @@ export async function addPoints(
   }
 
   await prismaQueue.enqueue(async () => {
-    const user = await prisma.user.findUnique({
+    const user = await prisma.user.findFirst({
       where: {
-        userid: `${tags["user-id"]}@${channel}`,
-        channel,
+        userid: `${targetUserId}@${channel}`,
       },
     });
 
     if (!user) {
-      prismaQueue.enqueue(() =>
-        prisma.user.create({
-          data: {
-            username: formattedUsername,
-            userid: `${tags["user-id"]}@${channel}`,
-            points,
-            channel,
-          },
-        }),
-      );
+      prisma.user.create({
+        data: {
+          username: formattedUsername,
+          userid: `${targetUserId}@${channel}`,
+          points,
+          channel,
+        },
+      });
+      return `${formattedUsername} doesn't exist on this channel, yet`;
     } else {
-      prismaQueue.enqueue(() =>
-        prisma.user.update({
-          where: {
-            userid: user?.userid,
-          },
-          data: {
-            points: (user?.points || 0) + points,
-          },
-        }),
-      );
+      await prisma.user.update({
+        where: {
+          userid: user.userid,
+        },
+        data: {
+          points: user.points + points,
+        },
+      });
     }
   });
 
@@ -102,12 +105,18 @@ export async function removePoints(
   { original, actionMessage }: TCommand,
   channel: string,
   tags: ChatUserstate,
+  api: TwitchApi,
 ): Promise<TOption<string>> {
   if (!original || !actionMessage || !tags.username || !tags["user-id"]) {
     return undefined;
   }
 
   const [resUsername, formattedUsername] = getUsername(original, tags.username);
+
+  const targetUserId = await api.getUserId(formattedUsername);
+  if (!targetUserId) {
+    return undefined;
+  }
 
   const startPosition = original.indexOf(resUsername) + resUsername.length;
   const points = parseInt(original.substring(startPosition));
@@ -120,8 +129,7 @@ export async function removePoints(
   const finalPoints = await prismaQueue.enqueue(async () => {
     const user = await prisma.user.findUnique({
       where: {
-        userid: `${tags["user-id"]}@${channel}`,
-        channel,
+        userid: `${targetUserId}@${channel}`,
       },
     });
 
@@ -149,6 +157,6 @@ export async function removePoints(
 
   return interpolate(actionMessage, {
     username: `@${resUsername}`,
-    finalPoints,
+    points: finalPoints,
   });
 }

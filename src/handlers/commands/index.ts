@@ -7,7 +7,7 @@ import { TTwitchApiChatter } from "services/types";
 import { soloNope, soloYes, startSolo } from "./solo.command";
 import { ChatUserstate } from "tmi.js";
 
-export function getCanRun (
+export function getCanRun(
   mods: TTwitchApiChatter[],
   channel: string,
   tags: ChatUserstate,
@@ -25,7 +25,7 @@ export function getCanRun (
   }
 
   return true;
-};
+}
 
 export function createCommandHandler(
   command: TCommand,
@@ -41,20 +41,20 @@ export function createCommandHandler(
     const canRun = getCanRun(mods, channel, tags);
     switch (command.action) {
       case "addpoints": {
-        if (!canRun) {
+        if (!canRun || !api) {
           return;
         }
-        const res = await addPoints(command, channel, tags);
+        const res = await addPoints(command, channel, tags, api);
         if (res) {
           client.say(channel, res);
         }
         return;
       }
       case "removepoints": {
-        if (!canRun) {
+        if (!canRun || !api) {
           return;
         }
-        const res = await removePoints(command, channel, tags);
+        const res = await removePoints(command, channel, tags, api);
         if (res) {
           client.say(channel, res);
         }
