@@ -8,7 +8,8 @@
     "build": "bun build --target=bun ./src/index.ts --outdir ./dist",
     "compile": "bun build --compile ./src/index.ts --outfile ./bin/bellatrix",
     "db:migrate": "prisma migrate dev --name",
-    "db:studio": "prisma studio"
+    "db:studio": "prisma studio",
+    "dev:webui": "bun --watch ./src/webui/app.tsx"
   },
   "devDependencies": {
     "@biomejs/biome": "1.1.2",
@@ -20,7 +21,9 @@
     "typescript": "^5.0.0"
   },
   "dependencies": {
+    "@elysiajs/html": "^0.7.0",
     "@prisma/client": "5.2.0",
+    "elysia": "^0.7.12",
     "tmi.js": "^1.8.5"
   }
 }
