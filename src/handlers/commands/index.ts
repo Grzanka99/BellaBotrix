@@ -6,6 +6,7 @@ import { TwitchApi } from "services/twitch-api";
 import { soloNope, soloYes, startSolo } from "./solo.command";
 import { TOption } from "types";
 import { getCanRun } from "./utils/can-run";
+import { spit } from "./spit.command";
 
 export function createCommandHandler(
   command: TCommand,
@@ -18,6 +19,7 @@ export function createCommandHandler(
     const mods = await api.getChannleModerators();
     const canRun = getCanRun(mods, channel, tags);
 
+    const addpointsHandler = () => {};
 
     switch (command.action) {
       case "addpoints": {
@@ -71,6 +73,13 @@ export function createCommandHandler(
       case "yes": {
         const res = await soloYes(command, channel, tags);
         if (res) {
+          client.say(channel, res);
+        }
+        return;
+      }
+      case "htfu": {
+        const res = await spit(command, tags, api);
+        if(res) {
           client.say(channel, res);
         }
         return;
