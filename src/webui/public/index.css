@@ -1,0 +1,7 @@
+#commands-list {
+  border: 2px solid black;
+}
+
+#commands-list tr td {
+  border: 1px solid black;
+}

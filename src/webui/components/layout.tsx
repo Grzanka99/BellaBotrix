@@ -6,6 +6,8 @@ export const Layout = async () => (
     <head>
       <title>Bellatrix Bot</title>
       <script src="https://unpkg.com/htmx.org@1.9.6" />
+      <link rel="stylesheet" href="public/index.css" />
+      <style />
     </head>
     <body>
       <div>

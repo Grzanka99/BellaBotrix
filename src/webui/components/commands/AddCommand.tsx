@@ -1,12 +1,8 @@
 import { prisma } from "services/db";
 import { SingleCommand } from "./SingleCommand";
+import { TNewUiCommand } from "webui/types";
 
-type TNewCmd = {
-  name: string | undefined;
-  message: string | undefined;
-};
-
-export const AddCommand = async (body: TNewCmd) => {
+export const AddCommand = async (body: TNewUiCommand) => {
   const { name, message } = body;
 
   if (!name || !message) {
