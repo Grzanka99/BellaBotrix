@@ -77,17 +77,28 @@ export async function startSolo(
     return "You don't have enought poitns for this fight xD";
   }
 
-  prismaQueue.enqueue(() =>
-    prisma.solo.create({
-      data: {
-        user1: username1,
-        user2: username2,
-        points,
-        channel,
-        inProgress: true,
-      },
-    }),
-  );
+  prismaQueue
+    .enqueue(() =>
+      prisma.solo.create({
+        data: {
+          user1: username1,
+          user2: username2,
+          points,
+          channel,
+          inProgress: true,
+        },
+      }),
+    )
+    .then((res) => {
+      setTimeout(() => {
+        prismaQueue.enqueue(() =>
+          prisma.solo.update({
+            where: { id: res.id },
+            data: { inProgress: false },
+          }),
+        );
+      }, 120 * 1000);
+    });
 
   return interpolate(actionMessage, {
     username1,
@@ -108,10 +119,7 @@ export async function soloNope(
   const foundSolo = await prismaQueue.enqueue(() =>
     prisma.solo.findFirst({
       where: {
-        OR: [
-          { user1: tags.username },
-          { user2: tags.username},
-        ],
+        OR: [{ user1: tags.username }, { user2: tags.username }],
         channel,
         inProgress: true,
         winner: null,

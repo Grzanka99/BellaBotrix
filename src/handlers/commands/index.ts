@@ -79,7 +79,7 @@ export function createCommandHandler(
       }
       case "htfu": {
         const res = await spit(command, tags, api);
-        if(res) {
+        if (res) {
           client.say(channel, res);
         }
         return;

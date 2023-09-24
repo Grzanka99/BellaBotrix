@@ -65,8 +65,8 @@ if (prisma) {
   }
 
   BASE_COMMANDS.forEach(async (command) => {
-    await prismaQueue.enqueue(() => {
-      return prisma.commands.upsert({
+    await prismaQueue.enqueue(() => 
+      prisma.commands.upsert({
         where: {
           name: command.name,
         },
@@ -77,8 +77,8 @@ if (prisma) {
           alias: command.alias,
           enabled: true,
         },
-      });
-    });
+      })
+    );
   });
 }
 
