@@ -1,5 +1,5 @@
 import { prisma } from "services/db";
-import { SingleCommand } from "./SingleCommand";
+import { SingleCommand } from "../SingleCommand";
 import { TNewUiCommand } from "webui/types";
 
 export const AddCommand = async (body: TNewUiCommand) => {

@@ -1,6 +1,9 @@
+import { R_COMMANDS } from "webui/routes";
+
 export const AddCommandForm = () => (
   <form
-    hx-post="/panel/add-command"
+    id="add-command-form"
+    hx-post={`${R_COMMANDS.PREFIX}${R_COMMANDS.ADD}`}
     hx-target="#commands-list"
     hx-swap="beforeend"
   >

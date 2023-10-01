@@ -1,7 +1,8 @@
-#commands-list {
-  border: 2px solid black;
+*, *::before, *::after {
+  box-sizing: border-box;
 }
 
-#commands-list tr td {
-  border: 1px solid black;
+body {
+  margin: 0;
+  padding: 0;
 }

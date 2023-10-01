@@ -66,7 +66,7 @@ export class TwitchApi {
       throw new Error("Could not obtain token from api");
     }
 
-    prisma.channel.update({
+    await prisma.channel.update({
       where: { name: this.channelName },
       data: { token: newTokens.refresh_token },
     });

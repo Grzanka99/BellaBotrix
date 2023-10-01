@@ -1,3 +1,4 @@
+import { R_COMMANDS } from "webui/routes";
 import { TSingleUiCommand } from "webui/types";
 
 export const SingleCommand = (props: TSingleUiCommand) => (
@@ -21,12 +22,23 @@ export const SingleCommand = (props: TSingleUiCommand) => (
     <td>
       <button
         type="button"
-        hx-post="/panel/edit-command"
+        hx-post={`${R_COMMANDS.PREFIX}${R_COMMANDS.EDIT}`}
         hx-target={`#command-row-${props.name}`}
         hx-swap="outerHTML"
         hx-include={`#command-row-${props.name}`}
       >
         edit
+      </button>
+    </td>
+    <td>
+      <button
+        type="button"
+        hx-post={`${R_COMMANDS.PREFIX}${R_COMMANDS.DELETE}`}
+        hx-target={`#command-row-${props.name}`}
+        hx-swap="outerHTML"
+        hx-include={`#command-row-${props.name}`}
+      >
+        delete
       </button>
     </td>
   </tr>

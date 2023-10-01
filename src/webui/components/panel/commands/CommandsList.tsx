@@ -5,13 +5,13 @@ export const CommandsList = async (): Promise<JSX.Element> => {
   const commands = await prisma.commands.findMany();
 
   return (
-    <table id="commands-list">
+    <table class="db-entries-table">
       <thead>
         <tr>
-          <td >name</td>
-          <td >enabled</td>
-          <td >message</td>
-          <td >aliases</td>
+          <td>name</td>
+          <td>enabled</td>
+          <td>message</td>
+          <td>aliases</td>
         </tr>
       </thead>
       <tbody>

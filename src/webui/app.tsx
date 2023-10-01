@@ -2,16 +2,18 @@ import { html } from "@elysiajs/html";
 import staticPlugin from "@elysiajs/static";
 import { Elysia } from "elysia";
 import { prisma } from "services/db";
-import {
-  getChannelRefreshKey,
-  validateToken,
-} from "services/twitch-api/api-connector";
+import { getChannelRefreshKey, validateToken } from "services/twitch-api/api-connector";
 import { AuthForm } from "./components/auth/AuthForm";
-import { AddCommand } from "./components/commands/AddCommand";
-import { EditCommand } from "./components/commands/EditCommandForm";
-import { SaveCommand } from "./components/commands/SaveCommand";
-import { Layout } from "./components/layout";
+import { PanelLayout } from "./components/panel/PanelLayout";
+import { CommandsLayout } from "./components/panel/commands/CommandsLayout";
+import { AddCommand } from "./components/panel/commands/actions/AddCommand";
+import { DeleteCommand } from "./components/panel/commands/actions/DeleteCommand";
+import { EditCommand } from "./components/panel/commands/actions/EditCommandForm";
+import { SaveCommand } from "./components/panel/commands/actions/SaveCommand";
+import { UsersLayout } from "./components/panel/users/UsersLayout";
+import { R_COMMANDS, R_USERS } from "./routes";
 import { TNewUiCommand, TSingleUiCommand } from "./types";
+import { UsersList } from "./components/panel/users/UsersList";
 
 const app = new Elysia();
 
@@ -22,18 +24,18 @@ app.use(
   }),
 );
 
-app.group("/panel", (panel) =>
-  panel
-    .get("/", Layout)
-    .post(
-      "/add-command",
-      async (req) => await AddCommand(req.body as TNewUiCommand),
-    )
-    .post("/edit-command", (req) => EditCommand(req.body as TSingleUiCommand))
-    .post("/save-command", async (req) =>
-      SaveCommand(req.body as TSingleUiCommand),
-    ),
+app.get("/panel", () => <PanelLayout />);
+
+app.group(R_COMMANDS.PREFIX, (commands) =>
+  commands
+    .get(R_COMMANDS.ROOT, CommandsLayout)
+    .post(R_COMMANDS.ADD, async (req) => await AddCommand(req.body as TNewUiCommand))
+    .post(R_COMMANDS.EDIT, (req) => EditCommand(req.body as TSingleUiCommand))
+    .post(R_COMMANDS.SAVE, async (req) => SaveCommand(req.body as TSingleUiCommand))
+    .post(R_COMMANDS.DELETE, async (req) => DeleteCommand(req.body as TSingleUiCommand)),
 );
+
+app.group(R_USERS.PREFIX, (users) => users.get(R_USERS.ROOT, UsersLayout).get(R_USERS.LIST, UsersList));
 
 app.get("/auth", AuthForm);
 app.get("/", async (req) => {

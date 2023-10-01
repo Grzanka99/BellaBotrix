@@ -1,3 +1,4 @@
+import { R_COMMANDS } from "webui/routes";
 import { TSingleUiCommand } from "webui/types";
 
 export const EditCommand = (props: TSingleUiCommand) => (
@@ -7,11 +8,7 @@ export const EditCommand = (props: TSingleUiCommand) => (
       <input type="hidden" value={props.name} name="name" />
     </td>
     <td>
-      <input
-        type="checkbox"
-        name="enabled"
-        checked={String(props.enabled) === "true"}
-      />
+      <input type="checkbox" name="enabled" checked={String(props.enabled) === "true"} />
     </td>
     <td>
       <input type="text" value={props.message || ""} name="message" />
@@ -22,7 +19,7 @@ export const EditCommand = (props: TSingleUiCommand) => (
     <td>
       <button
         type="button"
-        hx-post="/panel/save-command"
+        hx-post={`${R_COMMANDS.PREFIX}${R_COMMANDS.SAVE}`}
         hx-target={`#command-row-${props.name}`}
         hx-swap="outerHTML"
         hx-include={`#command-row-${props.name}`}
