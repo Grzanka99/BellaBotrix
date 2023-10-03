@@ -1,12 +1,7 @@
 import { prisma } from "services/db";
 import { TTwitchApiChatter } from "services/types";
 import { TOption } from "types";
-import {
-  getChatters,
-  getModerators,
-  getNewToken,
-  getTwitchApiUser,
-} from "./api-connector";
+import { getChatters, getModerators, getNewToken, getTwitchApiUser } from "./api-connector";
 import { logger } from "utils/logger";
 
 export class TwitchApi {
@@ -26,14 +21,11 @@ export class TwitchApi {
     });
 
     this.getNewToken()
-      .then((res) => {
-        logger.info(`Access token for channle ${this.channelName} obtained`);
-        this.channelToken = res;
+      .then(() => {
+        logger.info(`Access token for channel ${this.channelName} obtained`);
       })
       .catch(() => {
-        logger.error(
-          `Failed to optain access token for channel ${this.channelName}`,
-        );
+        logger.error(`Failed to optain access token for channel ${this.channelName}`);
       });
   }
 
@@ -66,6 +58,7 @@ export class TwitchApi {
       throw new Error("Could not obtain token from api");
     }
 
+    this.channelToken = newTokens.access_token;
     await prisma.channel.update({
       where: { name: this.channelName },
       data: { token: newTokens.refresh_token },
@@ -74,7 +67,7 @@ export class TwitchApi {
     return newTokens.access_token;
   }
 
-  public async getChannleModerators(): Promise<TTwitchApiChatter[]> {
+  public async getChannelModerators(): Promise<TTwitchApiChatter[]> {
     if (!this.userId || !this.channelToken) {
       logger.info(`Using cash for moderators on channel ${this.channelName}`);
       return this.moderators;
@@ -136,9 +129,7 @@ export class TwitchApi {
   private chattersList: TTwitchApiChatter[] = [];
 
   public startChattersAutorefresh(timeout: number): boolean {
-    logger.info(
-      `Setting timer for channel: ${this.channelName} each ${timeout}ms`,
-    );
+    logger.info(`Setting timer for channel: ${this.channelName} each ${timeout}ms`);
     this.refreshInterval = setInterval(async () => {
       const res = await this.getChannelChattersList();
       this.chattersList = res;

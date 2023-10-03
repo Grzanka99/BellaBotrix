@@ -8,18 +8,13 @@ import { TOption } from "types";
 import { getCanRun } from "./utils/can-run";
 import { spit } from "./spit.command";
 
-export function createCommandHandler(
-  command: TCommand,
-  api?: TwitchApi,
-): TOption<TUseHandler> {
+export function createCommandHandler(command: TCommand, api?: TwitchApi): TOption<TUseHandler> {
   if (!api) {
     return undefined;
   }
   return async function ({ client, channel, tags }): Promise<void> {
-    const mods = await api.getChannleModerators();
+    const mods = await api.getChannelModerators();
     const canRun = getCanRun(mods, channel, tags);
-
-    const addpointsHandler = () => {};
 
     switch (command.action) {
       case "addpoints": {

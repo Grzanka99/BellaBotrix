@@ -14,13 +14,11 @@ type TCommand = {
 const BASE_COMMANDS: TCommand[] = [
   {
     name: "addpoints",
-    message:
-      "$username just received $points points and now have bit more Kappa",
+    message: "$username just received $points points and now have bit more Kappa",
   },
   {
     name: "removepoints",
-    message:
-      "$username just was robbed of $points points and now have bit less LUL",
+    message: "$username just was robbed of $points points and now have bit less LUL",
   },
   {
     name: "points",
@@ -39,8 +37,7 @@ const BASE_COMMANDS: TCommand[] = [
   },
   {
     name: "yes",
-    message:
-      "Leeeet's gooom, $winner beat up $looser and won $points points! LEPSZY!",
+    message: "Leeeet's gooom, $winner beat up $looser and won $points points! LEPSZY!",
     alias: "tak",
   },
   {
@@ -65,7 +62,7 @@ if (prisma) {
   }
 
   BASE_COMMANDS.forEach(async (command) => {
-    await prismaQueue.enqueue(() => 
+    await prismaQueue.enqueue(() =>
       prisma.commands.upsert({
         where: {
           name: command.name,
@@ -77,7 +74,7 @@ if (prisma) {
           alias: command.alias,
           enabled: true,
         },
-      })
+      }),
     );
   });
 }
