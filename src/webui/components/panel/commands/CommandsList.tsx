@@ -14,7 +14,7 @@ export const CommandsList = async (): Promise<JSX.Element> => {
           <td>aliases</td>
         </tr>
       </thead>
-      <tbody>
+      <tbody id="commands-list">
         {commands.map((cmd) => (
           <SingleCommand {...cmd} />
         ))}
