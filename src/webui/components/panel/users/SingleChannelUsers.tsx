@@ -23,7 +23,7 @@ export const SingleChannelUserList = async (ctx: Context, starting?: string) => 
       id="channel-users-list"
       class="grid-based-table__content"
       hx-get={`${R_USERS.PREFIX}${R_USERS.LIST}?channel=${String(starting || ctx.query.channel)}`}
-      // hx-trigger="every 2s"
+      hx-trigger="every 2s"
       hx-target="#channel-users-list"
       hx-swap="outerHTML"
     >
