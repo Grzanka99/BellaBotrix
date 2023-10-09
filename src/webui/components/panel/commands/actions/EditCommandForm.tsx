@@ -2,21 +2,21 @@ import { R_COMMANDS } from "webui/routes";
 import { TSingleUiCommand } from "webui/types";
 
 export const EditCommand = (props: TSingleUiCommand) => (
-  <tr id={`command-row-${props.name}`}>
-    <td>
+  <ul id={`command-row-${props.name}`}>
+    <li>
       <input type="text" disabled value={props.name} name="name" />
       <input type="hidden" value={props.name} name="name" />
-    </td>
-    <td>
+    </li>
+    <li>
       <input type="checkbox" name="enabled" checked={String(props.enabled) === "true"} />
-    </td>
-    <td>
-      <input type="text" value={props.message || ""} name="message" />
-    </td>
-    <td>
+    </li>
+    <li>
+      <textarea name="message">{props.message || ""}</textarea>
+    </li>
+    <li>
       <input type="text" value={props.alias} name="alias" />
-    </td>
-    <td>
+    </li>
+    <li>
       <button
         type="button"
         hx-post={`${R_COMMANDS.PREFIX}${R_COMMANDS.SAVE}`}
@@ -26,6 +26,17 @@ export const EditCommand = (props: TSingleUiCommand) => (
       >
         save
       </button>
-    </td>
-  </tr>
+    </li>
+    <li>
+      <button
+        type="button"
+        hx-post={`${R_COMMANDS.PREFIX}${R_COMMANDS.CANCEL}`}
+        hx-target={`#command-row-${props.name}`}
+        hx-swap="outerHTML"
+        hx-include={`#command-row-${props.name}`}
+      >
+        cancel
+      </button>
+    </li>
+  </ul>
 );

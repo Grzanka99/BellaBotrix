@@ -18,3 +18,70 @@
   height: 35px;
   cursor: pointer;
 }
+
+.grid-based-table {
+  & ul, & li {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  padding: 20px;
+
+  & .grid-based-table__header, & .grid-based-table__content {
+    display: flex;
+    flex-direction: column;
+    padding: 0;
+    margin: 0;
+    width: 100%;
+
+    & ul {
+      display: grid;
+      width: 100%;
+
+      & li {
+        display: flex;
+        padding: 10px 15px;
+      }
+    }
+  }
+
+  & .grid-based-table__content {
+    border: 2px solid black;
+
+    & ul {
+      & li {
+        display: block;
+      }
+
+      & li:not(:last-child) {
+        border-right: 1px solid black;
+      }
+    }
+
+    & ul:not(:last-child) {
+      border-bottom: 1px solid black;
+    }
+  }
+
+  & .grid-based-table__header {
+    border: 2px solid black;
+    border-bottom: none;
+
+    & ul {
+      background: #abcdef;
+
+      & li {
+        overflow: hidden;
+        justify-content: center;
+      }
+
+      & li:not(:last-child) {
+        border-right: 1px solid black;
+      }
+    }
+  }
+}

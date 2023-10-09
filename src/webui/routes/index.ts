@@ -5,6 +5,7 @@ export const R_COMMANDS = {
   EDIT: "/htmx/edit",
   SAVE: "/htmx/save",
   DELETE: "/htmx/delete",
+  CANCEL: "/htmx/cancel",
 } as const;
 
 export const R_SOLO = {
@@ -15,10 +16,10 @@ export const R_SOLO = {
 export const R_USERS = {
   PREFIX: "/panel/users",
   ROOT: "/",
-  LIST: "/htmx/list"
-};
+  LIST: "/htmx/list",
+} as const;
 
 export const R_SETTINGS = {
   PREFIX: "/panel/settings",
   ROOT: "/",
-};
+} as const;

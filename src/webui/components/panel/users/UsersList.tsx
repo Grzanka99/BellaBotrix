@@ -1,53 +1,42 @@
 import { prisma } from "services/db";
-import { SingleUser } from "./SingleUser";
 import { R_USERS } from "webui/routes";
+import { SingleChannelUserList } from "./SingleChannelUsers";
+import { Context } from "elysia";
 
-export const UsersList = async () => {
-  const users = await prisma.user.findMany();
+export const UsersList = async (ctx: Context) => {
+  const channels = await prisma.channel.findMany();
 
-  if (!users) {
-    return <h2>DB Error</h2>;
+  if (!channels || !channels.length) {
+    return undefined;
   }
 
-  const groupedByChannel: Record<string, typeof users> = {};
-
-  users.forEach((user) => {
-    if (user.channel in groupedByChannel) {
-      groupedByChannel[user.channel].push(user);
-    } else {
-      groupedByChannel[user.channel] = [user];
-    }
-  });
-
   return (
-    <div
-            hx-get={`${R_USERS.PREFIX}${R_USERS.LIST}`}
-            hx-trigger="every 2s"
-            hx-swap="outerHTML"
-    >
-      {Object.keys(groupedByChannel).map((channel) => (
-        <>
-          <h2>{channel}</h2>
-          <table
-            class="db-entries-table"
-          >
-            <thead>
-              <tr>
-                <td>userid</td>
-                <td>username</td>
-                <td>channel</td>
-                <td>sentMessages</td>
-                <td>points</td>
-              </tr>
-            </thead>
-            <tbody>
-              {groupedByChannel[channel].map((user) => (
-                <SingleUser {...user} />
-              ))}
-            </tbody>
-          </table>
-        </>
-      ))}
-    </div>
+    <>
+      <select
+        name="channel"
+        hx-get={`${R_USERS.PREFIX}${R_USERS.LIST}`}
+        hx-target="#channel-users-list"
+        hx-swap="outerHTML"
+        autocomplete="off"
+      >
+        {channels.map((ch, i) => (
+          <option value={ch.name} selected={i === 0 ? "selected" : undefined}>
+            {ch.name}
+          </option>
+        ))}
+      </select>
+      <div class="grid-based-table">
+        <div class="grid-based-table__header">
+          <ul>
+            <li>userid</li>
+            <li>username</li>
+            <li>channel</li>
+            <li>sent</li>
+            <li>points</li>
+          </ul>
+        </div>
+        {await SingleChannelUserList(ctx, channels[0].name)}
+      </div>
+    </>
   );
 };

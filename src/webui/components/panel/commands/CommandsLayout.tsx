@@ -6,10 +6,14 @@ export const CommandsLayout = async () => {
   return (
     <PanelLayout
       current="/panel/commands"
-      headers={<link rel="stylesheet" href="/public/commands-table.css" />}
+      headers={
+        <>
+          <link rel="stylesheet" href="/public/commands-table.css" />
+          <link rel="stylesheet" href="/public/add-command-form.css" />
+        </>
+      }
     >
       <div>
-        <h1>Commands</h1>
         <AddCommandForm />
         {await CommandsList()}
       </div>

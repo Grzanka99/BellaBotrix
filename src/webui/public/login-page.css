@@ -5,27 +5,27 @@
   justify-content: center;
   align-items: center;
 
-  .login-form, .reg-form {
+  & .login-form, & .reg-form {
     display: flex;
     flex-direction: column;
     gap: 10px;
     
-    label {
+    & label {
       display: flex;
       gap: 10px;
       align-items: center;
 
-      span {
+      & span {
         width: 150px;
       }
 
-      input {
+      & input {
         width: 1fr;
       }
     }
   }
 
-  input, button {
+  & input, & button {
     min-width: 250px; 
     height: 50px;
   }

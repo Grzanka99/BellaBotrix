@@ -1,0 +1,34 @@
+#users-list-outer-wrapper {
+  display: flex;
+  justify-content: flex-start;
+  align-items: flex-start;
+
+  > select {
+    margin: 20px;
+    width: 250px;
+    height: 50px;
+    font-size: 1.2rem;
+    text-align: center;
+    border: 1px solid black;
+    background: rgba(0,0,0,0.15);
+    cursor: pointer;
+  }
+
+  > select:hover {
+    background: rgba(0,0,0,0.25);
+  }
+}
+
+.grid-based-table__content, .grid-based-table__header {
+  & ul {
+    grid-template-columns: 3fr 5fr 4fr 2fr 3fr;
+  }
+}
+
+.grid-based-table__content {
+  & li:first-child {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+}

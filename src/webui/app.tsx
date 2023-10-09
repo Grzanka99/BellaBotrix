@@ -15,9 +15,10 @@ import { DeleteCommand } from "./components/panel/commands/actions/DeleteCommand
 import { EditCommand } from "./components/panel/commands/actions/EditCommandForm";
 import { SaveCommand } from "./components/panel/commands/actions/SaveCommand";
 import { UsersLayout } from "./components/panel/users/UsersLayout";
-import { UsersList } from "./components/panel/users/UsersList";
 import { R_COMMANDS, R_USERS } from "./routes";
 import { TNewUiCommand, TSingleUiCommand } from "./types";
+import { SingleChannelUserList } from "./components/panel/users/SingleChannelUsers";
+import { CancelCommand } from "./components/panel/commands/actions/CancelCommand";
 
 const UNAUTHORIZED = "Unauthorized";
 
@@ -69,11 +70,14 @@ app.guard(
         .post(R_COMMANDS.ADD, async (req) => await AddCommand(req.body as TNewUiCommand))
         .post(R_COMMANDS.EDIT, (req) => EditCommand(req.body as TSingleUiCommand))
         .post(R_COMMANDS.SAVE, async (req) => SaveCommand(req.body as TSingleUiCommand))
-        .post(R_COMMANDS.DELETE, async (req) => DeleteCommand(req.body as TSingleUiCommand)),
+        .post(R_COMMANDS.DELETE, async (req) => DeleteCommand(req.body as TSingleUiCommand))
+        .post(R_COMMANDS.CANCEL, async (req) => CancelCommand(req.body as TSingleUiCommand)),
     );
 
     app.group(R_USERS.PREFIX, (users) =>
-      users.get(R_USERS.ROOT, UsersLayout).get(R_USERS.LIST, UsersList),
+      users
+        .get(R_USERS.ROOT, UsersLayout)
+        .get(R_USERS.LIST, async (ctx) => await SingleChannelUserList(ctx)),
     );
 
     app.get("/auth", AuthForm);

@@ -2,25 +2,26 @@ import { R_COMMANDS } from "webui/routes";
 import { TSingleUiCommand } from "webui/types";
 
 export const SingleCommand = (props: TSingleUiCommand) => (
-  <tr id={`command-row-${props.name}`}>
-    <td>
+  <ul id={`command-row-${props.name}`}>
+    <li>
       {props.name}
       <input type="hidden" value={props.name} name="name" />
-    </td>
-    <td>
+    </li>
+    <li>
       {props.enabled}
       <input type="hidden" value={String(props.enabled)} name="enabled" />
-    </td>
-    <td>
+    </li>
+    <li>
       {props.message}
       <input type="hidden" value={props.message || ""} name="message" />
-    </td>
-    <td>
+    </li>
+    <li>
       {props.alias}
       <input type="hidden" value={props.alias} name="alias" />
-    </td>
-    <td>
+    </li>
+    <li>
       <button
+        class="edit-button"
         type="button"
         hx-post={`${R_COMMANDS.PREFIX}${R_COMMANDS.EDIT}`}
         hx-target={`#command-row-${props.name}`}
@@ -29,9 +30,10 @@ export const SingleCommand = (props: TSingleUiCommand) => (
       >
         edit
       </button>
-    </td>
-    <td>
+    </li>
+    <li>
       <button
+        class="delete-button"
         type="button"
         hx-post={`${R_COMMANDS.PREFIX}${R_COMMANDS.DELETE}`}
         hx-target={`#command-row-${props.name}`}
@@ -40,6 +42,6 @@ export const SingleCommand = (props: TSingleUiCommand) => (
       >
         delete
       </button>
-    </td>
-  </tr>
+    </li>
+  </ul>
 );

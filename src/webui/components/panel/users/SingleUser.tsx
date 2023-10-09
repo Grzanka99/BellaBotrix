@@ -1,11 +1,11 @@
 import { TSingleUiUser } from "webui/types";
 
 export const SingleUser = (props: TSingleUiUser) => {
-  return <tr>
-    <td>{props.userid}</td>
-    <td>{props.username}</td>
-    <td>{props.channel}</td>
-    <td>{props.sentMessages}</td>
-    <td>{props.points}</td>
-  </tr>
+  return <ul>
+    <li>{props.userid}</li>
+    <li>{props.username}</li>
+    <li>{props.channel}</li>
+    <li>{props.sentMessages}</li>
+    <li>{props.points}</li>
+  </ul>
 }

@@ -1,5 +1,5 @@
 import { TCommand, TUseHandler } from "handlers/types";
-import { addPoints, getUserPoints, removePoints } from "./points.command";
+import { addPoints, getUserPoints, givePoints, removePoints } from "./points.command";
 import { interpolate } from "utils/interpolate-string";
 import { gamble } from "./gamble.command";
 import { TwitchApi } from "services/twitch-api";
@@ -35,6 +35,14 @@ export function createCommandHandler(command: TCommand, api?: TwitchApi): TOptio
         if (res) {
           client.say(channel, res);
         }
+        return;
+      }
+      case "givepoints": {
+        const res = await givePoints(command, channel,tags,api);
+        if(res){ 
+          client.say(channel,res);
+        }
+
         return;
       }
       case "points": {

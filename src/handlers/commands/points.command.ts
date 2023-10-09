@@ -160,3 +160,67 @@ export async function removePoints(
     points: finalPoints,
   });
 }
+
+export async function givePoints(
+  { original, actionMessage }: TCommand,
+  channel: string,
+  tags: ChatUserstate,
+): Promise<TOption<string>> {
+  if (!original || !actionMessage || !tags.username || !tags["user-id"]) {
+    return undefined;
+  }
+
+  const [resUsername, receiverUsername] = getUsername(original, tags.username);
+  const giverUsername = tags.username;
+
+  const startPosition = original.indexOf(resUsername) + resUsername.length;
+  const points = parseInt(original.substring(startPosition));
+
+  if (Number.isNaN(points)) {
+    logger.error("points is NaN");
+    return undefined;
+  }
+
+  const users = await prismaQueue.enqueue(() =>
+    prisma.user.findMany({
+      where: {
+        channel,
+        OR: [{ username: receiverUsername }, { username: giverUsername }],
+      },
+    }),
+  );
+
+  if (users.length !== 2) {
+    logger.warning(`Found ${users.length} users`);
+    return undefined;
+  }
+
+  const receiver = users.find((u) => u.username.toLowerCase() === receiverUsername.toLowerCase());
+  const giver = users.find((u) => u.username.toLowerCase() === giverUsername.toLowerCase());
+
+  if (!receiver || !giver) {
+    return undefined;
+  }
+
+  if (giver.points < points) {
+    return "You are not Polish goverment, you cannot give what you don't have";
+  }
+
+  await prismaQueue.enqueue(async () => {
+    await prisma.user.update({
+      where: { userid: giver.userid },
+      data: { points: giver.points - points },
+    });
+
+    await prisma.user.update({
+      where: { userid: receiver.userid },
+      data: { points: receiver.points + points },
+    });
+  });
+
+  return interpolate(actionMessage, {
+    receiver: `@${receiverUsername}`,
+    giver: `@${giverUsername}`,
+    points,
+  });
+}

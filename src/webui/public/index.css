@@ -6,3 +6,23 @@ body {
   margin: 0;
   padding: 0;
 }
+
+button {
+  border: 1px solid black;
+  background: #eeeeee;
+  align-self: center;
+  cursor: pointer;
+  transition: background 150ms ease;
+}
+
+button:hover {
+  background: #dddddd;
+}
+
+button.edit-button:hover {
+  background: yellowgreen;
+}
+
+button.delete-button:hover {
+  background: red;
+}
