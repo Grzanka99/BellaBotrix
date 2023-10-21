@@ -37,9 +37,37 @@ export type TTwitchOAuthRefresh = {
 };
 
 export type TTwitchValidateToken = {
-  client_id:string;
+  client_id: string;
   login: string;
   scopes: string[];
   user_id: string;
   expires_in: number;
+};
+
+export enum EEvenType {
+  Message = "message",
+  Roomstate = "roomstate",
+  Join = "join",
+}
+
+export type TTwitchMessageInfo = {
+  clientNonce: string;
+  color: string;
+  displayName: string;
+  emotes: Array<[string, string, number]>;
+  firstMessage: boolean;
+  isMod: boolean;
+  roomId: number;
+  isSubsriber: boolean;
+  userId: number;
+  userType: string;
+  badges: string[];
+};
+
+export type TTwitchIrcContext = {
+  type: EEvenType;
+  channel: string;
+  message: string;
+  isCommand?: boolean;
+  info: TTwitchMessageInfo;
 };
