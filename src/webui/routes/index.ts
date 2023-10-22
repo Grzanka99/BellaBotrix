@@ -11,6 +11,8 @@ export const R_COMMANDS = {
 export const R_SOLO = {
   PREFIX: "/panel/solo",
   ROOT: "/",
+  LIST: "/htmx/list",
+  CLOSE: "/htmx/close",
 } as const;
 
 export const R_USERS = {

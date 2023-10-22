@@ -4,27 +4,27 @@ import { SingleChannelUserList } from "./SingleChannelUsers";
 import { Context } from "elysia";
 
 export const UsersList = async (ctx: Context) => {
-  const channels = await prisma.channel.findMany();
+  const username = String(ctx.cookie.auth.value.username);
+  if (!username || !username.length) {
+    return undefined;
+  }
 
-  if (!channels || !channels.length) {
+  const channel = await prisma.channel.findUnique({
+    where: {
+      id: (
+        await prisma.webuiUser.findUnique({
+          where: { username },
+        })
+      )?.channelId,
+    },
+  });
+
+  if (!channel) {
     return undefined;
   }
 
   return (
     <>
-      <select
-        name="channel"
-        hx-get={`${R_USERS.PREFIX}${R_USERS.LIST}`}
-        hx-target="#channel-users-list"
-        hx-swap="outerHTML"
-        autocomplete="off"
-      >
-        {channels.map((ch, i) => (
-          <option value={ch.name} selected={i === 0 ? "selected" : undefined}>
-            {ch.name}
-          </option>
-        ))}
-      </select>
       <div class="grid-based-table">
         <div class="grid-based-table__header">
           <ul>
@@ -35,7 +35,7 @@ export const UsersList = async (ctx: Context) => {
             <li>points</li>
           </ul>
         </div>
-        {await SingleChannelUserList(ctx, channels[0].name)}
+        {await SingleChannelUserList(ctx,channel.name)}
       </div>
     </>
   );

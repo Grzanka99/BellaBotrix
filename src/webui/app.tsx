@@ -15,10 +15,13 @@ import { DeleteCommand } from "./components/panel/commands/actions/DeleteCommand
 import { EditCommand } from "./components/panel/commands/actions/EditCommandForm";
 import { SaveCommand } from "./components/panel/commands/actions/SaveCommand";
 import { UsersLayout } from "./components/panel/users/UsersLayout";
-import { R_COMMANDS, R_USERS } from "./routes";
-import { TNewUiCommand, TSingleUiCommand } from "./types";
+import { R_COMMANDS, R_SOLO, R_USERS } from "./routes";
+import { TNewUiCommand, TSingleUiCommand, TSingleUiSoloReq } from "./types";
 import { SingleChannelUserList } from "./components/panel/users/SingleChannelUsers";
 import { CancelCommand } from "./components/panel/commands/actions/CancelCommand";
+import { SoloLayout } from "./components/panel/solo/SoloLayout";
+import { SoloListContent } from "./components/panel/solo/SoloListContent";
+import { SoloClose } from "./components/panel/solo/SoloClose";
 
 const UNAUTHORIZED = "Unauthorized";
 
@@ -80,8 +83,16 @@ app.guard(
         .get(R_USERS.LIST, async (ctx) => await SingleChannelUserList(ctx)),
     );
 
+    app.group(R_SOLO.PREFIX, (solo) =>
+      solo
+        .get(R_SOLO.ROOT, SoloLayout)
+        .get(R_SOLO.LIST, async (ctx) => await SoloListContent(ctx))
+        .post(R_SOLO.CLOSE, async (ctx) => SoloClose(ctx.body as TSingleUiSoloReq)),
+    );
+
     app.get("/auth", AuthForm);
     app.get("/", async (req) => {
+      const username = String(req.cookie.auth.value.username);
       const code = req.query.code;
       const error = req.query.error;
 
@@ -101,7 +112,7 @@ app.guard(
         return new Response("Something went wrong");
       }
 
-      await prisma.channel.upsert({
+      const channel = await prisma.channel.upsert({
         where: {
           channel_id: validated.user_id,
         },
@@ -113,6 +124,15 @@ app.guard(
           channel_id: validated.user_id,
           token: res.refresh_token,
           enabled: true,
+        },
+      });
+
+      await prisma.webuiUser.update({
+        where: {
+          username: username,
+        },
+        data: {
+          channelId: channel.id,
         },
       });
 

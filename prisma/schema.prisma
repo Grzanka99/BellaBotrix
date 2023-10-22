@@ -46,8 +46,9 @@ model Solo {
 }
 
 model WebuiUser {
-  id       Int    @id @default(autoincrement())
-  username String @unique()
-  password String
-  token String @default("")
+  id        Int    @id @default(autoincrement())
+  username  String @unique()
+  password  String
+  token     String @default("")
+  channelId Int    @default(-1)
 }

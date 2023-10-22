@@ -2,7 +2,7 @@ const base = "https://id.twitch.tv/oauth2/authorize";
 const clientId = Bun.env.API_CLIENT_ID;
 const redirectUri = Bun.env.APP_URL || 'http://localhost:3000';
 const responseType = "code";
-const scopes = ["moderator:read:chatters", "moderation:read"];
+const scopes = ["moderator:read:chatters", "moderation:read", "channel:moderate"];
 
 export const AuthForm = () => (
   <form action={base} method="get">
