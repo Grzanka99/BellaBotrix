@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { describe, expect, test } from "bun:test";
 import { getCanRun } from "./can-run";
 
@@ -14,7 +15,7 @@ describe("command privilages", () => {
       "#wannacry_tm",
       {
         username: "wannacry_tm",
-        "user-id": "123345",
+        userId: "123345",
       },
     );
 
@@ -33,7 +34,7 @@ describe("command privilages", () => {
       "#wannacry_tm",
       {
         username: "testuser",
-        "user-id": "123345",
+        userId: "123345",
       },
     );
 
@@ -52,7 +53,7 @@ describe("command privilages", () => {
       "#wannacry_tm",
       {
         username: "testuser",
-        "user-id": "123345",
+        userId: "123345",
       },
     );
 

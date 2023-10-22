@@ -1,16 +1,15 @@
-import { TTwitchApiChatter } from "services/types";
-import { ChatUserstate } from "tmi.js";
+import { TTwitchApiChatter, TTwitchMessageInfo } from "services/types";
 
 export function getCanRun(
   mods: TTwitchApiChatter[],
   channel: string,
-  tags: ChatUserstate,
+  tags: TTwitchMessageInfo,
 ): boolean {
-  if (!tags["user-id"] || !tags.username) {
+  if (!tags.userId|| !tags.username) {
     return false;
   }
 
-  const inModsList = mods.find((m) => m.user_id === tags["user-id"]);
+  const inModsList = mods.find((m) => m.user_id === tags.userId);
 
   if (!inModsList) {
     const isItStreamerItself = channel === `#${tags.username}`;

@@ -56,10 +56,11 @@ export type TTwitchMessageInfo = {
   displayName: string;
   emotes: Array<[string, string, number]>;
   firstMessage: boolean;
+  username: string,
   isMod: boolean;
   roomId: number;
   isSubsriber: boolean;
-  userId: number;
+  userId: string;
   userType: string;
   badges: Record<string, boolean> & {
     broadcaster?: boolean;
@@ -73,5 +74,6 @@ export type TTwitchIrcContext = {
   channel: string;
   message: string;
   isCommand?: boolean;
-  info: TTwitchMessageInfo;
+  self: boolean;
+  tags: TTwitchMessageInfo;
 };

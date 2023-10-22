@@ -13,9 +13,10 @@ export function parseMessageInfo(data: string, message: string) {
     isMod: false,
     roomId: -1,
     isSubsriber: false,
-    userId: -1,
+    userId: '',
     userType: "",
     badges: {},
+    username: "",
   };
 
   for (let i = 0; i < splitted.length; i++) {
@@ -27,7 +28,9 @@ export function parseMessageInfo(data: string, message: string) {
     } else if (curr.startsWith("color=")) {
       userInfo.color = curr.substring("color=".length);
     } else if (curr.startsWith("display-name=")) {
-      userInfo.displayName = curr.substring("display-name=".length);
+      const uname = curr.substring("display-name=".length);
+      userInfo.displayName = uname;
+      userInfo.username = uname.toLowerCase();
     } else if (curr.startsWith("emotes=")) {
       userInfo.emotes = parseEmotes(curr.substring("emotes=".length), message);
     } else if (curr.startsWith("first-msg=")) {
@@ -39,7 +42,7 @@ export function parseMessageInfo(data: string, message: string) {
     } else if (curr.startsWith("subscriber=")) {
       userInfo.isSubsriber = curr.substring("subscriber=".length) === "1";
     } else if (curr.startsWith("user-id=")) {
-      userInfo.userId = Number(curr.substring("user-id=".length));
+      userInfo.userId = curr.substring("user-id=".length);
     } else if (curr.startsWith("user-type=")) {
       userInfo.userType = curr.substring("user-type=".length);
     }

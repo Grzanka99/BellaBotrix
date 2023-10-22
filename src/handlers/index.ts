@@ -1,21 +1,19 @@
 import { TChatMessage, THandler } from "handlers/types";
-import { ChatUserstate } from "tmi.js";
-import { identifyIsTaxMessage } from "./tax-handler/identify-message";
-import { createTaxHandler } from "./tax-handler";
 import { identifyIsBotCommand } from "./commands/identify-message";
 import { createCommandHandler } from "./commands";
 import { createActivityHandler } from "./activity-handler";
 import { TwitchApi } from "services/twitch-api";
+import { TTwitchMessageInfo } from "services/types";
 
 export async function getChatHandler(
   _channel: string,
-  tags: ChatUserstate,
+  tags: TTwitchMessageInfo,
   message: string,
   api?: TwitchApi,
 ): Promise<THandler[]> {
   const handlers: THandler[] = [{ useHandler: createActivityHandler() }];
 
-  if (tags["message-type"] !== "chat" || !tags.username) {
+  if (!tags.username) {
     return handlers;
   }
 
@@ -24,13 +22,8 @@ export async function getChatHandler(
     content: message,
   };
 
-  const isMessageToTax = identifyIsTaxMessage(chatMessage);
-  if (isMessageToTax) {
-    handlers.push({ useHandler: createTaxHandler(isMessageToTax) });
-  }
-
   const isCommand = await identifyIsBotCommand(chatMessage.content);
-  if (isCommand) {
+  if (isCommand && api) {
     handlers.push({ useHandler: createCommandHandler(isCommand, api) });
   }
 

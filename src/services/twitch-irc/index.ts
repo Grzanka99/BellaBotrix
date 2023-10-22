@@ -52,13 +52,16 @@ export class TwitchIrc {
       // const _idk = splited[1];
       // const channel = splited[3];
       const message = splited.slice(4, splited.length).join(" ").substring(1).trim();
+      const tags = parseMessageInfo(messageinfo, message);
 
       return {
         type: EEvenType.Message,
         channel: this._channel,
         message,
         isCommand: this.isCommand(message),
-        info: parseMessageInfo(messageinfo, message),
+        tags,
+        // TODO: Better logic;
+        self: tags.displayName.toLowerCase() === "bellabotrix",
       };
     } else if (splited.includes("ROOMSTATE")) {
       // return { type: EEvenType.Roomstate };
@@ -100,24 +103,24 @@ export class TwitchIrc {
   }
 }
 
-const irc = await createIrcClient(
-  "ws://irc-ws.chat.twitch.tv:80",
-  Bun.env.CLIENT_ID || "",
-  Bun.env.PASSWORD || "",
-);
-if (!irc) {
-  logger.error("Error creating irc irc client");
-} else {
-  // const wannacry_tm = new TwitchIrc(irc, "#wannacry_tm");
-  const trejekk = new TwitchIrc(irc, "#wannacry_tm", (it) => {
-    it.send("What's up?");
-  });
-
-  // wannacry_tm.onMessage((it, ctx) => {
-  //   console.log("wc", ctx);
-  // });
-  //
-  // trejekk.onMessage((it, ctx) => {
-  //   console.log("tk", ctx);
-  // });
-}
+// const irc = await createIrcClient(
+//   "ws://irc-ws.chat.twitch.tv:80",
+//   Bun.env.CLIENT_ID || "",
+//   Bun.env.PASSWORD || "",
+// );
+// if (!irc) {
+//   logger.error("Error creating irc irc client");
+// } else {
+//   // const wannacry_tm = new TwitchIrc(irc, "#wannacry_tm");
+//   const trejekk = new TwitchIrc(irc, "#wannacry_tm", (it) => {
+//     it.send("What's up?");
+//   });
+//
+//   // wannacry_tm.onMessage((it, ctx) => {
+//   //   console.log("wc", ctx);
+//   // });
+//   //
+//   // trejekk.onMessage((it, ctx) => {
+//   //   console.log("tk", ctx);
+//   // });
+// }

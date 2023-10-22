@@ -1,6 +1,6 @@
 import { TCommand } from "handlers/types";
 import { prisma, prismaQueue } from "services/db";
-import { ChatUserstate } from "tmi.js";
+import { TTwitchMessageInfo } from "services/types";
 import { TOption } from "types";
 import { interpolate } from "utils/interpolate-string";
 import { logger } from "utils/logger";
@@ -13,10 +13,7 @@ function getUsername(original: string): TOption<[string, string]> {
   }
 
   if (username[0]) {
-    return [
-      username[0].replace("@", ""),
-      username[0].replace("@", "").toLowerCase().trim(),
-    ];
+    return [username[0].replace("@", ""), username[0].replace("@", "").toLowerCase().trim()];
   }
 
   return undefined;
@@ -25,9 +22,9 @@ function getUsername(original: string): TOption<[string, string]> {
 export async function startSolo(
   { original, actionMessage }: TCommand,
   channel: string,
-  tags: ChatUserstate,
+  tags: TTwitchMessageInfo,
 ): Promise<TOption<string>> {
-  if (!original || !actionMessage || !tags.username || !tags["user-id"]) {
+  if (!original || !actionMessage || !tags.username || !tags.userId) {
     return undefined;
   }
 
@@ -68,7 +65,7 @@ export async function startSolo(
   const user1points = await prismaQueue.enqueue(() =>
     prisma.user.findUnique({
       where: {
-        userid: `${tags["user-id"]}@${channel}`,
+        userid: `${tags.userId}@${channel}`,
       },
     }),
   );
@@ -110,9 +107,9 @@ export async function startSolo(
 export async function soloNope(
   { actionMessage }: TCommand,
   channel: string,
-  tags: ChatUserstate,
+  tags: TTwitchMessageInfo,
 ): Promise<TOption<string>> {
-  if (!tags["user-id"] || !tags.username || !actionMessage) {
+  if (!tags.userId || !tags.username || !actionMessage) {
     return undefined;
   }
 
@@ -151,9 +148,9 @@ export async function soloNope(
 export async function soloYes(
   { actionMessage }: TCommand,
   channel: string,
-  tags: ChatUserstate,
+  tags: TTwitchMessageInfo,
 ): Promise<TOption<string>> {
-  if (!tags["user-id"] || !tags.username || !actionMessage) {
+  if (!tags.userId || !tags.username || !actionMessage) {
     return undefined;
   }
 
@@ -175,7 +172,7 @@ export async function soloYes(
   const user2points = await prismaQueue.enqueue(() =>
     prisma.user.findUnique({
       where: {
-        userid: `${tags["user-id"]}@${channel}`,
+        userid: `${tags.userId}@${channel}`,
       },
     }),
   );

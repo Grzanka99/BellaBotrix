@@ -1,11 +1,11 @@
 import { TCommand } from "handlers/types";
 import { prisma, prismaQueue } from "services/db";
 import { TwitchApi } from "services/twitch-api";
-import { ChatUserstate } from "tmi.js";
 import { TOption } from "types";
 import { interpolate } from "utils/interpolate-string";
 import { logger } from "utils/logger";
 import { getUsername } from "./utils/get-username";
+import { TTwitchMessageInfo } from "services/types";
 
 export async function getUserPoints(
   { original, actionMessage }: TCommand,
@@ -45,10 +45,10 @@ export async function getUserPoints(
 export async function addPoints(
   { original, actionMessage }: TCommand,
   channel: string,
-  tags: ChatUserstate,
+  tags: TTwitchMessageInfo,
   api: TwitchApi,
 ): Promise<TOption<string>> {
-  if (!original || !actionMessage || !tags.username || !tags["user-id"]) {
+  if (!original || !actionMessage || !tags.username || !tags.userId) {
     return undefined;
   }
 
@@ -104,10 +104,10 @@ export async function addPoints(
 export async function removePoints(
   { original, actionMessage }: TCommand,
   channel: string,
-  tags: ChatUserstate,
+  tags: TTwitchMessageInfo,
   api: TwitchApi,
 ): Promise<TOption<string>> {
-  if (!original || !actionMessage || !tags.username || !tags["user-id"]) {
+  if (!original || !actionMessage || !tags.username || !tags.userId) {
     return undefined;
   }
 
@@ -164,9 +164,9 @@ export async function removePoints(
 export async function givePoints(
   { original, actionMessage }: TCommand,
   channel: string,
-  tags: ChatUserstate,
+  tags: TTwitchMessageInfo,
 ): Promise<TOption<string>> {
-  if (!original || !actionMessage || !tags.username || !tags["user-id"]) {
+  if (!original || !actionMessage || !tags.username || !tags.userId) {
     return undefined;
   }
 

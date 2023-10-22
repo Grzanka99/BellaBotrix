@@ -1,4 +1,5 @@
-import { ChatUserstate, Client } from "tmi.js";
+import { TwitchIrc } from "services/twitch-irc";
+import { TTwitchMessageInfo } from "services/types";
 
 export type TChatMessage = {
   author: string;
@@ -19,8 +20,8 @@ export type TCommand = {
 
 export type THandlerArgs = {
   message: string;
-  tags: ChatUserstate;
-  client: Client;
+  tags: TTwitchMessageInfo;
+  client: TwitchIrc;
   channel: string;
 };
 

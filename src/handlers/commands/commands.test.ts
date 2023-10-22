@@ -1,6 +1,5 @@
 import { describe, expect, test } from "bun:test";
 import { identifyIsBotCommand } from "./identify-message";
-import { getCanRun } from ".";
 
 describe("identify is command", () => {
   test.skip("should identify as command", async () => {

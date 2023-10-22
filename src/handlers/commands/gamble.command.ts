@@ -1,10 +1,10 @@
 import { EWonLost, TCommand } from "handlers/types";
-import { ChatUserstate } from "tmi.js";
-import { TOption } from "types";
-import { getUsername } from "./utils/get-username";
 import { prisma, prismaQueue } from "services/db";
+import { TTwitchMessageInfo } from "services/types";
+import { TOption } from "types";
 import { interpolate } from "utils/interpolate-string";
 import { logger } from "utils/logger";
+import { getUsername } from "./utils/get-username";
 
 export function getResult(totalPoints: number): [EWonLost, number] {
   const chances = 50 - (totalPoints % 50);
@@ -30,21 +30,13 @@ export function getResult(totalPoints: number): [EWonLost, number] {
 export async function gamble(
   command: TCommand,
   channel: string,
-  tags: ChatUserstate,
+  tags: TTwitchMessageInfo,
 ): Promise<TOption<string>> {
-  if (
-    !command.original ||
-    !command.actionMessage ||
-    !tags["user-id"] ||
-    !tags.username
-  ) {
+  if (!command.original || !command.actionMessage || !tags.userId || !tags.username) {
     return undefined;
   }
 
-  const [resUsername, formattedUsername] = getUsername(
-    command.original,
-    tags.username,
-  );
+  const [resUsername, formattedUsername] = getUsername(command.original, tags.username);
 
   const startPosition = command.original.indexOf("!gamble") + 8;
   const points = command.original.substring(startPosition);
@@ -62,7 +54,7 @@ export async function gamble(
   const user = await prismaQueue.enqueue(() =>
     prisma.user.findUnique({
       where: {
-        userid: `${tags["user-id"]}@${channel}`,
+        userid: `${tags.userId}@${channel}`,
         channel,
       },
     }),

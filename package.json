@@ -13,7 +13,6 @@
   },
   "devDependencies": {
     "@biomejs/biome": "1.1.2",
-    "@types/tmi.js": "^1.8.3",
     "bun-types": "latest",
     "prisma": "^5.2.0"
   },
@@ -24,7 +23,6 @@
     "@elysiajs/html": "^0.7.0",
     "@elysiajs/static": "^0.7.1",
     "@prisma/client": "5.2.0",
-    "elysia": "^0.7.12",
-    "tmi.js": "^1.8.5"
+    "elysia": "^0.7.12"
   }
 }
