@@ -29,7 +29,7 @@ export async function getChannelRefreshKey(
     let url = `${OAUTH_URL}?client_id=${API_CLIENT_ID}`;
     url += `&client_secret=${API_CLIENT_SECRET}`;
     url += `&code=${code}`;
-    url += "&grant_type=authorization_code&redirect_uri=http://localhost:3000";
+    url += `&grant_type=authorization_code&redirect_uri=${Bun.env.APP_URL || 'http://localhost:3000'}`;
 
     const res = await fetch(url, { method: "POST" });
     const json = await res.json<TTwitchOAuthRefresh>();
