@@ -8,7 +8,7 @@ export const SingleCommand = (props: TSingleUiCommand) => (
       <input type="hidden" value={props.name} name="name" />
     </li>
     <li>
-      {props.enabled}
+      {String(props.enabled)}
       <input type="hidden" value={String(props.enabled)} name="enabled" />
     </li>
     <li>

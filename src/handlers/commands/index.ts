@@ -4,7 +4,6 @@ import { interpolate } from "utils/interpolate-string";
 import { gamble } from "./gamble.command";
 import { TwitchApi } from "services/twitch-api";
 import { soloNope, soloYes, startSolo } from "./solo.command";
-import { TOption } from "types";
 import { getCanRun } from "./utils/can-run";
 import { spit } from "./spit.command";
 

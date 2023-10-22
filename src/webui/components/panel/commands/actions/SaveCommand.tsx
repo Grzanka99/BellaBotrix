@@ -3,6 +3,7 @@ import { SingleCommand } from "../SingleCommand";
 import { prisma } from "services/db";
 
 export const SaveCommand = async (props: TSingleUiCommand) => {
+  console.log(props);
   try {
     const res = await prisma.commands.update({
       where: {
@@ -10,13 +11,12 @@ export const SaveCommand = async (props: TSingleUiCommand) => {
       },
       data: {
         message: props.message,
-        enabled: String(props.enabled) === "true" || String(props.enabled) === "on",
+        enabled: !!props.enabled,
         alias: props.alias,
       },
     });
 
-      return <SingleCommand {...res} />;
-
+    return <SingleCommand {...res} />;
   } catch (err) {
     <SingleCommand {...props} />;
   }

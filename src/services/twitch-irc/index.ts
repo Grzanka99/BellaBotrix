@@ -1,5 +1,4 @@
 import { logger } from "utils/logger";
-import { createIrcClient } from "./IrcClient";
 import { TOption } from "types";
 import { parseMessageInfo } from "./parsers";
 import { EEvenType, TTwitchIrcContext } from "services/types";
@@ -35,7 +34,16 @@ export class TwitchIrc {
   }
 
   public send(msg: string) {
-    this.ws.send(`PRIVMSG ${this._channel} :${msg}`);
+    const chunkSize = 500;
+    if (msg.length > chunkSize) {
+      let currentChunk = "";
+      for (let i = 0; i < msg.length; i += chunkSize) {
+        currentChunk = msg.slice(i, i + chunkSize);
+        this.ws.send(`PRIVMSG ${this._channel} :${currentChunk}`);
+      }
+    } else {
+      this.ws.send(`PRIVMSG ${this._channel} :${msg}`);
+    }
   }
 
   public say = this.send;

@@ -4,9 +4,7 @@ import { TOption } from "types";
 
 const PREFIX = "!";
 
-export async function identifyIsBotCommand(
-  message: string,
-): Promise<TOption<TCommand>> {
+export async function identifyIsBotCommand(message: string): Promise<TOption<TCommand>> {
   if (message[0] !== "!") {
     return undefined;
   }
@@ -32,7 +30,7 @@ export async function identifyIsBotCommand(
     return !!byName;
   });
 
-  if (!command) {
+  if (!command || !command.enabled) {
     return undefined;
   }
 

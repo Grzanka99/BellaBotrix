@@ -2,7 +2,7 @@ export type TSingleUiCommand = {
   id: number;
   name: string;
   message: string | null;
-  enabled: boolean;
+  enabled?: boolean;
   alias: string;
 };
 
