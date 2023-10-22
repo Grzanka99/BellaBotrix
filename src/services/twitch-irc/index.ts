@@ -1,7 +1,7 @@
 import { logger } from "utils/logger";
 import { createIrcClient } from "./IrcClient";
 import { TOption } from "types";
-import { parseMessageInfo } from "./parser";
+import { parseMessageInfo } from "./parsers";
 import { EEvenType, TTwitchIrcContext } from "services/types";
 
 export class TwitchIrc {

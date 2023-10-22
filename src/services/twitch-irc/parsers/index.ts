@@ -1,5 +1,6 @@
 import { TTwitchMessageInfo } from "services/types";
-import { decodeEmotes } from "./emotes";
+import { parseEmotes } from "./emotes.parser";
+import { parseBadges } from "./badges.parser";
 
 export function parseMessageInfo(data: string, message: string) {
   const splitted = data.split(";");
@@ -14,13 +15,13 @@ export function parseMessageInfo(data: string, message: string) {
     isSubsriber: false,
     userId: -1,
     userType: "",
-    badges: [],
+    badges: {},
   };
 
   for (let i = 0; i < splitted.length; i++) {
     const curr = splitted[i];
     if (curr.startsWith("badges=")) {
-      userInfo.badges = curr.substring("badges=".length).split(",");
+      userInfo.badges = parseBadges(curr.substring("badges=".length).split(","));
     } else if (curr.startsWith("client-nonce=")) {
       userInfo.clientNonce = curr.substring("client-nonce=".length);
     } else if (curr.startsWith("color=")) {
@@ -28,7 +29,7 @@ export function parseMessageInfo(data: string, message: string) {
     } else if (curr.startsWith("display-name=")) {
       userInfo.displayName = curr.substring("display-name=".length);
     } else if (curr.startsWith("emotes=")) {
-      userInfo.emotes = decodeEmotes(curr.substring("emotes=".length), message);
+      userInfo.emotes = parseEmotes(curr.substring("emotes=".length), message);
     } else if (curr.startsWith("first-msg=")) {
       userInfo.firstMessage = curr.substring("first-msg=".length) === "1";
     } else if (curr.startsWith("mod=")) {

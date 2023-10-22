@@ -61,7 +61,11 @@ export type TTwitchMessageInfo = {
   isSubsriber: boolean;
   userId: number;
   userType: string;
-  badges: string[];
+  badges: Record<string, boolean> & {
+    broadcaster?: boolean;
+    subscriper?: boolean;
+    premium?: boolean;
+  };
 };
 
 export type TTwitchIrcContext = {

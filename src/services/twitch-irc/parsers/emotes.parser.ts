@@ -1,4 +1,4 @@
-export function decodeEmotes(enocoded: string, message: string): Array<[string, string, number]> {
+export function parseEmotes(enocoded: string, message: string): Array<[string, string, number]> {
   if (!message) {
     return [];
   }
@@ -15,8 +15,6 @@ export function decodeEmotes(enocoded: string, message: string): Array<[string, 
 
     return [id, emoteName, occurancesSplited.length];
   });
-
-  console.log(toIdEmoteTuple);
 
   return toIdEmoteTuple;
 }
