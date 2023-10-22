@@ -6,16 +6,36 @@ import { EEvenType, TTwitchIrcContext } from "services/types";
 
 export class TwitchIrc {
   private ws: WebSocket;
-  private channel: string;
+  private _channel: string;
+  private _connected = false;
 
-  constructor(ws: WebSocket, channel: `#${string}`) {
+  private get logger() {
+    return {
+      info: (msg: string) => logger.info(`CH: ${this.channel}: ${msg}`),
+      warning: (msg: string) => logger.warning(`CH: ${this.channel}: ${msg}`),
+      error: (msg: string) => logger.error(`CH: ${this.channel}: ${msg}`),
+    };
+  }
+
+  constructor(ws: WebSocket, channel: `#${string}`, onConnect?: (it: TwitchIrc) => void) {
     this.ws = ws;
-    this.channel = channel;
+    this._channel = channel;
     this.ws.send(`JOIN ${channel}`);
+    this.logger.info("Connecting");
+
+    this.ws.addEventListener("message", (r) => {
+      if (r.data.includes(`:bellabotrix!bellabotrix@bellabotrix.tmi.twitch.tv JOIN ${channel}`)) {
+        this.logger.info("Connected");
+        this._connected = true;
+        if (onConnect) {
+          onConnect(this);
+        }
+      }
+    });
   }
 
   public send(msg: string) {
-    this.ws.send(`PRIVMSG ${this.channel} :${msg}`);
+    this.ws.send(`PRIVMSG ${this._channel} :${msg}`);
   }
 
   public say = this.send;
@@ -23,7 +43,7 @@ export class TwitchIrc {
   public parseMessageToCtx(msg: string): TOption<TTwitchIrcContext> {
     const splited = msg.split(" ");
 
-    if (!splited.includes(this.channel)) {
+    if (!splited.includes(this._channel)) {
       return;
     }
 
@@ -35,7 +55,7 @@ export class TwitchIrc {
 
       return {
         type: EEvenType.Message,
-        channel: this.channel,
+        channel: this._channel,
         message,
         isCommand: this.isCommand(message),
         info: parseMessageInfo(messageinfo, message),
@@ -48,7 +68,7 @@ export class TwitchIrc {
     return undefined;
   }
 
-  public onMessage(handler: (it: TwitchIrc, ctx: TTwitchIrcContext) => void) {
+  public onMessage(handler: (ctx: TTwitchIrcContext, it: TwitchIrc) => void) {
     this.ws.addEventListener("message", (res) => {
       if (typeof res.data !== "string") {
         return;
@@ -59,7 +79,7 @@ export class TwitchIrc {
         return;
       }
 
-      handler(this, newCtx);
+      handler(newCtx, this);
     });
   }
 
@@ -69,6 +89,14 @@ export class TwitchIrc {
     }
 
     return false;
+  }
+
+  public get channel() {
+    return this._channel;
+  }
+
+  public get connected() {
+    return this._connected;
   }
 }
 
@@ -80,14 +108,16 @@ const irc = await createIrcClient(
 if (!irc) {
   logger.error("Error creating irc irc client");
 } else {
-  const wannacry_tm = new TwitchIrc(irc, "#wannacry_tm");
-  const trejekk = new TwitchIrc(irc, "#trejekk");
-
-  wannacry_tm.onMessage((it, ctx) => {
-    console.log("wc", ctx);
+  // const wannacry_tm = new TwitchIrc(irc, "#wannacry_tm");
+  const trejekk = new TwitchIrc(irc, "#wannacry_tm", (it) => {
+    it.send("What's up?");
   });
 
-  trejekk.onMessage((it, ctx) => {
-    console.log("tk", ctx);
-  });
+  // wannacry_tm.onMessage((it, ctx) => {
+  //   console.log("wc", ctx);
+  // });
+  //
+  // trejekk.onMessage((it, ctx) => {
+  //   console.log("tk", ctx);
+  // });
 }
