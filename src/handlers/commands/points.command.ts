@@ -181,6 +181,10 @@ export async function givePoints(
     return undefined;
   }
 
+  if (points < 0) {
+    return "Nice try, M**awi***i, is that you?";
+  }
+
   const users = await prismaQueue.enqueue(() =>
     prisma.user.findMany({
       where: {

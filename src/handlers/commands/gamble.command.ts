@@ -7,7 +7,7 @@ import { logger } from "utils/logger";
 import { getUsername } from "./utils/get-username";
 
 export function getResult(totalPoints: number): [EWonLost, number] {
-  const chances = 50 - (totalPoints % 50);
+  const chances = 50 - (totalPoints % 50) + 25;
   const rand = Math.floor(Math.random() * 100) + 1;
 
   logger.info(`Chances are ${chances}`);
