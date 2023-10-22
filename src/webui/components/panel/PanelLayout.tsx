@@ -32,6 +32,7 @@ const HeaderLink = ({ href, text, current }: THeaderLinkProps) => {
 
 export const PanelLayout = ({
   children,
+  // @ts-ignore
   current = "",
   headers,
 }: TPanelLayoutProps): JSX.Element => {

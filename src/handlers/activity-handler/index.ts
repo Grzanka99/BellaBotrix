@@ -3,7 +3,7 @@ import { prisma, prismaQueue } from "services/db";
 
 export function createActivityHandler(): TUseHandler {
   return async function ({ tags, channel }) {
-    if (!tags.username || !tags["user-id"] || tags["message-type"] !== "chat") {
+    if (!tags.username || !tags.userId) {
       return;
     }
 
@@ -12,7 +12,7 @@ export function createActivityHandler(): TUseHandler {
       const user = await prisma.user.findUnique({
         where: {
           channel,
-          userid: `${tags["user-id"]}@${channel}`,
+          userid: `${tags.userId}@${channel}`,
         },
       });
 
@@ -20,7 +20,7 @@ export function createActivityHandler(): TUseHandler {
         await prisma.user.create({
           data: {
             username: username.toLowerCase().trim(),
-            userid: `${tags["user-id"]}@${channel}`,
+            userid: `${tags.userId}@${channel}`,
             channel,
             sentMessages: 1,
             points: 10,

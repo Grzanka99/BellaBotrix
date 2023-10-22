@@ -35,7 +35,7 @@ export function createCommandHandler(command: TCommand, api: TwitchApi): TUseHan
         return;
       }
       case "givepoints": {
-        const res = await givePoints(command, channel, tags, api);
+        const res = await givePoints(command, channel, tags);
         if (res) {
           client.say(res);
         }
