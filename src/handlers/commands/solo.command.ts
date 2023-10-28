@@ -254,19 +254,19 @@ export async function getUserWinrate(
     return undefined;
   }
 
-  const [resUsername, _] = getUsername(original) || [sender, sender];
+  const [resUsername,formattedUsername] = getUsername(original) || [sender, sender];
 
   const solosWithUser = await prismaQueue.enqueue(() =>
     prisma.solo.findMany({
       where: {
-        OR: [{ user1: resUsername }, { user2: resUsername }],
+        OR: [{ user1: formattedUsername }, { user2: formattedUsername }],
         AND: { inProgress: false, winner: { not: "undecided" }, channel },
       },
     }),
   );
 
   const total = solosWithUser.length;
-  const wins = solosWithUser.filter((el) => el.winner === resUsername).length;
+  const wins = solosWithUser.filter((el) => el.winner === formattedUsername).length;
   const winrate = ((wins / total) * 100).toFixed(2);
 
   return interpolate(actionMessage, {
