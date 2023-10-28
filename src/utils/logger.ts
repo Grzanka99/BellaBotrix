@@ -12,4 +12,5 @@ export const logger = {
   info: (msg: string) => console.log(`${time()} [INFO] ${msg}`),
   warning: (msg: string) => console.log(`${time()} [WARN] ${msg}`),
   error: (msg: string) => console.log(`${time()} [ERRO] ${msg}`),
+  message: (msg: string) => console.log(`${time()} [MESG] ${msg}`),
 };

@@ -90,6 +90,8 @@ export class TwitchIrc {
         return;
       }
 
+      logger.message(`${newCtx.tags.displayName}@${this.channel}: ${newCtx.message}`);
+
       handler(newCtx, this);
     });
   }
@@ -110,25 +112,3 @@ export class TwitchIrc {
     return this._connected;
   }
 }
-
-// const irc = await createIrcClient(
-//   "ws://irc-ws.chat.twitch.tv:80",
-//   Bun.env.CLIENT_ID || "",
-//   Bun.env.PASSWORD || "",
-// );
-// if (!irc) {
-//   logger.error("Error creating irc irc client");
-// } else {
-//   // const wannacry_tm = new TwitchIrc(irc, "#wannacry_tm");
-//   const trejekk = new TwitchIrc(irc, "#wannacry_tm", (it) => {
-//     it.send("What's up?");
-//   });
-//
-//   // wannacry_tm.onMessage((it, ctx) => {
-//   //   console.log("wc", ctx);
-//   // });
-//   //
-//   // trejekk.onMessage((it, ctx) => {
-//   //   console.log("tk", ctx);
-//   // });
-// }

@@ -54,6 +54,10 @@ const BASE_COMMANDS: TCommand[] = [
     message: "$username1 just spit on $username2 PepeSpit",
     alias: "tfu",
   },
+  {
+    name: "winrate",
+    message: "$username has $winrate winrate in $total soloes with $wins wins",
+  }
 ];
 
 if (prisma) {

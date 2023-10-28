@@ -14,11 +14,18 @@ export async function createIrcClient(
         client.send(`PASS ${password}`);
         client.send(`NICK ${nick}`);
 
-        client.addEventListener("ping", (res) => {
-          console.log("sending pong");
-          client.pong(res.data);
-        });
         res(client);
+      });
+
+      client.addEventListener("message", (res) => {
+        if (!res.data || typeof res.data !== "string") {
+          return;
+        }
+
+        if (res.data.startsWith("PING :")) {
+          logger.info("sending pong");
+          client.send(`PONG: ${res.data.substring("PING: ".length).trim()}`);
+        }
       });
     } catch (err) {
       logger.error("Couldn't establish connection");

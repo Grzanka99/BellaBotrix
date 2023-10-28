@@ -3,7 +3,7 @@ import { addPoints, getUserPoints, givePoints, removePoints } from "./points.com
 import { interpolate } from "utils/interpolate-string";
 import { gamble } from "./gamble.command";
 import { TwitchApi } from "services/twitch-api";
-import { soloNope, soloYes, startSolo } from "./solo.command";
+import { getUserWinrate, soloNope, soloYes, startSolo } from "./solo.command";
 import { getCanRun } from "./utils/can-run";
 import { spit } from "./spit.command";
 
@@ -46,6 +46,14 @@ export function createCommandHandler(command: TCommand, api: TwitchApi): TUseHan
         if (res) {
           client.say(res);
         }
+        return;
+      }
+      case"winrate": {
+        const res = await getUserWinrate(command, channel, tags.username);
+        if(res) {
+          client.say(res);
+        }
+
         return;
       }
       case "gamble": {

@@ -244,3 +244,35 @@ export async function soloYes(
     points: foundSolo.points,
   });
 }
+
+export async function getUserWinrate(
+  { original, actionMessage }: TCommand,
+  channel: string,
+  sender?: string,
+): Promise<TOption<string>> {
+  if (!original || !actionMessage || !sender) {
+    return undefined;
+  }
+
+  const [resUsername, _] = getUsername(original) || [sender, sender];
+
+  const solosWithUser = await prismaQueue.enqueue(() =>
+    prisma.solo.findMany({
+      where: {
+        OR: [{ user1: resUsername }, { user2: resUsername }],
+        AND: { inProgress: false, winner: { not: "undecided" }, channel },
+      },
+    }),
+  );
+
+  const total = solosWithUser.length;
+  const wins = solosWithUser.filter((el) => el.winner === resUsername).length;
+  const winrate = ((wins / total) * 100).toFixed(2);
+
+  return interpolate(actionMessage, {
+    total,
+    wins,
+    winrate: `${winrate}%`,
+    username: `@${resUsername}`,
+  });
+}
