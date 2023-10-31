@@ -1,10 +1,12 @@
+import { HTMLDeclarationWrapper } from "../HTMLDeclarationWrapper";
+
 type TProps = {
   children?: JSX.Element;
 };
 
 export const LoginLayout = ({ children }: TProps): JSX.Element => {
   return (
-    <html lang="en">
+    <HTMLDeclarationWrapper>
       <head>
         <title>Bellatrix Bot</title>
         <script src="https://unpkg.com/htmx.org@1.9.6" />
@@ -15,6 +17,6 @@ export const LoginLayout = ({ children }: TProps): JSX.Element => {
       <body>
         <main class="login-content">{children}</main>
       </body>
-    </html>
+    </HTMLDeclarationWrapper>
   );
 };

@@ -1,4 +1,5 @@
 import { R_COMMANDS, R_SETTINGS, R_SOLO, R_USERS } from "webui/routes";
+import { HTMLDeclarationWrapper } from "../HTMLDeclarationWrapper";
 
 type TPathPrefix =
   | typeof R_COMMANDS.PREFIX
@@ -37,7 +38,7 @@ export const PanelLayout = ({
   headers,
 }: TPanelLayoutProps): JSX.Element => {
   return (
-    <html lang="en">
+    <HTMLDeclarationWrapper>
       <head>
         <title>Bellatrix Bot</title>
         <script src="https://unpkg.com/htmx.org@1.9.6" />
@@ -69,6 +70,6 @@ export const PanelLayout = ({
         </header>
         <main class="panel-content">{children}</main>
       </body>
-    </html>
+    </HTMLDeclarationWrapper>
   );
 };
