@@ -110,5 +110,3 @@ export function startWebui() {
   app.listen(Bun.env.WEBUI_PORT || 3000);
   logger.info(`WebUI Started at ${Bun.env.WEBUI_PORT || 3000}`);
 }
-
-startWebui();
