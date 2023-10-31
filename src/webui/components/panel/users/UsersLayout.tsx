@@ -8,7 +8,14 @@ export const UsersLayout = async (ctx: Context) => {
       current="/panel/users"
       headers={<link rel="stylesheet" href="/public/users-list.css" />}
     >
-      <div id="users-list-outer-wrapper">{await UsersList(ctx)}</div>
+      <div>
+        <div class="users-list-controls">
+          <label class="styled-input-with-label">
+            Search: <input id="users-list-filter" name="search" type="text" />
+          </label>
+        </div>
+        {await UsersList(ctx)}
+      </div>
     </PanelLayout>
   );
 };

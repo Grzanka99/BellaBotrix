@@ -63,6 +63,8 @@ export const PanelLayout = ({
               current={current}
             />
             <HeaderLink href="/auth" text="authorize" current={current} />
+
+            <HeaderLink href="/logout" text="logout" current={current} />
           </ul>
         </header>
         <main class="panel-content">{children}</main>

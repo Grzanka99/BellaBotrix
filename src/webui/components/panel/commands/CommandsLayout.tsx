@@ -8,8 +8,7 @@ export const CommandsLayout = async () => {
       current="/panel/commands"
       headers={
         <>
-          <link rel="stylesheet" href="/public/commands-table.css" />
-          <link rel="stylesheet" href="/public/add-command-form.css" />
+          <link rel="stylesheet" href="/public/commands-list.css" />
         </>
       }
     >

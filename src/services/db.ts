@@ -82,10 +82,3 @@ if (prisma) {
     );
   });
 }
-
-// NOTE: remove later
-setInterval(() => {
-  if (prismaQueue.enqueued) {
-    logger.warning(`PRISMA CURRENTLY ENQUEUED: ${prismaQueue.enqueued}`);
-  }
-}, 100);

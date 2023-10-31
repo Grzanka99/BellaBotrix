@@ -1,9 +1,18 @@
+body {
+  height: 100vh;
+  max-height: 100vh;
+  overflow: hidden;
+  display: grid;
+  grid-template-rows: 50px calc(100% - 50px);
+}
+
 .panel-header {
   display: flex;
   justify-content: center;
   align-items: center;
   width: 100%;
   background: #abcdef;
+  height: 50px;
 }
 
 .panel-header__list {
@@ -43,8 +52,18 @@
   background: rgba(0, 0, 0, 0.1);
 }
 
-.panel-content div {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
+.panel-content {
+  height: 100%;
+
+  > div {
+    display: flex;
+    flex-direction: column;
+
+    height: 100%;
+    overflow: hidden;
+  }
+
+  & .grid-based-table {
+    height: 100%;
+  }
 }

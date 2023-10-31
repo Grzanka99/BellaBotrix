@@ -24,8 +24,17 @@ export const UsersList = async (ctx: Context) => {
   }
 
   return (
-    <>
-      <div class="grid-based-table">
+    <div id="users-list-outer-wrapper">
+      <div
+        class="grid-based-table"
+        hx-get={`${R_USERS.PREFIX}${R_USERS.LIST}?channel=${String(
+          channel.name || ctx.query.channel,
+        )}`}
+        hx-trigger="every 2s"
+        hx-target="#channel-users-list"
+        hx-swap="innerHTML"
+        hx-include="#users-list-filter"
+      >
         <div class="grid-based-table__header">
           <ul>
             <li>userid</li>
@@ -35,8 +44,10 @@ export const UsersList = async (ctx: Context) => {
             <li>points</li>
           </ul>
         </div>
-        {await SingleChannelUserList(ctx,channel.name)}
+        <div id="channel-users-list" class="grid-based-table__content">
+          {await SingleChannelUserList(ctx, channel.name)}
+        </div>
       </div>
-    </>
+    </div>
   );
 };

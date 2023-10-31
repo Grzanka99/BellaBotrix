@@ -2,7 +2,6 @@ import { html } from "@elysiajs/html";
 import staticPlugin from "@elysiajs/static";
 import { Elysia, t } from "elysia";
 import { prisma } from "services/db";
-import { getChannelRefreshKey, validateToken } from "services/twitch-api/api-connector";
 import { AuthForm } from "./components/auth/AuthForm";
 import { LoginForm } from "./components/login/LoginForm";
 import { RegisterForm } from "./components/login/RegisterForm";
@@ -15,13 +14,15 @@ import { DeleteCommand } from "./components/panel/commands/actions/DeleteCommand
 import { EditCommand } from "./components/panel/commands/actions/EditCommandForm";
 import { SaveCommand } from "./components/panel/commands/actions/SaveCommand";
 import { UsersLayout } from "./components/panel/users/UsersLayout";
-import { R_COMMANDS, R_SOLO, R_USERS } from "./routes";
+import { R_AUTH, R_COMMANDS, R_LOGIN, R_PANEL, R_ROOT, R_SOLO, R_USERS } from "./routes";
 import { TNewUiCommand, TSingleUiCommand, TSingleUiSoloReq } from "./types";
 import { SingleChannelUserList } from "./components/panel/users/SingleChannelUsers";
 import { CancelCommand } from "./components/panel/commands/actions/CancelCommand";
 import { SoloLayout } from "./components/panel/solo/SoloLayout";
 import { SoloListContent } from "./components/panel/solo/SoloListContent";
 import { SoloClose } from "./components/panel/solo/SoloClose";
+import { logger } from "utils/logger";
+import { authorizeApp } from "./services/authapp.service";
 
 const UNAUTHORIZED = "Unauthorized";
 
@@ -34,10 +35,18 @@ app.use(
   }),
 );
 
-app.get("/login", LoginForm);
-app.post("/login/auth", loginAuth);
-app.get("/login/register", RegisterForm);
-app.post("/login/register/auth", registerAuth);
+app.group(R_LOGIN.PREFIX, (login) =>
+  login
+    .get(R_LOGIN.ROOT, LoginForm)
+    .post(R_LOGIN.LOGIN_AUTH, loginAuth)
+    .get(R_LOGIN.REGISTER, RegisterForm)
+    .post(R_LOGIN.REGISTER_AUTH, registerAuth),
+);
+
+app.get("/logout", (ctx) => {
+  ctx.cookie.auth.value = undefined;
+  ctx.set.redirect = "/login";
+});
 
 app.guard(
   {
@@ -65,7 +74,7 @@ app.guard(
     },
   },
   (app) => {
-    app.get("/panel", () => <PanelLayout />);
+    app.get(R_PANEL, () => <PanelLayout />);
 
     app.group(R_COMMANDS.PREFIX, (commands) =>
       commands
@@ -90,54 +99,8 @@ app.guard(
         .post(R_SOLO.CLOSE, async (ctx) => SoloClose(ctx.body as TSingleUiSoloReq)),
     );
 
-    app.get("/auth", AuthForm);
-    app.get("/", async (req) => {
-      const username = String(req.cookie.auth.value.username);
-      const code = req.query.code;
-      const error = req.query.error;
-
-      if (!code || error) {
-        return new Response("Something went wrong");
-      }
-
-      const res = await getChannelRefreshKey(code);
-
-      if (!res) {
-        return new Response("Something went wrong");
-      }
-
-      const validated = await validateToken(res.access_token);
-
-      if (!validated) {
-        return new Response("Something went wrong");
-      }
-
-      const channel = await prisma.channel.upsert({
-        where: {
-          channel_id: validated.user_id,
-        },
-        update: {
-          token: res.refresh_token,
-        },
-        create: {
-          name: validated.login,
-          channel_id: validated.user_id,
-          token: res.refresh_token,
-          enabled: true,
-        },
-      });
-
-      await prisma.webuiUser.update({
-        where: {
-          username: username,
-        },
-        data: {
-          channelId: channel.id,
-        },
-      });
-
-      return new Response("Authorized");
-    });
+    app.get(R_AUTH, AuthForm);
+    app.get(R_ROOT, authorizeApp);
 
     return app;
   },
@@ -145,4 +108,7 @@ app.guard(
 
 export function startWebui() {
   app.listen(Bun.env.WEBUI_PORT || 3000);
+  logger.info(`WebUI Started at ${Bun.env.WEBUI_PORT || 3000}`);
 }
+
+startWebui();

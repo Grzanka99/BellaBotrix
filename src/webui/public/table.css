@@ -51,6 +51,12 @@
 
   & .grid-based-table__content {
     border: 2px solid black;
+    max-height: 100%;
+    overflow-x: auto;
+
+    &::-webkit-scrollbar {
+      display: none;
+    }
 
     & ul {
       & li {

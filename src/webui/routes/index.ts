@@ -1,3 +1,7 @@
+export const R_ROOT = "/";
+export const R_PANEL = "/panel";
+export const R_AUTH = "/auth";
+
 export const R_COMMANDS = {
   PREFIX: "/panel/commands",
   ROOT: "/",
@@ -24,4 +28,13 @@ export const R_USERS = {
 export const R_SETTINGS = {
   PREFIX: "/panel/settings",
   ROOT: "/",
+} as const;
+
+export const R_LOGIN = {
+  PREFIX: "/login",
+  ROOT: "/",
+  LOGIN_AUTH: "/auth",
+  REGISTER: "/register",
+  REGISTER_AUTH: "/register/auth",
+  LOGOUT: "/logout",
 } as const;
