@@ -1,1 +1,2 @@
-export type TOption<T> = T | undefined; 
+export type TOption<T> = T | undefined;
+

@@ -5,9 +5,10 @@ import { TOption } from "types";
 import { interpolate } from "utils/interpolate-string";
 import { logger } from "utils/logger";
 import { getUsername } from "./utils/get-username";
+import { TSettings } from "types/schema/settings.schema";
 
-export function getResult(totalPoints: number): [EWonLost, number] {
-  const chances = 50 - (totalPoints % 50) + 25;
+export function getResult(totalPoints: number, offset: number): [EWonLost, number] {
+  const chances = 50 - (totalPoints % 50) + offset;
   const rand = Math.floor(Math.random() * 100) + 1;
 
   logger.info(`Chances are ${chances}`);
@@ -31,6 +32,7 @@ export async function gamble(
   command: TCommand,
   channel: string,
   tags: TTwitchMessageInfo,
+  settings: TSettings,
 ): Promise<TOption<string>> {
   if (!command.original || !command.actionMessage || !tags.userId || !tags.username) {
     return undefined;
@@ -72,7 +74,7 @@ export async function gamble(
     return "You are poor, you need more points";
   }
 
-  const [result, rolled] = getResult(user.points + numberPoints);
+  const [result, rolled] = getResult(user.points + numberPoints, settings.points.chancesOffset.value);
 
   let resultPoints = 0;
   switch (result) {

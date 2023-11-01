@@ -8,7 +8,13 @@ import { getCanRun } from "./utils/can-run";
 import { spit } from "./spit.command";
 
 export function createCommandHandler(command: TCommand, api: TwitchApi): TUseHandler {
-  return async function ({ client, channel, tags }): Promise<void> {
+  return async function ({ client, channel, tags, settings }): Promise<void> {
+    console.log("asdasd");
+    if (!settings) {
+      return;
+    }
+    console.log("dsadsa");
+
     const mods = await api.getChannelModerators();
     const canRun = getCanRun(mods, channel, tags);
 
@@ -48,16 +54,16 @@ export function createCommandHandler(command: TCommand, api: TwitchApi): TUseHan
         }
         return;
       }
-      case"winrate": {
+      case "winrate": {
         const res = await getUserWinrate(command, channel, tags.username);
-        if(res) {
+        if (res) {
           client.say(res);
         }
 
         return;
       }
       case "gamble": {
-        const res = await gamble(command, channel, tags);
+        const res = await gamble(command, channel, tags, settings);
         if (res) {
           client.say(res);
         }

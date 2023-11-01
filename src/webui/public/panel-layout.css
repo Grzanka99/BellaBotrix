@@ -53,9 +53,11 @@ body {
 }
 
 .panel-content {
+  position: relative;
   height: 100%;
 
   > div {
+    position: relative;
     display: flex;
     flex-direction: column;
 

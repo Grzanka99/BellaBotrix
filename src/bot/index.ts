@@ -23,13 +23,12 @@ export async function bootstrap(): Promise<void> {
 
   logger.info("Getting enabled channels from DB");
   const channels = (await prisma.channel.findMany()).filter((ch) => ch.enabled);
-  const channelsNames = channels.map((ch) => ch.name);
   if (!channels.length) {
     logger.error("Could not find any enabled channel, quitting");
     return;
   }
 
-  logger.info(`Creating Twitch IRC client for ${channelsNames.length} channel`);
+  logger.info(`Creating Twitch IRC client for ${channels.length} channel`);
 
   const ircClient = await createIrcClient(
     "ws://irc-ws.chat.twitch.tv:80",
@@ -42,33 +41,45 @@ export async function bootstrap(): Promise<void> {
   }
 
   const twitchIrcClient = await Promise.all(
-    channelsNames.map(
-      (ch) =>
-        new Promise<TwitchIrc>((res) => {
-          const twitchClientForChannel = new TwitchIrc(ircClient, `#${ch}`, async ({ channel }) => {
+    channels.map(async (ch) => {
+      const user = await prisma.webuiUser.findFirst({
+        where: { channelId: ch.id },
+      });
+
+      if (!user) {
+        return;
+      }
+
+      return new Promise<TwitchIrc>((res) => {
+        const twitchClientForChannel = new TwitchIrc(
+          ircClient,
+          `#${ch.name}`,
+          user.id,
+          async ({ channel,  }) => {
             if (apis[channel]) {
               return;
             }
 
             logger.info(`Creting Twitch API connector for channel: ${channel}`);
-            const api = await chatters(channel, mainOAuthToken);
+            const api = await chatters(channel, mainOAuthToken, );
 
             if (api) {
               apis[channel] = api;
               res(twitchClientForChannel);
             }
-          });
-        }),
-    ),
+          },
+        );
+      });
+    }),
   );
 
-  twitchIrcClient.forEach((client) => {
+  twitchIrcClient.filter(Boolean).forEach((client) => {
     client.onMessage(async ({ channel, tags, message, self }, it) => {
       if (self) {
         return;
       }
 
-      const handler = await getChatHandler(channel, tags, message, apis[channel]);
+      const handler = await getChatHandler(channel, tags, message, it.settings, apis[channel]);
 
       handler.forEach(async (handler) => {
         await handler.useHandler({
@@ -76,6 +87,7 @@ export async function bootstrap(): Promise<void> {
           tags,
           message,
           client,
+          settings: it.settings,
         });
       });
     });

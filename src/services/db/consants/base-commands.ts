@@ -1,17 +1,10 @@
-import { PrismaClient } from "@prisma/client";
-import { AsyncQueue } from "utils/async-queue";
-import { logger } from "utils/logger";
-
-export const prisma = new PrismaClient();
-export const prismaQueue = new AsyncQueue();
-
 type TCommand = {
   name: string;
   message: string;
   alias?: string;
 };
 
-const BASE_COMMANDS: TCommand[] = [
+export const BASE_COMMANDS: TCommand[] = [
   {
     name: "addpoints",
     message: "$username just received $points points and now have bit more Kappa",
@@ -57,28 +50,5 @@ const BASE_COMMANDS: TCommand[] = [
   {
     name: "winrate",
     message: "$username has $winrate winrate in $total soloes with $wins wins",
-  }
+  },
 ];
-
-if (prisma) {
-  if (Bun.env.RESET_COMMANDS === "true") {
-    await prismaQueue.enqueue(() => prisma.commands.deleteMany());
-  }
-
-  BASE_COMMANDS.forEach(async (command) => {
-    await prismaQueue.enqueue(() =>
-      prisma.commands.upsert({
-        where: {
-          name: command.name,
-        },
-        update: {},
-        create: {
-          name: command.name,
-          message: command.message,
-          alias: command.alias,
-          enabled: true,
-        },
-      }),
-    );
-  });
-}

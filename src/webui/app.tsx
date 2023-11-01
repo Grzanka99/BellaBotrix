@@ -14,7 +14,16 @@ import { DeleteCommand } from "./components/panel/commands/actions/DeleteCommand
 import { EditCommand } from "./components/panel/commands/actions/EditCommandForm";
 import { SaveCommand } from "./components/panel/commands/actions/SaveCommand";
 import { UsersLayout } from "./components/panel/users/UsersLayout";
-import { R_AUTH, R_COMMANDS, R_LOGIN, R_PANEL, R_ROOT, R_SOLO, R_USERS } from "./routes";
+import {
+  R_AUTH,
+  R_COMMANDS,
+  R_LOGIN,
+  R_PANEL,
+  R_ROOT,
+  R_SETTINGS,
+  R_SOLO,
+  R_USERS,
+} from "./routes";
 import { TNewUiCommand, TSingleUiCommand, TSingleUiSoloReq } from "./types";
 import { SingleChannelUserList } from "./components/panel/users/SingleChannelUsers";
 import { CancelCommand } from "./components/panel/commands/actions/CancelCommand";
@@ -23,6 +32,8 @@ import { SoloListContent } from "./components/panel/solo/SoloListContent";
 import { SoloClose } from "./components/panel/solo/SoloClose";
 import { logger } from "utils/logger";
 import { authorizeApp } from "./services/authapp.service";
+import { SettingsLayout } from "./components/panel/settings/SettingsLyaout";
+import { UpdateSettings } from "./components/panel/settings/UpdateSettings";
 
 const UNAUTHORIZED = "Unauthorized";
 
@@ -97,6 +108,10 @@ app.guard(
         .get(R_SOLO.ROOT, SoloLayout)
         .get(R_SOLO.LIST, async (ctx) => await SoloListContent(ctx))
         .post(R_SOLO.CLOSE, async (ctx) => SoloClose(ctx.body as TSingleUiSoloReq)),
+    );
+
+    app.group(R_SETTINGS.PREFIX, (settings) =>
+      settings.get(R_SETTINGS.ROOT, SettingsLayout).post(R_SETTINGS.UPDATE, UpdateSettings),
     );
 
     app.get(R_AUTH, AuthForm);

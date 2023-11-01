@@ -28,6 +28,9 @@ export const R_USERS = {
 export const R_SETTINGS = {
   PREFIX: "/panel/settings",
   ROOT: "/",
+  UPDATE: "/htmx/update",
+  RESET: "/htmx/reset",
+  FORM: "htmx/settings",
 } as const;
 
 export const R_LOGIN = {

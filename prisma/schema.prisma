@@ -51,4 +51,5 @@ model WebuiUser {
   password  String
   token     String @default("")
   channelId Int    @default(-1)
+  settings String @default("")
 }

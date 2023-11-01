@@ -2,11 +2,16 @@ import { logger } from "utils/logger";
 import { TOption } from "types";
 import { parseMessageInfo } from "./parsers";
 import { EEvenType, TTwitchIrcContext } from "services/types";
+import { TSettings } from "types/schema/settings.schema";
+import { getSettings } from "services/settings";
+import { interpolate } from "utils/interpolate-string";
 
 export class TwitchIrc {
   private ws: WebSocket;
   private _channel: string;
   private _connected = false;
+  private ownerId: number;
+  private _settings: TSettings | undefined = undefined;
 
   private get logger() {
     return {
@@ -16,12 +21,32 @@ export class TwitchIrc {
     };
   }
 
-  constructor(ws: WebSocket, channel: `#${string}`, onConnect?: (it: TwitchIrc) => void) {
+  private async fetchSettings() {
+    this._settings = await getSettings(this.ownerId);
+
+    return this._settings;
+  }
+
+  constructor(
+    ws: WebSocket,
+    channel: `#${string}`,
+    ownerId: number,
+    onConnect?: (it: TwitchIrc) => void,
+  ) {
     this.ws = ws;
     this._channel = channel;
     this.ws.send(`JOIN ${channel}`);
     this.logger.info("Connecting");
+    this.ownerId = ownerId;
 
+    this.fetchSettings().then(() => {
+      this.logger.info("Scheduling settings refresh for 10 seconds");
+      this.onJoin(() => {});
+
+      setInterval(async () => {
+        await this.fetchSettings();
+      }, 10000);
+    });
     this.ws.addEventListener("message", (r) => {
       if (r.data.includes(`:bellabotrix!bellabotrix@bellabotrix.tmi.twitch.tv JOIN ${channel}`)) {
         this.logger.info("Connected");
@@ -96,6 +121,36 @@ export class TwitchIrc {
     });
   }
 
+  public onJoin(handler: (username: string, it: TwitchIrc) => void) {
+    this.ws.addEventListener("message", (res) => {
+      if (typeof res.data !== "string") {
+        return;
+      }
+
+      const isJoinMessage = res.data.includes(`JOIN ${this.channel}`);
+
+      if (!isJoinMessage) {
+        return;
+      }
+
+      const username = res.data.substring(1, res.data.indexOf("!"));
+
+      if (this.settings?.joinMessage.forAllUsers.enabled.value) {
+        this.say(interpolate(this.settings.joinMessage.forAllUsers.message.value, { username }));
+      }
+
+      if (this.settings?.joinMessage.forSpecificUsers.enabled.value) {
+        if (this.settings.joinMessage.forSpecificUsers.users.value.includes(username)) {
+          this.say(
+            interpolate(this.settings.joinMessage.forSpecificUsers.message.value, { username }),
+          );
+        }
+      }
+
+      handler(username, this);
+    });
+  }
+
   public isCommand(msg: string): boolean {
     if (msg[0] === "!" && msg[1] !== " ") {
       return true;
@@ -110,5 +165,9 @@ export class TwitchIrc {
 
   public get connected() {
     return this._connected;
+  }
+
+  public get settings() {
+    return this._settings;
   }
 }

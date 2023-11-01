@@ -1,5 +1,6 @@
 import { TwitchIrc } from "services/twitch-irc";
 import { TTwitchMessageInfo } from "services/types";
+import { TSettings } from "types/schema/settings.schema";
 
 export type TChatMessage = {
   author: string;
@@ -23,6 +24,7 @@ export type THandlerArgs = {
   tags: TTwitchMessageInfo;
   client: TwitchIrc;
   channel: string;
+  settings: TSettings | undefined;
 };
 
 export type TUseHandler = (args: THandlerArgs) => Promise<void>;
