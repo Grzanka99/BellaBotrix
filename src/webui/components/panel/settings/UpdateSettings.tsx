@@ -39,7 +39,7 @@ export const UpdateSettings = async (ctx: Context) => {
     settings.automod.emotesLimit.limit.value = data["automod.emotesLimit.limit"];
     settings.automod.emotesLimit.sanctions.value = JSON.parse(
       data["automod.emotesLimit.sanctions"],
-    );
+    ) as Record<string, string>;
     settings.automod.emotesLimit.warningMessage.value = data["automod.emotesLimit.warningMessage"];
     settings.automod.emotesLimit.banMessage.value = data["automod.emotesLimit.banMessage"];
 
