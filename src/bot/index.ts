@@ -6,6 +6,7 @@ import { prisma } from "services/db";
 import { logger } from "utils/logger";
 import { createIrcClient } from "services/twitch-irc/IrcClient";
 import { TwitchIrc } from "services/twitch-irc";
+import { setDefaultCommandsForChannel } from "services/commands";
 
 export async function bootstrap(): Promise<void> {
   console.time("bootstrap");
@@ -55,13 +56,13 @@ export async function bootstrap(): Promise<void> {
           ircClient,
           `#${ch.name}`,
           user.id,
-          async ({ channel,  }) => {
+          async ({ channel }) => {
             if (apis[channel]) {
               return;
             }
 
             logger.info(`Creting Twitch API connector for channel: ${channel}`);
-            const api = await chatters(channel, mainOAuthToken, );
+            const api = await chatters(channel, mainOAuthToken);
 
             if (api) {
               apis[channel] = api;
@@ -73,13 +74,24 @@ export async function bootstrap(): Promise<void> {
     }),
   );
 
-  twitchIrcClient.filter(Boolean).forEach((client) => {
+  twitchIrcClient.filter(Boolean).forEach(async (client) => {
+
+    await setDefaultCommandsForChannel(client.channel);
+
+
+
     client.onMessage(async ({ channel, tags, message, self }, it) => {
       if (self) {
         return;
       }
 
-      const handler = await getChatHandler(channel, tags, message, it.settings, apis[channel]);
+      const handler = await getChatHandler({
+        channel,
+        tags,
+        message,
+        settings: it.settings,
+        api: apis[channel],
+      });
 
       handler.forEach(async (handler) => {
         await handler.useHandler({

@@ -34,6 +34,7 @@ import { logger } from "utils/logger";
 import { authorizeApp } from "./services/authapp.service";
 import { SettingsLayout } from "./components/panel/settings/SettingsLyaout";
 import { UpdateSettings } from "./components/panel/settings/UpdateSettings";
+import { CommandsList } from "./components/panel/commands/CommandsList";
 
 const UNAUTHORIZED = "Unauthorized";
 
@@ -92,9 +93,10 @@ app.guard(
         .get(R_COMMANDS.ROOT, CommandsLayout)
         .post(R_COMMANDS.ADD, async (req) => await AddCommand(req.body as TNewUiCommand))
         .post(R_COMMANDS.EDIT, (req) => EditCommand(req.body as TSingleUiCommand))
-        .post(R_COMMANDS.SAVE, async (req) => SaveCommand(req.body as TSingleUiCommand))
-        .post(R_COMMANDS.DELETE, async (req) => DeleteCommand(req.body as TSingleUiCommand))
-        .post(R_COMMANDS.CANCEL, async (req) => CancelCommand(req.body as TSingleUiCommand)),
+        .post(R_COMMANDS.SAVE, async (req) => SaveCommand(req.body as TSingleUiCommand, req))
+        .post(R_COMMANDS.DELETE, async (req) => DeleteCommand(req.body as TSingleUiCommand, req))
+        .post(R_COMMANDS.CANCEL, async (req) => CancelCommand(req.body as TSingleUiCommand, req))
+        .get(R_COMMANDS.LIST, CommandsList),
     );
 
     app.group(R_USERS.PREFIX, (users) =>

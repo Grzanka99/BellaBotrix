@@ -9,11 +9,9 @@ import { spit } from "./spit.command";
 
 export function createCommandHandler(command: TCommand, api: TwitchApi): TUseHandler {
   return async function ({ client, channel, tags, settings }): Promise<void> {
-    console.log("asdasd");
     if (!settings) {
       return;
     }
-    console.log("dsadsa");
 
     const mods = await api.getChannelModerators();
     const canRun = getCanRun(mods, channel, tags);

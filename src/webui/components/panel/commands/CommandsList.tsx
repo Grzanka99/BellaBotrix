@@ -1,24 +1,21 @@
-import { prisma } from "services/db";
+import { Context } from "elysia";
 import { SingleCommand } from "./SingleCommand";
+import { prisma } from "services/db";
+import { getChannelFromCtx } from "webui/helpers";
 
-export const CommandsList = async (): Promise<JSX.Element> => {
-  const commands = await prisma.commands.findMany();
+export const CommandsList = async (ctx: Context) => {
+  const channel = await getChannelFromCtx(ctx);
+  if (!channel) {
+    return <div>Something went wrong, make sure that bot is authorized for your channel</div>;
+  }
+
+  const commands = await prisma.commands.findMany({ where: { channelName: `#${channel.name}` } });
 
   return (
-    <div class="grid-based-table" id="commands-list-table">
-      <div class="grid-based-table__header">
-        <ul>
-          <li>name</li>
-          <li>enabled</li>
-          <li>message</li>
-          <li>aliases</li>
-        </ul>
-      </div>
-      <div id="commands-list" class="grid-based-table__content">
-        {commands.map((cmd) => (
-          <SingleCommand {...cmd} />
-        ))}
-      </div>
-    </div>
+    <>
+      {commands.map((cmd) => (
+        <SingleCommand {...cmd} />
+      ))}
+    </>
   );
 };

@@ -1,9 +1,8 @@
 import { WebuiUser } from "@prisma/client";
 import { prisma } from "services/db";
-import { DEFAULT_SETTINGS } from "services/db/consants/settings";
+import { DEFAULT_SETTINGS } from "./constants/settings";
 import { TOption } from "types";
 import { SettingSchema, TSettings } from "types/schema/settings.schema";
-import { logger } from "utils/logger";
 
 const getDefaults = () => {
   const res = SettingSchema.safeParse(DEFAULT_SETTINGS);
@@ -86,7 +85,7 @@ export async function updateSettings(
       });
     }
 
-    if(!res) {
+    if (!res) {
       return undefined;
     }
 

@@ -57,8 +57,11 @@ export const SettingsForm = async (ctx: Context, error = false) => {
       {error ? <h2>Error occured when saving settings</h2> : undefined}
 
       <FormSection name="Commands">
-        <AdvancedInput label="enabled" {...settings.commands}>
-          <input type="checkbox" name="commands" checked={settings.commands.value} />
+        <AdvancedInput label="Enabled" {...settings.commands.enabled}>
+          <input type="checkbox" name="commands.enabled" checked={settings.commands.enabled.value} />
+        </AdvancedInput>
+        <AdvancedInput label="Prefix" {...settings.commands.prefix}>
+          <input type="text" name="commands.prefix" value={settings.commands.prefix.value} />
         </AdvancedInput>
       </FormSection>
       <FormSection name="Joning Messages">

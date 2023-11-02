@@ -10,6 +10,7 @@ export const R_COMMANDS = {
   SAVE: "/htmx/save",
   DELETE: "/htmx/delete",
   CANCEL: "/htmx/cancel",
+  LIST: "/htmx/list",
 } as const;
 
 export const R_SOLO = {

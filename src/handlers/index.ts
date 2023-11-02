@@ -6,13 +6,21 @@ import { TwitchApi } from "services/twitch-api";
 import { TTwitchMessageInfo } from "services/types";
 import { TSettings } from "types/schema/settings.schema";
 
-export async function getChatHandler(
-  _channel: string,
-  tags: TTwitchMessageInfo,
-  message: string,
-  settings: TSettings | undefined,
-  api?: TwitchApi,
-): Promise<THandler[]> {
+type TProps = {
+  channel: string;
+  tags: TTwitchMessageInfo;
+  message: string;
+  settings: TSettings | undefined;
+  api?: TwitchApi;
+};
+
+export async function getChatHandler({
+  channel,
+  tags,
+  message,
+  settings,
+  api,
+}: TProps): Promise<THandler[]> {
   const handlers: THandler[] = [{ useHandler: createActivityHandler() }];
 
   if (!tags.username) {
@@ -24,9 +32,16 @@ export async function getChatHandler(
     content: message,
   };
 
-  const isCommand = await identifyIsBotCommand(chatMessage.content);
-  if (isCommand && api && settings?.commands.value) {
-    handlers.push({ useHandler: createCommandHandler(isCommand, api) });
+  if (api && settings?.commands.enabled.value) {
+    const isCommand = await identifyIsBotCommand(
+      chatMessage.content,
+      channel,
+      settings?.commands.prefix.value,
+    );
+
+    if (isCommand) {
+      handlers.push({ useHandler: createCommandHandler(isCommand, api) });
+    }
   }
 
   return handlers;

@@ -15,7 +15,10 @@ export type TSettingOption<T> = {
 };
 
 export const SettingSchema = z.object({
-  commands: SettingOptionSchema(z.boolean()),
+  commands: z.object({
+    enabled: SettingOptionSchema(z.boolean()),
+    prefix: SettingOptionSchema(z.string().length(1)),
+  }),
   joinMessage: z.object({
     forAllUsers: z.object({
       enabled: SettingOptionSchema(z.boolean()),
@@ -47,7 +50,8 @@ export const SettingSchema = z.object({
 export const OnOffSchema = z.union([z.literal("on"), z.literal("off"), z.undefined()]);
 
 export const SettingUpdateSchema = z.object({
-  commands: OnOffSchema,
+  "commands.enabled": OnOffSchema,
+  "commands.prefix": z.string().length(1).default("!"),
   "joinMessage.forAllUsers.enabled": OnOffSchema,
   "joinMessage.forAllUsers.message": z.string(),
   "joinMessage.forSpecificUsers.enabled": OnOffSchema,

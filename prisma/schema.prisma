@@ -11,11 +11,13 @@ datasource db {
 }
 
 model Commands {
-  id      Int     @id @default(autoincrement())
-  name    String  @unique
-  enabled Boolean
-  message String?
-  alias   String  @default("")
+  id          Int     @id @default(autoincrement())
+  uniqueName String @unique
+  name        String
+  enabled     Boolean
+  message     String?
+  alias       String  @default("")
+  channelName String @default("")
 }
 
 model User {
@@ -51,5 +53,5 @@ model WebuiUser {
   password  String
   token     String @default("")
   channelId Int    @default(-1)
-  settings String @default("")
+  settings  String @default("")
 }

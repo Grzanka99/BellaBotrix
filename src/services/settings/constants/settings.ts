@@ -2,8 +2,14 @@ import { TSettings } from "types/schema/settings.schema";
 
 export const DEFAULT_SETTINGS: TSettings = {
   commands: {
+    enabled: {
     value: true,
     description: "Enable or disable commands",
+    },
+    prefix: {
+      value: '!',
+      description: "Prefix that will be put before command"
+    }
   },
   joinMessage: {
     forAllUsers: {

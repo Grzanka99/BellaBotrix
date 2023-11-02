@@ -5,6 +5,7 @@
     & li {
       & button {
         width: 100%;
+        height: 35px;
       }
 
       overflow-x: auto;
@@ -15,6 +16,29 @@
 
 .grid-based-table#commands-list-table {
   height: calc(100% - 100px);
+}
+
+.command-row--edit-mode {
+  & textarea {
+    resize: vertical;
+    width: 100%;
+    max-width: 100%;
+  }
+
+  & input {
+    width: 100%;
+    max-width: 100%;
+  }
+
+  & textarea, & input {
+    border: 1px solid black;
+    padding: 5px;
+    height: 35px;
+
+    &[type=checkbox] {
+      height: 25px;
+    }
+  }
 }
 
 #add-command-form {

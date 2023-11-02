@@ -17,7 +17,8 @@ export const UpdateSettings = async (ctx: Context) => {
   const { data } = beforeTransform;
 
   try {
-    settings.commands.value = dbfc(data.commands);
+    settings.commands.enabled.value = dbfc(data['commands.enabled']);
+    settings.commands.prefix.value = data['commands.prefix'];
 
     settings.joinMessage.forAllUsers.enabled.value = dbfc(data["joinMessage.forAllUsers.enabled"]);
     settings.joinMessage.forAllUsers.message.value = data["joinMessage.forAllUsers.message"];
@@ -48,7 +49,6 @@ export const UpdateSettings = async (ctx: Context) => {
     if (!parsed.success) {
       return await SettingsForm(ctx, true);
     }
-
 
     const res = await updateSettings(username, parsed.data);
 

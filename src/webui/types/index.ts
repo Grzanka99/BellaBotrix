@@ -16,6 +16,7 @@ export type TSingleUiUser = {
 };
 
 export type TNewUiCommand = {
+  channelName: string | undefined;
   name: string | undefined;
   message: string | undefined;
 };

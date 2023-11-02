@@ -2,7 +2,7 @@ import { R_COMMANDS } from "webui/routes";
 import { TSingleUiCommand } from "webui/types";
 
 export const EditCommand = (props: TSingleUiCommand) => (
-  <ul id={`command-row-${props.name}`}>
+  <ul id={`command-row-${props.name}`} class="command-row--edit-mode">
     <li>
       <input type="text" disabled value={props.name} name="name" />
       <input type="hidden" value={props.name} name="name" />
