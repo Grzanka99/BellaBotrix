@@ -13,7 +13,7 @@
   }
 }
 
-.grid-based-table {
+.grid-based-table#commands-list-table {
   height: calc(100% - 100px);
 }
 
