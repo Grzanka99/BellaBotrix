@@ -1,4 +1,4 @@
-import { TCommand } from "handlers/types";
+import { TWithCommandHandler } from "handlers/types";
 import { prisma, prismaQueue } from "services/db";
 import { TTwitchMessageInfo } from "services/types";
 import { TOption } from "types";
@@ -20,11 +20,11 @@ function getUsername(original: string): TOption<[string, string]> {
 }
 
 export async function startSolo(
-  { original, actionMessage }: TCommand,
+  { original, actionMessage }: TWithCommandHandler,
   channel: string,
   tags: TTwitchMessageInfo,
 ): Promise<TOption<string>> {
-  if (!original || !actionMessage || !tags.username || !tags.userId) {
+  if (!original || !actionMessage.base || !tags.username || !tags.userId) {
     return undefined;
   }
 
@@ -53,13 +53,10 @@ export async function startSolo(
   });
 
   if (existingSolo) {
-    return interpolate(
-      "Hey, @$username1, you already in solo with @$username2, if you wan't to cancel, write !nope",
-      {
-        username1,
-        username2,
-      },
-    );
+    return interpolate(actionMessage.inSolo || "", {
+      username1,
+      username2,
+    });
   }
 
   const user1points = await prismaQueue.enqueue(() =>
@@ -71,7 +68,10 @@ export async function startSolo(
   );
 
   if (!user1points || user1points.points < points) {
-    return "You don't have enought poitns for this fight xD";
+    return interpolate(actionMessage.notEnoughtPoints || "", {
+      username1,
+      username2,
+    });
   }
 
   prismaQueue
@@ -97,7 +97,7 @@ export async function startSolo(
       }, 120 * 1000);
     });
 
-  return interpolate(actionMessage, {
+  return interpolate(actionMessage.base, {
     username1,
     username2,
     points,
@@ -105,11 +105,11 @@ export async function startSolo(
 }
 
 export async function soloNope(
-  { actionMessage }: TCommand,
+  { actionMessage }: TWithCommandHandler,
   channel: string,
   tags: TTwitchMessageInfo,
 ): Promise<TOption<string>> {
-  if (!tags.userId || !tags.username || !actionMessage) {
+  if (!tags.userId || !tags.username || !actionMessage.base) {
     return undefined;
   }
 
@@ -140,17 +140,17 @@ export async function soloNope(
     }),
   );
 
-  return interpolate(actionMessage, {
+  return interpolate(actionMessage.base, {
     username: `@${tags.username}`,
   });
 }
 
 export async function soloYes(
-  { actionMessage }: TCommand,
+  { actionMessage }: TWithCommandHandler,
   channel: string,
   tags: TTwitchMessageInfo,
 ): Promise<TOption<string>> {
-  if (!tags.userId || !tags.username || !actionMessage) {
+  if (!tags.userId || !tags.username || !actionMessage.base) {
     return undefined;
   }
 
@@ -182,7 +182,9 @@ export async function soloYes(
   }
 
   if (user2points.points < foundSolo.points) {
-    return `@${tags.username}, you don't have enought poitns to enter this fight, LUL`;
+    return interpolate(actionMessage.notEnoughtPoints || "", {
+      username: tags.displayName,
+    });
   }
 
   const whoWon = Math.floor((Math.random() * 100) % 2);
@@ -238,7 +240,7 @@ export async function soloYes(
     return res;
   }
 
-  return interpolate(actionMessage, {
+  return interpolate(actionMessage.base, {
     winner: `@${winner}`,
     looser: `@${looser}`,
     points: foundSolo.points,
@@ -246,15 +248,15 @@ export async function soloYes(
 }
 
 export async function getUserWinrate(
-  { original, actionMessage }: TCommand,
+  { original, actionMessage }: TWithCommandHandler,
   channel: string,
   sender?: string,
 ): Promise<TOption<string>> {
-  if (!original || !actionMessage || !sender) {
+  if (!original || !actionMessage.base || !sender) {
     return undefined;
   }
 
-  const [resUsername,formattedUsername] = getUsername(original) || [sender, sender];
+  const [resUsername, formattedUsername] = getUsername(original) || [sender, sender];
 
   const solosWithUser = await prismaQueue.enqueue(() =>
     prisma.solo.findMany({
@@ -267,12 +269,29 @@ export async function getUserWinrate(
 
   const total = solosWithUser.length;
   const wins = solosWithUser.filter((el) => el.winner === formattedUsername).length;
-  const winrate = ((wins / total) * 100).toFixed(2);
+  const winrate = (wins / total) * 100;
+  const formattedWinrate = `${winrate.toFixed(2)}%`;
 
-  return interpolate(actionMessage, {
-    total,
-    wins,
-    winrate: `${winrate}%`,
-    username: `@${resUsername}`,
-  });
+  if (winrate === 50) {
+    return interpolate(actionMessage.fiftypercent || "$winrate", {
+      total,
+      wins,
+      winrate: formattedWinrate,
+      username: `@${resUsername}`,
+    });
+  } else if (winrate > 50) {
+    return interpolate(actionMessage.base, {
+      total,
+      wins,
+      winrate: formattedWinrate,
+      username: `@${resUsername}`,
+    });
+  } else if (winrate < 50) {
+    return interpolate(actionMessage.winrateNegative || "$winrate", {
+      total,
+      wins,
+      winrate: formattedWinrate,
+      username: `@${resUsername}`,
+    });
+  }
 }

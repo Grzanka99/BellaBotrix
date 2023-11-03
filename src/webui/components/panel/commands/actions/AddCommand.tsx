@@ -1,25 +1,48 @@
 import { prisma } from "services/db";
 import { SingleCommand } from "../SingleCommand";
-import { TNewUiCommand } from "webui/types";
 import { getUniqueName } from "services/commands";
+import { Context } from "elysia";
+import { z } from "zod";
+import { dbCommandToCommand } from "services/commands/commands.transform";
 
-export const AddCommand = async (body: TNewUiCommand) => {
-  const { name, message, channelName } = body;
+const BodySchema = z.object({
+  name: z.string(),
+  message: z.string(),
+  channelName: z.string(),
+});
 
-  if (!name || !message || !channelName) {
-    return undefined;
+export const AddCommand = async (ctx: Context) => {
+  const parsedBody = BodySchema.safeParse(ctx.body);
+
+  if (!parsedBody.success) {
+    ctx.set.status = "Bad Request";
+    return;
   }
+
+  const { name, channelName, message } = parsedBody.data;
 
   const newCmd = await prisma.commands.create({
     data: {
       uniqueName: getUniqueName(name, channelName),
       channelName: `#${channelName}`,
       name,
-      message,
+      message: JSON.stringify({ base: message }),
       enabled: true,
       alias: "",
     },
   });
 
-  return <SingleCommand {...newCmd} />;
+  if (!newCmd) {
+    ctx.set.status = "Internal Server Error";
+    return;
+  }
+
+  const data = dbCommandToCommand(newCmd);
+
+  if (!data) {
+    ctx.set.status = "Internal Server Error";
+    return;
+  }
+
+  return <SingleCommand {...data} />;
 };

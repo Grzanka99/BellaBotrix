@@ -2,8 +2,7 @@ import { Context } from "elysia";
 import { SettingsForm } from "./SettingsForm";
 import { getSettings, updateSettings } from "services/settings";
 import { SettingSchema, SettingUpdateSchema } from "types/schema/settings.schema";
-
-const dbfc = (v: "on" | "off" | undefined) => v === "on";
+import { dbfc } from "webui/helpers";
 
 export const UpdateSettings = async (ctx: Context) => {
   const username = String(ctx.cookie.auth.value.username);

@@ -1,26 +1,24 @@
 import { prisma } from "services/db";
-import { TSingleUiCommand } from "webui/types";
-import { SingleCommand } from "../SingleCommand";
 import { Context } from "elysia";
-import { getChannelFromCtx } from "webui/helpers";
-import { getUniqueName } from "services/commands";
 
-export const DeleteCommand = async (props: TSingleUiCommand, ctx: Context) => {
-  const channel = await getChannelFromCtx(ctx);
+type TBody = {
+  uniqueName: string | undefined;
+};
 
-  if(!channel) {
-    return <SingleCommand {...props} />;
+export const DeleteCommand = async (ctx: Context) => {
+  const { uniqueName } = ctx.body as TBody;
+
+  if (!uniqueName) {
+    ctx.set.status = "Bad Request";
+    return;
   }
 
   try {
-    await prisma.commands.delete({
-      where: {
-        uniqueName: getUniqueName(props.name, channel.name)
-      },
-    });
+    await prisma.commands.delete({ where: { uniqueName } });
 
-    return <></>;
+    return undefined;
   } catch (err) {
-    return <SingleCommand {...props} />;
+    ctx.set.status = "Internal Server Error";
+    return;
   }
 };

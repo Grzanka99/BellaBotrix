@@ -20,3 +20,6 @@ export async function getChannelFromCtx(ctx: Context): Promise<TOption<Channel>>
 
   return channel;
 }
+
+
+export const dbfc = (v: "on" | "off" | undefined) => v === "on";

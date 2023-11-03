@@ -1,4 +1,5 @@
-import { TCommand } from "handlers/types";
+import { TWithCommandHandler } from "handlers/types";
+import { dbCommandToCommand } from "services/commands/commands.transform";
 import { prisma } from "services/db";
 import { TOption } from "types";
 
@@ -6,18 +7,18 @@ export async function identifyIsBotCommand(
   message: string,
   channel: string,
   prefix: string,
-): Promise<TOption<TCommand>> {
+): Promise<TOption<TWithCommandHandler>> {
   if (message[0] !== prefix) {
     return undefined;
   }
 
+  const triggerWord = message.includes(" ")
+    ? message.substring(1, message.indexOf(" "))
+    : message.replace(prefix, "");
+
   const allCommands = await prisma.commands.findMany({ where: { channelName: channel } });
 
   const command = allCommands.find((cmd) => {
-    const triggerWord = message.includes(" ")
-      ? message.substring(1, message.indexOf(" "))
-      : message.replace(prefix, "");
-
     const byName = triggerWord === cmd.name;
 
     if (!byName) {
@@ -33,9 +34,15 @@ export async function identifyIsBotCommand(
     return undefined;
   }
 
+  const parsedCommand = dbCommandToCommand(command);
+
+  if (!parsedCommand) {
+    return undefined;
+  }
+
   return {
     action: command.name,
-    actionMessage: command.message,
+    actionMessage: parsedCommand.message,
     original: message,
   };
 }

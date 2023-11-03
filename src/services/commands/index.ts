@@ -1,5 +1,6 @@
 import { prisma, prismaQueue } from "services/db";
 import { BASE_COMMANDS } from "./constants/base-commands";
+import { minimalCommandToMinimalDbCommand } from "./commands.transform";
 
 export function getUniqueName(cmd: string, channel: string) {
   const ch = channel.startsWith("#") ? channel : `#${channel}`;
@@ -7,9 +8,13 @@ export function getUniqueName(cmd: string, channel: string) {
 }
 
 export async function setDefaultCommandsForChannel(channel: string) {
-  BASE_COMMANDS.forEach(async (command) => {
-    await prismaQueue.enqueue(() =>
-      prisma.commands.upsert({
+  BASE_COMMANDS.map(minimalCommandToMinimalDbCommand).forEach(async (command) => {
+    await prismaQueue.enqueue(async () => {
+      if (!command) {
+        return;
+      }
+
+      return await prisma.commands.upsert({
         where: {
           uniqueName: getUniqueName(command.name, channel),
         },
@@ -22,7 +27,7 @@ export async function setDefaultCommandsForChannel(channel: string) {
           enabled: true,
           channelName: channel,
         },
-      }),
-    );
+      });
+    });
   });
 }

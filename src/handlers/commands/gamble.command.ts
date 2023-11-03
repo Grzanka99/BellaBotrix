@@ -1,4 +1,4 @@
-import { EWonLost, TCommand } from "handlers/types";
+import { EWonLost, TWithCommandHandler } from "handlers/types";
 import { prisma, prismaQueue } from "services/db";
 import { TTwitchMessageInfo } from "services/types";
 import { TOption } from "types";
@@ -29,7 +29,7 @@ export function getResult(totalPoints: number, offset: number): [EWonLost, numbe
 }
 
 export async function gamble(
-  command: TCommand,
+  command: TWithCommandHandler,
   channel: string,
   tags: TTwitchMessageInfo,
   settings: TSettings,
@@ -50,7 +50,7 @@ export async function gamble(
   }
 
   if (points !== "all" && numberPoints < 0) {
-    return "Are you kidding me?! DarkMode";
+    return command.actionMessage.wtf;
   }
 
   const user = await prismaQueue.enqueue(() =>
@@ -63,7 +63,7 @@ export async function gamble(
   );
 
   if (!user) {
-    return "You have 0 points Kappa";
+    return;
   }
 
   if (points === "all") {
@@ -71,26 +71,36 @@ export async function gamble(
   }
 
   if (user.points < numberPoints) {
-    return "You are poor, you need more points";
+    return interpolate(command.actionMessage.notEnoughtPoints || "", {
+      username: resUsername,
+    });
   }
 
-  const [result, rolled] = getResult(user.points + numberPoints, settings.points.chancesOffset.value);
+  const [result, rolled] = getResult(
+    user.points + numberPoints,
+    settings.points.chancesOffset.value,
+  );
 
+  let msg = "";
   let resultPoints = 0;
   switch (result) {
     case EWonLost.Won: {
       resultPoints = numberPoints;
+      msg = command.actionMessage.base || "";
       break;
     }
     case EWonLost.SuperWon: {
       resultPoints = numberPoints * 2;
+      msg = command.actionMessage.superWon || "";
       break;
     }
     case EWonLost.ExtremeWon: {
       resultPoints = numberPoints * 5;
+      msg = command.actionMessage.extremeWon || "";
       break;
     }
     case EWonLost.Lost: {
+      msg = command.actionMessage.lost || "";
       resultPoints = -numberPoints;
       break;
     }
@@ -109,7 +119,7 @@ export async function gamble(
     }),
   );
 
-  return interpolate(command.actionMessage, {
+  return interpolate(msg, {
     username: resUsername,
     rolled,
     result,

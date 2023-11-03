@@ -1,3 +1,5 @@
+import { z } from "zod";
+
 export type TSingleUiCommand = {
   id: number;
   name: string;
@@ -40,3 +42,9 @@ export type TSingleUiSoloReq = {
   points: string;
   winner: string;
 };
+
+export const MessageRecordSchema = z.custom<`message.${string}`>((val) => {
+  return typeof val === "string" ? val.startsWith("message.") : false;
+});
+
+export type TMessageRecord = z.infer<typeof MessageRecordSchema>;

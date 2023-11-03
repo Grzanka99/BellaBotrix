@@ -1,24 +1,22 @@
+import { TCommand } from "types/schema/commands.schema";
 import { R_COMMANDS } from "webui/routes";
-import { TSingleUiCommand } from "webui/types";
 
-export const SingleCommand = (props: TSingleUiCommand) => (
+export const SingleCommand = (props: TCommand) => (
   <ul id={`command-row-${props.name}`}>
-    <li>
-      {props.name}
-      <input type="hidden" value={props.name} name="name" />
+    <input type="hidden" value={props.uniqueName} name="uniqueName" />
+    <li>{props.name}</li>
+    <li>{String(props.enabled)}</li>
+    <li class="command-row__messages">
+      <ul class="command-row__messages__msg-list">
+        {Object.keys(props.message).map((key) => (
+          <li>
+            <code>{key}</code>
+            <span>{props.message[key]}</span>
+          </li>
+        ))}
+      </ul>
     </li>
-    <li>
-      {String(props.enabled)}
-      <input type="hidden" value={String(props.enabled)} name="enabled" />
-    </li>
-    <li>
-      {props.message}
-      <input type="hidden" value={props.message || ""} name="message" />
-    </li>
-    <li>
-      {props.alias}
-      <input type="hidden" value={props.alias} name="alias" />
-    </li>
+    <li>{props.alias ? props.alias.join(", "): ''}</li>
     <li>
       <button
         class="edit-button"

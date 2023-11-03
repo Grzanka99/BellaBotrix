@@ -20,10 +20,12 @@
 }
 
 .grid-based-table {
-  & ul, & li {
-    list-style: none;
-    padding: 0;
-    margin: 0;
+  > div {
+    > ul, > li {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+    }
   }
 
   display: flex;
@@ -38,11 +40,11 @@
     margin: 0;
     width: 100%;
 
-    & ul {
+    > ul {
       display: grid;
       width: 100%;
 
-      & li {
+      > li {
         display: flex;
         padding: 10px 15px;
       }
@@ -58,17 +60,17 @@
       display: none;
     }
 
-    & ul {
-      & li {
+    > ul {
+      > li {
         display: block;
       }
 
-      & li:not(:last-child) {
+      > li:not(:last-child) {
         border-right: 1px solid black;
       }
     }
 
-    & ul:not(:last-child) {
+    > ul:not(:last-child) {
       border-bottom: 1px solid black;
     }
   }
@@ -77,15 +79,15 @@
     border: 2px solid black;
     border-bottom: none;
 
-    & ul {
+    > ul {
       background: #abcdef;
 
-      & li {
+      > li {
         overflow: hidden;
         justify-content: center;
       }
 
-      & li:not(:last-child) {
+      > li:not(:last-child) {
         border-right: 1px solid black;
       }
     }

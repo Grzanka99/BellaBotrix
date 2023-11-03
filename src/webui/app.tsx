@@ -91,11 +91,11 @@ app.guard(
     app.group(R_COMMANDS.PREFIX, (commands) =>
       commands
         .get(R_COMMANDS.ROOT, CommandsLayout)
-        .post(R_COMMANDS.ADD, async (req) => await AddCommand(req.body as TNewUiCommand))
-        .post(R_COMMANDS.EDIT, (req) => EditCommand(req.body as TSingleUiCommand))
-        .post(R_COMMANDS.SAVE, async (req) => SaveCommand(req.body as TSingleUiCommand, req))
-        .post(R_COMMANDS.DELETE, async (req) => DeleteCommand(req.body as TSingleUiCommand, req))
-        .post(R_COMMANDS.CANCEL, async (req) => CancelCommand(req.body as TSingleUiCommand, req))
+        .post(R_COMMANDS.ADD,AddCommand)
+        .post(R_COMMANDS.EDIT, EditCommand)
+        .post(R_COMMANDS.SAVE, SaveCommand)
+        .post(R_COMMANDS.DELETE, DeleteCommand)
+        .post(R_COMMANDS.CANCEL, CancelCommand)
         .get(R_COMMANDS.LIST, CommandsList),
     );
 

@@ -70,3 +70,4 @@ export const SettingUpdateSchema = z.object({
 
 export type TSettings = z.infer<typeof SettingSchema>;
 export type TSettingsUpdate = z.infer<typeof SettingUpdateSchema>;
+export type TOnOff = z.infer<typeof OnOffSchema>;

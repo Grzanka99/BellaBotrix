@@ -13,9 +13,9 @@ export type TTaxValues = {
   points: number;
 };
 
-export type TCommand = {
+export type TWithCommandHandler = {
   action: string;
-  actionMessage: string | null;
+  actionMessage: Record<"base" | (string & {}), string | undefined>;
   original: string;
 };
 

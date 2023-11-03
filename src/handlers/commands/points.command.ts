@@ -1,4 +1,4 @@
-import { TCommand } from "handlers/types";
+import { TWithCommandHandler } from "handlers/types";
 import { prisma, prismaQueue } from "services/db";
 import { TwitchApi } from "services/twitch-api";
 import { TOption } from "types";
@@ -8,11 +8,11 @@ import { getUsername } from "./utils/get-username";
 import { TTwitchMessageInfo } from "services/types";
 
 export async function getUserPoints(
-  { original, actionMessage }: TCommand,
+  { original, actionMessage }: TWithCommandHandler,
   channel: string,
   sender?: string,
 ): Promise<TOption<string>> {
-  if (!original || !actionMessage || !sender) {
+  if (!original || !actionMessage.base || !sender) {
     return undefined;
   }
 
@@ -28,13 +28,13 @@ export async function getUserPoints(
   );
 
   if (!user) {
-    return interpolate(actionMessage, {
+    return interpolate(actionMessage.base, {
       username: `@${resUsername}`,
       points: 0,
     });
   }
 
-  const msg = interpolate(actionMessage, {
+  const msg = interpolate(actionMessage.base, {
     username: `@${resUsername}`,
     points: formattedUsername === sender ? user.points + 1 : user.points,
   });
@@ -43,12 +43,12 @@ export async function getUserPoints(
 }
 
 export async function addPoints(
-  { original, actionMessage }: TCommand,
+  { original, actionMessage }: TWithCommandHandler,
   channel: string,
   tags: TTwitchMessageInfo,
   api: TwitchApi,
 ): Promise<TOption<string>> {
-  if (!original || !actionMessage || !tags.username || !tags.userId) {
+  if (!original || !actionMessage.base || !tags.username || !tags.userId) {
     return undefined;
   }
 
@@ -96,18 +96,18 @@ export async function addPoints(
     }
   });
 
-  return interpolate(actionMessage, {
+  return interpolate(actionMessage.base, {
     username: `@${resUsername}`,
     points,
   });
 }
 export async function removePoints(
-  { original, actionMessage }: TCommand,
+  { original, actionMessage }: TWithCommandHandler,
   channel: string,
   tags: TTwitchMessageInfo,
   api: TwitchApi,
 ): Promise<TOption<string>> {
-  if (!original || !actionMessage || !tags.username || !tags.userId) {
+  if (!original || !actionMessage.base || !tags.username || !tags.userId) {
     return undefined;
   }
 
@@ -134,7 +134,7 @@ export async function removePoints(
     });
 
     if (!user) {
-      return interpolate(actionMessage, {
+      return interpolate(actionMessage.base || "", {
         username: `@${resUsername}`,
         points: 0,
       });
@@ -155,18 +155,18 @@ export async function removePoints(
     return finalPoints;
   });
 
-  return interpolate(actionMessage, {
+  return interpolate(actionMessage.base || "", {
     username: `@${resUsername}`,
     points: finalPoints,
   });
 }
 
 export async function givePoints(
-  { original, actionMessage }: TCommand,
+  { original, actionMessage }: TWithCommandHandler,
   channel: string,
   tags: TTwitchMessageInfo,
 ): Promise<TOption<string>> {
-  if (!original || !actionMessage || !tags.username || !tags.userId) {
+  if (!original || !actionMessage.base || !tags.username || !tags.userId) {
     return undefined;
   }
 
@@ -182,7 +182,10 @@ export async function givePoints(
   }
 
   if (points < 0) {
-    return "Nice try, M**awi***i, is that you?";
+    return interpolate(actionMessage.pointsLtZero || "", {
+      giver: giverUsername,
+      receiver: receiverUsername,
+    });
   }
 
   const users = await prismaQueue.enqueue(() =>
@@ -207,7 +210,10 @@ export async function givePoints(
   }
 
   if (giver.points < points) {
-    return "You are not Polish goverment, you cannot give what you don't have";
+    return interpolate(actionMessage.notEnoughtPoints || "", {
+      giver: giverUsername,
+      receiver: receiverUsername,
+    });
   }
 
   await prismaQueue.enqueue(async () => {
@@ -222,7 +228,7 @@ export async function givePoints(
     });
   });
 
-  return interpolate(actionMessage, {
+  return interpolate(actionMessage.base, {
     receiver: `@${receiverUsername}`,
     giver: `@${giverUsername}`,
     points,

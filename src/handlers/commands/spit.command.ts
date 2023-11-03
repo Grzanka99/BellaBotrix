@@ -1,15 +1,15 @@
-import { TCommand } from "handlers/types";
+import { TWithCommandHandler } from "handlers/types";
 import { TwitchApi } from "services/twitch-api";
 import { TTwitchMessageInfo } from "services/types";
 import { TOption } from "types";
 import { interpolate } from "utils/interpolate-string";
 
 export async function spit(
-  command: TCommand,
+  command: TWithCommandHandler,
   tags: TTwitchMessageInfo,
   api: TwitchApi,
 ): Promise<TOption<string>> {
-  if (!command.original || !command.actionMessage || !tags.userId|| !tags.username) {
+  if (!command.original || !command.actionMessage.base || !tags.userId || !tags.username) {
     return undefined;
   }
 
@@ -23,7 +23,14 @@ export async function spit(
   const chindex = Math.floor(Math.random() * chatters.length);
   const user2 = chatters[chindex];
 
-  return interpolate(command.actionMessage, {
+  if (user2.user_name === tags.username) {
+    return interpolate(command.actionMessage.onHimself || command.actionMessage.base, {
+      username1,
+      username2: `@${user2.user_name}`,
+    });
+  }
+
+  return interpolate(command.actionMessage.base, {
     username1,
     username2: `@${user2.user_name}`,
   });
