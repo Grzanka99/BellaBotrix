@@ -40,7 +40,7 @@ export class TwitchApi {
     return res.data[0].id;
   }
 
-  private async getNewToken(): Promise<string> {
+  private async getNewToken() {
     logger.info("Obtaining new access token");
     const res = await prisma.channel.findUnique({
       where: { name: this.channelName },
@@ -63,8 +63,6 @@ export class TwitchApi {
       where: { name: this.channelName },
       data: { token: newTokens.refresh_token },
     });
-
-    return newTokens.access_token;
   }
 
   public async getChannelModerators(): Promise<TTwitchApiChatter[]> {

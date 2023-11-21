@@ -11,7 +11,7 @@ export function parseEmotes(enocoded: string, message: string): Array<[string, s
     const [id, occurances] = emote.split(":");
     const occurancesSplited = occurances.split(",");
     const [foi1, foi2] = occurancesSplited[0].split("-");
-    const emoteName = message.substring(Number(foi1), Number(foi2) + 1);
+    const emoteName = message.substring(Number(foi1), Number(foi2) + 1)
 
     return [id, emoteName, occurancesSplited.length];
   });
