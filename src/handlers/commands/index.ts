@@ -1,5 +1,5 @@
 import { TWithCommandHandler, TUseHandler } from "handlers/types";
-import { addPoints, getUserPoints, givePoints, removePoints } from "./points.command";
+import { addPoints, getTop, getUserPoints, givePoints, removePoints } from "./points.command";
 import { interpolate } from "utils/interpolate-string";
 import { gamble } from "./gamble.command";
 import { TwitchApi } from "services/twitch-api";
@@ -91,6 +91,13 @@ export function createCommandHandler(command: TWithCommandHandler, api: TwitchAp
       case "htfu": {
         const res = await spit(command, tags, api);
         if (res) {
+          client.say(res);
+        }
+        return;
+      }
+      case "top": {
+        const res = await getTop(channel)
+        if(res) {
           client.say(res);
         }
         return;

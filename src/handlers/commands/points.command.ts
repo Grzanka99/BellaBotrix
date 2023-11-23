@@ -7,6 +7,28 @@ import { logger } from "utils/logger";
 import { getUsername } from "./utils/get-username";
 import { TTwitchMessageInfo } from "services/types";
 
+export async function getTop(channel: string): TOption<string> {
+  const top: any[] = await prismaQueue.enqueue(() => prisma.user.findMany({
+    take: 10,
+    orderBy: {
+      points: 'desc',
+    },
+  }))
+
+  if(!top) {
+    return undefined
+  }
+
+  let msg = '';
+
+  for (let i = 0; i < 10; i++) {
+    msg += `${i+1}. ${top[i].username} has ${top[i].points}, `
+  }
+
+  return msg;
+}
+
+
 export async function getUserPoints(
   { original, actionMessage }: TWithCommandHandler,
   channel: string,
