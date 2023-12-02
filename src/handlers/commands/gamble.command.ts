@@ -100,7 +100,7 @@ export async function gamble(
       break;
     }
     case EWonLost.Lost: {
-      msg = command.actionMessage.lost || "";
+      msg = command.actionMessage.lose || "";
       resultPoints = -numberPoints;
       break;
     }
