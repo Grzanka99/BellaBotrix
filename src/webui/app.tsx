@@ -35,6 +35,7 @@ import { authorizeApp } from "./services/authapp.service";
 import { SettingsLayout } from "./components/panel/settings/SettingsLyaout";
 import { UpdateSettings } from "./components/panel/settings/UpdateSettings";
 import { CommandsList } from "./components/panel/commands/CommandsList";
+import { MarkAsBot } from "./components/panel/users/actions/BotMarking";
 
 const UNAUTHORIZED = "Unauthorized";
 
@@ -91,7 +92,7 @@ app.guard(
     app.group(R_COMMANDS.PREFIX, (commands) =>
       commands
         .get(R_COMMANDS.ROOT, CommandsLayout)
-        .post(R_COMMANDS.ADD,AddCommand)
+        .post(R_COMMANDS.ADD, AddCommand)
         .post(R_COMMANDS.EDIT, EditCommand)
         .post(R_COMMANDS.SAVE, SaveCommand)
         .post(R_COMMANDS.DELETE, DeleteCommand)
@@ -102,7 +103,9 @@ app.guard(
     app.group(R_USERS.PREFIX, (users) =>
       users
         .get(R_USERS.ROOT, UsersLayout)
-        .get(R_USERS.LIST, async (ctx) => await SingleChannelUserList(ctx)),
+        .get(R_USERS.LIST, async (ctx) => await SingleChannelUserList(ctx))
+        .post(R_USERS.MARK_AS_BOT, async (ctx) => await MarkAsBot(ctx, true))
+        .post(R_USERS.UNMARK_AS_BOT, async (ctx) => await MarkAsBot(ctx, false)),
     );
 
     app.group(R_SOLO.PREFIX, (solo) =>

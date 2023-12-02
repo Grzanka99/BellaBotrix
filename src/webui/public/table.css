@@ -61,6 +61,12 @@
     }
 
     > ul {
+      position: relative;
+
+      &:hover {
+        background-color: rgba(150,150,150,0.2);
+      }
+
       > li {
         display: block;
       }

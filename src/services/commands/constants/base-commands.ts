@@ -61,7 +61,8 @@ export const BASE_COMMANDS: TMinimalCommandsList = [
   },
   {
     name: "htfu",
-    message: { base: "$username1 just spit on $username2 PepeSpit",
+    message: {
+      base: "$username1 just spit on $username2 PepeSpit",
       onHimself: "$username1 just stip on himself, what a kitty",
     },
     alias: ["tfu"],
@@ -72,6 +73,12 @@ export const BASE_COMMANDS: TMinimalCommandsList = [
       base: "$username has $winrate winrate in $total soloes with $wins wins",
       winrateNegative: "$username is a looooser with $winrate winrate xD",
       fiftypercent: "$username has exacly 50% winrate, WOWOWOWOWOW",
+    },
+  },
+  {
+    name: "top",
+    message: {
+      base: "Those are reachest guys: $result",
     },
   },
 ];

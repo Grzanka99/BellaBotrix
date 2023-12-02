@@ -12,21 +12,22 @@ datasource db {
 
 model Commands {
   id          Int     @id @default(autoincrement())
-  uniqueName String @unique
+  uniqueName  String  @unique
   name        String
   enabled     Boolean
   message     String?
   alias       String  @default("")
-  channelName String @default("")
+  channelName String  @default("")
 }
 
 model User {
-  id           Int    @id @default(autoincrement())
-  userid       String @unique
+  id           Int     @id @default(autoincrement())
+  userid       String  @unique
   username     String
   channel      String
-  sentMessages Int    @default(0)
-  points       Int    @default(0)
+  sentMessages Int     @default(0)
+  points       Int     @default(0)
+  isBot        Boolean @default(false)
 }
 
 model Channel {

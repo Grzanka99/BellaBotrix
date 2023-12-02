@@ -15,6 +15,7 @@ export type TSingleUiUser = {
   channel: string;
   sentMessages: number;
   points: number;
+  isBot: boolean;
 };
 
 export type TNewUiCommand = {

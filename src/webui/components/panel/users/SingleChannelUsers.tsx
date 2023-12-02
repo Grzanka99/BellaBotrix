@@ -23,12 +23,11 @@ export const SingleChannelUserList = async (ctx: Context, starting?: string) => 
   });
 
   if (!users || !users.length) {
-    return <ul>
-      <li>
-
-      Not found
-      </li>
-    </ul>;
+    return (
+      <ul>
+        <li>Not found</li>
+      </ul>
+    );
   }
 
   return (

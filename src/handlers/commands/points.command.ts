@@ -7,27 +7,37 @@ import { logger } from "utils/logger";
 import { getUsername } from "./utils/get-username";
 import { TTwitchMessageInfo } from "services/types";
 
-export async function getTop(channel: string): TOption<string> {
-  const top: any[] = await prismaQueue.enqueue(() => prisma.user.findMany({
-    take: 10,
-    orderBy: {
-      points: 'desc',
-    },
-  }))
+export async function getTop(
+  { actionMessage }: TWithCommandHandler,
+  channel: string,
+): Promise<TOption<string>> {
+  const top = await prismaQueue.enqueue(() =>
+    prisma.user.findMany({
+      take: 10,
+      where: {
+        channel,
+        isBot: false
+      },
+      orderBy: {
+        points: "desc",
+      },
+    }),
+  );
 
-  if(!top) {
-    return undefined
+  if (!top) {
+    return undefined;
   }
 
-  let msg = '';
+  let msg = "";
 
   for (let i = 0; i < 10; i++) {
-    msg += `${i+1}. ${top[i].username} has ${top[i].points}, `
+    msg += `${i + 1}. ${top[i].username} has ${top[i].points}, `;
   }
 
-  return msg;
+  return interpolate(actionMessage.base || '', {
+    result: msg,
+  });
 }
-
 
 export async function getUserPoints(
   { original, actionMessage }: TWithCommandHandler,

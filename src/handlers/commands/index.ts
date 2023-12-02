@@ -13,12 +13,16 @@ export function createCommandHandler(command: TWithCommandHandler, api: TwitchAp
       return;
     }
 
-    const mods = await api.getChannelModerators();
-    const canRun = getCanRun(mods, channel, tags);
+    async function canRun(): Promise<boolean> {
+      const mods = await api.getChannelModerators();
+      const canRun = getCanRun(mods, channel, tags);
+
+      return canRun;
+    }
 
     switch (command.action) {
       case "addpoints": {
-        if (!canRun || !api) {
+        if (!(await canRun()) || !api) {
           return;
         }
         const res = await addPoints(command, channel, tags, api);
@@ -28,7 +32,7 @@ export function createCommandHandler(command: TWithCommandHandler, api: TwitchAp
         return;
       }
       case "removepoints": {
-        if (!canRun || !api) {
+        if (!(await canRun()) || !api) {
           return;
         }
         const res = await removePoints(command, channel, tags, api);
@@ -96,8 +100,8 @@ export function createCommandHandler(command: TWithCommandHandler, api: TwitchAp
         return;
       }
       case "top": {
-        const res = await getTop(channel)
-        if(res) {
+        const res = await getTop(command, channel);
+        if (res) {
           client.say(res);
         }
         return;

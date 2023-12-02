@@ -42,6 +42,7 @@ export const UsersList = async (ctx: Context) => {
             <li>channel</li>
             <li>sent</li>
             <li>points</li>
+            <li>is bot</li>
           </ul>
         </div>
         <div id="channel-users-list" class="grid-based-table__content">

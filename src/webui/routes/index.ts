@@ -24,6 +24,9 @@ export const R_USERS = {
   PREFIX: "/panel/users",
   ROOT: "/",
   LIST: "/htmx/list",
+
+  MARK_AS_BOT: "/htmx/markasbot",
+  UNMARK_AS_BOT:"/htmx/unmarkasbot"
 } as const;
 
 export const R_SETTINGS = {
