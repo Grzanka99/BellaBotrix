@@ -30,7 +30,7 @@ export const SoloListContent = async (ctx: Context): Promise<JSX.Element> => {
   return (
     <HTMXWrapper>
       <>
-        {soloList.map((solo) => (
+        {soloList.reverse().map((solo) => (
           <SingleSolo {...solo} />
         ))}
       </>
