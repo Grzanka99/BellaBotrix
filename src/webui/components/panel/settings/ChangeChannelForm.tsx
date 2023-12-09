@@ -47,9 +47,6 @@ export const ChangeChannelForm = async (ctx: Context) => {
       <div>
 
       <select
-        // hx-post={`${R_SETTINGS.PREFIX}${R_SETTINGS.CHACH}`}
-        // hx-swap="none"
-        // hx-trigger="change"
         name="channelId"
       >
         {toChannels.filter(Boolean).map((el) => {

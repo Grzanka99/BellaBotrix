@@ -65,7 +65,9 @@ export async function ChangeContext(ctx: Context) {
   }
 
   ctx.cookie.auth.value = newCookieData.data;
-  ctx.cookie.auth.path = "/"
+  ctx.cookie.auth.path = "/";
+  ctx.cookie.auth.httpOnly = true;
+  ctx.cookie.auth.secure = true;
   ctx.set.redirect = R_SETTINGS.PREFIX;
   return;
 }

@@ -40,6 +40,8 @@ export async function loginAuth(req: Context) {
     key,
   };
   authCookie.path = "/"
+  authCookie.httpOnly = true;
+  authCookie.secure = true;
 
   await prisma.webuiUser.update({
     where: {
