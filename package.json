@@ -9,13 +9,14 @@
     "compile": "bun build --compile ./src/index.ts --outfile ./bin/bellatrix",
     "db:migrate": "prisma migrate dev --name",
     "db:studio": "prisma studio",
+    "db:generate": "prisma generate",
     "dev:webui": "bun --watch ./src/webui/app.tsx"
   },
   "devDependencies": {
     "@biomejs/biome": "1.1.2",
     "@total-typescript/ts-reset": "^0.5.1",
     "bun-types": "latest",
-    "prisma": "^5.2.0"
+    "prisma": "^5.7.0"
   },
   "peerDependencies": {
     "typescript": "^5.0.0"
@@ -23,7 +24,9 @@
   "dependencies": {
     "@elysiajs/html": "^0.7.0",
     "@elysiajs/static": "^0.7.1",
-    "@prisma/client": "5.2.0",
+    "@libsql/client": "^0.4.0-pre.5",
+    "@prisma/adapter-libsql": "^5.7.0",
+    "@prisma/client": "5.7.0",
     "elysia": "^0.7.12",
     "zod": "^3.22.4"
   }
