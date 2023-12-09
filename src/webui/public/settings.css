@@ -91,3 +91,39 @@
   
   z-index: 100;
 }
+
+.grid-based-table__content, .grid-based-table__header {
+  & ul {
+    grid-template-columns: 1fr 300px 100px;
+
+    & li {
+      & button {
+        width: 100%;
+      }
+
+      overflow-x: auto;
+      white-space: nowrap;
+    }
+  }
+}
+
+#change-channel-form {
+  & select, & button {
+    border: 1px solid black;
+    background: #eeeeee;
+    width: fit-content;
+    font-size: 1.2rem;
+    height: 35px;
+    align-self: flex-end;
+    padding: 0 10px;
+  }
+
+  & select {
+    width: 250px;
+  }
+
+  > div {
+    display: flex;
+    gap: 15px;
+  }
+}

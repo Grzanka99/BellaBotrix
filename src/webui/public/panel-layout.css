@@ -13,6 +13,7 @@ body {
   width: 100%;
   background: #abcdef;
   height: 50px;
+  position: relative;
 }
 
 .panel-header__list {
@@ -68,4 +69,19 @@ body {
   & .grid-based-table {
     height: 100%;
   }
+}
+
+#selected-channel-name {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: fit-content;
+  height: 100%;
+  color: black;
+  font-size: 1.5rem;
+
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding-left: 15px;
 }

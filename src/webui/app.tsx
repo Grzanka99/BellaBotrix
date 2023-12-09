@@ -24,7 +24,7 @@ import {
   R_SOLO,
   R_USERS,
 } from "./routes";
-import { TNewUiCommand, TSingleUiCommand, TSingleUiSoloReq } from "./types";
+import { TSingleUiSoloReq } from "./types";
 import { SingleChannelUserList } from "./components/panel/users/SingleChannelUsers";
 import { CancelCommand } from "./components/panel/commands/actions/CancelCommand";
 import { SoloLayout } from "./components/panel/solo/SoloLayout";
@@ -36,6 +36,9 @@ import { SettingsLayout } from "./components/panel/settings/SettingsLyaout";
 import { UpdateSettings } from "./components/panel/settings/UpdateSettings";
 import { CommandsList } from "./components/panel/commands/CommandsList";
 import { MarkAsBot } from "./components/panel/users/actions/BotMarking";
+import { AddChacc } from "./components/panel/settings/actions/AddChacc";
+import { RevokeChacc } from "./components/panel/settings/actions/RemoveChacc";
+import { ChangeContext } from "./components/panel/settings/actions/ChangeContext";
 
 const UNAUTHORIZED = "Unauthorized";
 
@@ -116,7 +119,12 @@ app.guard(
     );
 
     app.group(R_SETTINGS.PREFIX, (settings) =>
-      settings.get(R_SETTINGS.ROOT, SettingsLayout).post(R_SETTINGS.UPDATE, UpdateSettings),
+      settings
+        .get(R_SETTINGS.ROOT, SettingsLayout)
+        .post(R_SETTINGS.UPDATE, UpdateSettings)
+        .post(R_SETTINGS.CHACC, AddChacc)
+        .delete(R_SETTINGS.CHACC, RevokeChacc)
+        .post(R_SETTINGS.CHACH, async (ctx) => await ChangeContext(ctx)),
     );
 
     app.get(R_AUTH, AuthForm);
@@ -130,3 +138,5 @@ export function startWebui() {
   app.listen(Bun.env.WEBUI_PORT || 3000);
   logger.info(`WebUI Started at ${Bun.env.WEBUI_PORT || 3000}`);
 }
+
+startWebui();

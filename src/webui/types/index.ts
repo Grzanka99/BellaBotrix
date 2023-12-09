@@ -34,6 +34,11 @@ export type TSingleUiSolo = {
   winner: string | null;
 };
 
+export type TSingleUiChacc = {
+  username: string;
+  accessLevel: string;
+}
+
 export type TSingleUiSoloReq = {
   id: string;
   user1: string;

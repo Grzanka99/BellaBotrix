@@ -1,11 +1,14 @@
 import { Context } from "elysia";
 import { PanelLayout } from "../PanelLayout";
 import { UsersList } from "./UsersList";
+import { getChannelFromCtx } from "webui/helpers";
 
 export const UsersLayout = async (ctx: Context) => {
+  const channel = await getChannelFromCtx(ctx);
   return (
     <PanelLayout
       current="/panel/users"
+      channel={channel?.name}
       headers={<link rel="stylesheet" href="/public/users-list.css" />}
     >
       <div>

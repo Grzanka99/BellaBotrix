@@ -2,11 +2,15 @@ import { Context } from "elysia";
 import { PanelLayout } from "../PanelLayout";
 import { AddCommandForm } from "./AddCommandForm";
 import { CommandsList } from "./CommandsList";
+import { getChannelFromCtx } from "webui/helpers";
 
 export const CommandsLayout = async (ctx: Context) => {
+  const channel =await getChannelFromCtx(ctx);
+
   return (
     <PanelLayout
       current="/panel/commands"
+      channel={channel?.name}
       headers={
         <>
           <link rel="stylesheet" href="/public/commands-list.css" />

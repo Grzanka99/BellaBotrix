@@ -2,6 +2,7 @@ import { Context } from "elysia";
 import { prisma } from "services/db";
 import { SingleSolo } from "./SingleSolo";
 import { R_SOLO } from "webui/routes";
+import { getChannelFromCtx } from "webui/helpers";
 
 const HTMXWrapper = ({ children }: { children: JSX.Element }) => (
   <div
@@ -17,12 +18,8 @@ const HTMXWrapper = ({ children }: { children: JSX.Element }) => (
 );
 
 export const SoloListContent = async (ctx: Context): Promise<JSX.Element> => {
-  const username = String(ctx.cookie.auth.value.username);
-  const channel = await prisma.channel.findUnique({
-    where: { id: (await prisma.webuiUser.findUnique({ where: { username } }))?.channelId },
-  });
-
-  if (!username || !channel) {
+  const channel = await getChannelFromCtx(ctx);
+  if (!channel) {
     return <HTMXWrapper>not found</HTMXWrapper>;
   }
 

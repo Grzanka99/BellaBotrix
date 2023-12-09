@@ -31,7 +31,7 @@ const AdvancedInput = ({ children, vars, description, label }: TLabelProps) => (
       {vars ? (
         <code class="settings-form__ainput__info__vars">
           {Object.keys(vars).map((v) => (
-            <span title={vars[v]}>${v}</span>
+            <span title={vars[v]}>${v} </span>
           ))}
         </code>
       ) : undefined}
@@ -58,7 +58,11 @@ export const SettingsForm = async (ctx: Context, error = false) => {
 
       <FormSection name="Commands">
         <AdvancedInput label="Enabled" {...settings.commands.enabled}>
-          <input type="checkbox" name="commands.enabled" checked={settings.commands.enabled.value} />
+          <input
+            type="checkbox"
+            name="commands.enabled"
+            checked={settings.commands.enabled.value}
+          />
         </AdvancedInput>
         <AdvancedInput label="Prefix" {...settings.commands.prefix}>
           <input type="text" name="commands.prefix" value={settings.commands.prefix.value} />

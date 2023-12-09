@@ -11,6 +11,7 @@ type TPanelLayoutProps = {
   children?: JSX.Element;
   headers?: JSX.Element;
   current?: TPathPrefix;
+  channel?: string;
 };
 
 type THeaderLinkProps = {
@@ -36,6 +37,7 @@ export const PanelLayout = ({
   // @ts-ignore
   current = "",
   headers,
+  channel,
 }: TPanelLayoutProps): JSX.Element => {
   return (
     <HTMLDeclarationWrapper>
@@ -64,9 +66,9 @@ export const PanelLayout = ({
               current={current}
             />
             <HeaderLink href="/auth" text="authorize" current={current} />
-
             <HeaderLink href="/logout" text="logout" current={current} />
           </ul>
+          <div id="selected-channel-name">@{channel}</div>
         </header>
         <main class="panel-content">{children}</main>
       </body>

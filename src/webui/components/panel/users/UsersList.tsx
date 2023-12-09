@@ -1,23 +1,10 @@
-import { prisma } from "services/db";
 import { R_USERS } from "webui/routes";
 import { SingleChannelUserList } from "./SingleChannelUsers";
 import { Context } from "elysia";
+import { getChannelFromCtx } from "webui/helpers";
 
 export const UsersList = async (ctx: Context) => {
-  const username = String(ctx.cookie.auth.value.username);
-  if (!username || !username.length) {
-    return undefined;
-  }
-
-  const channel = await prisma.channel.findUnique({
-    where: {
-      id: (
-        await prisma.webuiUser.findUnique({
-          where: { username },
-        })
-      )?.channelId,
-    },
-  });
+  const channel = await getChannelFromCtx(ctx);
 
   if (!channel) {
     return undefined;

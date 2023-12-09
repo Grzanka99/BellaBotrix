@@ -56,3 +56,10 @@ model WebuiUser {
   channelId Int    @default(-1)
   settings  String @default("")
 }
+
+model ChannelAccess {
+  id          Int @id @default(autoincrement())
+  userid      Int
+  channelId   Int
+  accessLevel String @default("MOD")
+}

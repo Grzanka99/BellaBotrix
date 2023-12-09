@@ -26,7 +26,7 @@ export const R_USERS = {
   LIST: "/htmx/list",
 
   MARK_AS_BOT: "/htmx/markasbot",
-  UNMARK_AS_BOT:"/htmx/unmarkasbot"
+  UNMARK_AS_BOT: "/htmx/unmarkasbot",
 } as const;
 
 export const R_SETTINGS = {
@@ -35,6 +35,8 @@ export const R_SETTINGS = {
   UPDATE: "/htmx/update",
   RESET: "/htmx/reset",
   FORM: "htmx/settings",
+  CHACC: "/htmx/chacc",
+  CHACH: "/htmx/chach",
 } as const;
 
 export const R_LOGIN = {
