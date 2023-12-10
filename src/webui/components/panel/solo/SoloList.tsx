@@ -1,11 +1,18 @@
 import { Context } from "elysia";
 import { TOption } from "types";
 import { SoloListContent } from "./SoloListContent";
+import { R_SOLO } from "webui/routes";
 
 export const SoloList = async (ctx: Context): Promise<TOption<JSX.Element>> => {
   return (
     <div class="grid-based-table">
-      <div class="grid-based-table__header">
+      <div
+        class="grid-based-table__header"
+        hx-get={`${R_SOLO.PREFIX}${R_SOLO.LIST}`}
+        hx-trigger="every 5s"
+        hx-target="#solo-users-list"
+        hx-swap="innerHTML"
+      >
         <ul>
           <li>id</li>
           <li>user 1</li>
@@ -15,7 +22,9 @@ export const SoloList = async (ctx: Context): Promise<TOption<JSX.Element>> => {
           <li>in progress</li>
         </ul>
       </div>
-      {await SoloListContent(ctx)}
+      <div id="solo-users-list" class="grid-based-table__content">
+        {await SoloListContent(ctx)}
+      </div>
     </div>
   );
 };

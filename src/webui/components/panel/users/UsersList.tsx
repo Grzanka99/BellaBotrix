@@ -17,7 +17,7 @@ export const UsersList = async (ctx: Context) => {
         hx-get={`${R_USERS.PREFIX}${R_USERS.LIST}?channel=${String(
           channel.name || ctx.query.channel,
         )}`}
-        hx-trigger="every 2s"
+        hx-trigger="every 5s"
         hx-target="#channel-users-list"
         hx-swap="innerHTML"
         hx-include="#users-list-filter"
