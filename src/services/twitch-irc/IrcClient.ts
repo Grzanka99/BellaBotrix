@@ -23,8 +23,10 @@ export async function createIrcClient(
         }
 
         if (res.data.startsWith("PING :")) {
-          logger.info("sending pong");
-          client.send(`PONG: ${res.data.substring("PING: ".length).trim()}`);
+          logger.info(`Received ping: ${res.data.substring("PING: ".length)}`);
+          const pong = `PONG: ${res.data.substring("PING: ".length).trim()}`;
+          logger.info(`Sending pong: ${pong}`);
+          client.send(pong);
         }
       });
     } catch (err) {
