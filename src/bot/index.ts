@@ -23,7 +23,7 @@ export async function startBot(): Promise<void> {
   logger.info("Main OAuth token obtained");
 
   logger.info("Getting enabled channels from DB");
-  const channels = (await prisma.channel.findMany()).filter((ch) => ch.enabled);
+  const channels = await prisma.channel.findMany({ where: { enabled: true } });
   if (!channels.length) {
     logger.error("Could not find any enabled channel, quitting");
     return;
@@ -106,3 +106,6 @@ export async function startBot(): Promise<void> {
 }
 
 startBot();
+
+// NOTE: Keep Alive xD
+setInterval(() => {}, 100000);
