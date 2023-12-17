@@ -8,7 +8,7 @@ import { createIrcClient } from "services/twitch-irc/IrcClient";
 import { TwitchIrc } from "services/twitch-irc";
 import { setDefaultCommandsForChannel } from "services/commands";
 
-export async function bootstrap(): Promise<void> {
+export async function startBot(): Promise<void> {
   console.time("bootstrap");
   const apis: Record<string, TwitchApi> = {};
 
@@ -74,11 +74,8 @@ export async function bootstrap(): Promise<void> {
     }),
   );
 
-  twitchIrcClient.filter(Boolean).forEach(async (client) => {
-
+  for (const client of twitchIrcClient.filter(Boolean)) {
     await setDefaultCommandsForChannel(client.channel);
-
-
 
     client.onMessage(async ({ channel, tags, message, self }, it) => {
       if (self) {
@@ -93,17 +90,19 @@ export async function bootstrap(): Promise<void> {
         api: apis[channel],
       });
 
-      handler.forEach(async (handler) => {
-        await handler.useHandler({
+      for (const h of handler) {
+        await h.useHandler({
           channel,
           tags,
           message,
           client,
           settings: it.settings,
         });
-      });
+      }
     });
-  });
+  }
 
   console.timeEnd("bootstrap");
 }
+
+startBot();

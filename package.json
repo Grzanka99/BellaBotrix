@@ -3,13 +3,12 @@
   "module": "index.ts",
   "type": "module",
   "scripts": {
-    "start": "bun run ./src/index.ts",
-    "dev": "bun --watch ./src/index.ts",
-    "build": "bun build --target=bun ./src/index.ts --outdir ./dist",
-    "compile": "bun build --compile ./src/index.ts --outfile ./bin/bellatrix",
+    "start:bot": "bun run ./src/bot/index.ts",
+    "start:web": "bun run ./src/webui/index.ts",
+    "dev:bot": "bun --watch ./src/bot/index.ts",
+    "dev:web": "bun --watch ./src/webui/index.ts",
     "db:migrate": "prisma migrate dev --name",
-    "db:studio": "prisma studio",
-    "dev:webui": "bun --watch ./src/webui/app.tsx"
+    "db:studio": "prisma studio"
   },
   "devDependencies": {
     "@biomejs/biome": "1.1.2",
