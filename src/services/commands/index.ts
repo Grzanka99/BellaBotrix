@@ -8,7 +8,8 @@ export function getUniqueName(cmd: string, channel: string) {
 }
 
 export async function setDefaultCommandsForChannel(channel: string) {
-  BASE_COMMANDS.map(minimalCommandToMinimalDbCommand).forEach(async (command) => {
+  // biome-ignore lint/complexity/noForEach: <explanation>
+BASE_COMMANDS.map(minimalCommandToMinimalDbCommand).forEach(async (command) => {
     await prismaQueue.enqueue(async () => {
       if (!command) {
         return;

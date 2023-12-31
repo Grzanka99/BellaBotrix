@@ -44,6 +44,23 @@ export type TTwitchValidateToken = {
   expires_in: number;
 };
 
+export type TTwitchApiStream = {
+  id: string;
+  user_id: string;
+  user_login: string;
+  user_name: string;
+  game_id: string;
+  game_name: string;
+  type: string;
+  title: string;
+  tags: string[];
+  viewer_count: number;
+  started_at: string;
+  language: string;
+  thumbnail_url: string;
+  is_mature: boolean;
+};
+
 export enum EEvenType {
   Message = "message",
   Roomstate = "roomstate",
@@ -56,7 +73,7 @@ export type TTwitchMessageInfo = {
   displayName: string;
   emotes: Array<[string, string, number]>;
   firstMessage: boolean;
-  username: string,
+  username: string;
   isMod: boolean;
   roomId: number;
   isSubsriber: boolean;

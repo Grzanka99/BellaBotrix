@@ -1,6 +1,7 @@
 import {
   TTwitchApiChatter,
   TTwitchApiResponse,
+  TTwitchApiStream,
   TTwitchApiUser,
   TTwitchOAuthRefresh,
   TTwitchValidateToken,
@@ -22,14 +23,14 @@ const post = (url: string): Promise<Response> =>
     },
   });
 
-export async function getChannelRefreshKey(
-  code: string,
-): Promise<TOption<TTwitchOAuthRefresh>> {
+export async function getChannelRefreshKey(code: string): Promise<TOption<TTwitchOAuthRefresh>> {
   try {
     let url = `${OAUTH_URL}?client_id=${API_CLIENT_ID}`;
     url += `&client_secret=${API_CLIENT_SECRET}`;
     url += `&code=${code}`;
-    url += `&grant_type=authorization_code&redirect_uri=${Bun.env.APP_URL || 'http://localhost:3000'}`;
+    url += `&grant_type=authorization_code&redirect_uri=${
+      Bun.env.APP_URL || "http://localhost:3000"
+    }`;
 
     const res = await fetch(url, { method: "POST" });
     const json = await res.json<TTwitchOAuthRefresh>();
@@ -40,9 +41,7 @@ export async function getChannelRefreshKey(
   }
 }
 
-export async function validateToken(
-  token: string,
-): Promise<TOption<TTwitchValidateToken>> {
+export async function validateToken(token: string): Promise<TOption<TTwitchValidateToken>> {
   try {
     const url = "https://id.twitch.tv/oauth2/validate";
 
@@ -60,9 +59,7 @@ export async function validateToken(
   }
 }
 
-export async function getNewToken(
-  refreshToken: string,
-): Promise<TOption<TTwitchOAuthRefresh>> {
+export async function getNewToken(refreshToken: string): Promise<TOption<TTwitchOAuthRefresh>> {
   try {
     const res = await post(
       `${OAUTH_URL}?grant_type=refresh_token&refresh_token=${refreshToken}&client_id=${API_CLIENT_ID}&client_secret=${API_CLIENT_SECRET}`,
@@ -157,5 +154,26 @@ export async function getModerators(
   }
 
   const json = await res.json<TTwitchApiResponse<TTwitchApiChatter[]>>();
+  return json;
+}
+
+export async function getStreams(
+  userid: string,
+  token: string,
+): Promise<TOption<TTwitchApiResponse<TTwitchApiStream[]>>> {
+  const url = `https://api.twitch.tv/helix/streams?user_id=${userid}`;
+
+  const res = await fetch(url, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+      "Client-Id": API_CLIENT_ID,
+    } as HeadersInit,
+  });
+
+  if (res.status !== 200) {
+    return undefined;
+  }
+
+  const json = await res.json<TTwitchApiResponse<TTwitchApiStream[]>>();
   return json;
 }

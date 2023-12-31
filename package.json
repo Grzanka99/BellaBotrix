@@ -7,6 +7,7 @@
     "start:web": "bun run ./src/webui/index.ts",
     "dev:bot": "bun --watch ./src/bot/index.ts",
     "dev:web": "bun --watch ./src/webui/index.ts",
+    "compile:bot": "bun build ./src/bot/index.ts --target=bun --outfile=./bin/bellatrix --compile",
     "db:migrate": "prisma migrate dev --name",
     "db:studio": "prisma studio"
   },

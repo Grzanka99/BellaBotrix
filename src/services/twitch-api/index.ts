@@ -1,7 +1,13 @@
 import { prisma } from "services/db";
-import { TTwitchApiChatter } from "services/types";
+import { TTwitchApiChatter, TTwitchApiStream } from "services/types";
 import { TOption } from "types";
-import { getChatters, getModerators, getNewToken, getTwitchApiUser } from "./api-connector";
+import {
+  getChatters,
+  getModerators,
+  getNewToken,
+  getStreams,
+  getTwitchApiUser,
+} from "./api-connector";
 import { logger } from "utils/logger";
 
 export class TwitchApi {
@@ -134,6 +140,18 @@ export class TwitchApi {
     }, timeout);
 
     return true;
+  }
+
+  public async getStreamInfo(): Promise<TOption<TTwitchApiStream>> {
+    if (!this.userId || !this.channelToken) {
+      return undefined;
+    }
+    const res = await getStreams(this.userId, this.channelToken);
+    if (!res?.data.length) {
+      return undefined;
+    }
+
+    return res.data[0];
   }
 
   public stopChattersAutorefresh(): boolean {

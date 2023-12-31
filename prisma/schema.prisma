@@ -58,8 +58,15 @@ model WebuiUser {
 }
 
 model ChannelAccess {
-  id          Int @id @default(autoincrement())
+  id          Int    @id @default(autoincrement())
   userid      Int
   channelId   Int
   accessLevel String @default("MOD")
+}
+
+model Timers {
+  id        Int @id @default(autoincrement())
+  channelId Int
+  timeout   Int
+  message   String
 }
