@@ -5,7 +5,6 @@ import { EEvenType, TTwitchIrcContext } from "services/types";
 import { TSettings } from "types/schema/settings.schema";
 import { getSettings } from "services/settings";
 import { interpolate } from "utils/interpolate-string";
-import { ChannelTimer } from "services/timers";
 
 export class TwitchIrc {
   private ws: WebSocket;
@@ -40,7 +39,7 @@ export class TwitchIrc {
     this.logger.info("Connecting");
     this.ownerId = ownerId;
 
-    this.fetchSettings().then((res) => {
+    this.fetchSettings().then(() => {
       this.logger.info("Scheduling settings refresh for 10 seconds");
 
       setInterval(async () => {

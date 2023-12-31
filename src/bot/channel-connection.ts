@@ -18,6 +18,7 @@ export class ChannelConnection {
   private _api: TwitchApi;
   private _irc: TwitchIrc;
   private channelName: string;
+  private isSetup = false;
 
   private chattersInterval: Timer | undefined;
 
@@ -36,14 +37,18 @@ export class ChannelConnection {
     if (!info) {
       this.automsgTimer?.stop();
       this.automsgTimer = undefined;
-    } else {
+    } else if (!this.automsgTimer) {
       this.automsgTimer = new ChannelTimer(this.channelName, (msg) => {
         this.irc.send(msg);
       });
     }
   }
 
-  public async setup() {
+  public async setup(): Promise<void> {
+    if (this.isSetup) {
+      return;
+    }
+
     logger.info(`Setting up connection for channel: ${this.channelName}`);
     await setDefaultCommandsForChannel(this.channelName);
 
@@ -82,10 +87,11 @@ export class ChannelConnection {
       gc(false);
     });
 
+    this.isSetup = true;
     logger.info(`Connection for channel: ${this.channelName} set up`);
   }
 
-  public setdown() {
+  public async setdown(): Promise<void> {
     clearInterval(this.chattersInterval);
     this.chattersInterval = undefined;
 
@@ -93,15 +99,16 @@ export class ChannelConnection {
     this.automsgTimer?.stop();
     this.automsgInterval = undefined;
     this.automsgTimer = undefined;
+    this.isSetup = false;
 
     gc(true);
   }
 
-  public get api() {
+  public get api(): TwitchApi {
     return this._api;
   }
 
-  public get irc() {
+  public get irc(): TwitchIrc {
     return this._irc;
   }
 }

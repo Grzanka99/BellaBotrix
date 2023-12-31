@@ -1,33 +1,33 @@
 import { prisma } from "services/db";
-import { TimersSchema } from "types/schema/timers.schema";
 import { logger } from "utils/logger";
-import { SingleTimer } from "./single-timer";
+import { SingleTimer, TTimerSender } from "./single-timer";
 import { gc } from "bun";
 
 export class ChannelTimer {
   private id: number | undefined;
   private channelName: string;
-  private fetchTimersTimer: Timer | undefined;
+  private syncInterval: Timer | undefined;
   private timers: Record<number, SingleTimer> = {};
-  private send: (msg: string) => void;
+  private send: TTimerSender;
 
-  constructor(channel: string, sendFn: (msg: string) => void) {
+  constructor(channel: string, sendFn: TTimerSender) {
     this.channelName = channel.replaceAll("#", "");
     this.send = sendFn;
 
     prisma.channel.findUnique({ where: { name: this.channelName } }).then((res) => {
       if (!res) {
+        logger.error(`Something went wrong while settings timers for channel: ${channel}`);
         return;
       }
 
       logger.info(`Starting timers for channel: ${channel}`);
       this.id = res.id;
       this.syncTimersWithDB();
-      this.startFetchTimersTimer();
+      this.startSyncInterval();
     });
   }
 
-  private async syncTimersWithDB() {
+  private async syncTimersWithDB(): Promise<void> {
     const timers = await prisma.timers.findMany({
       where: {
         channelId: this.id,
@@ -37,12 +37,7 @@ export class ChannelTimer {
       },
     });
 
-    const parsed = TimersSchema.safeParse(timers);
-    if (!parsed.success) {
-      return;
-    }
-
-    for (const t of parsed.data) {
+    for (const t of timers) {
       if (this.timers[t.id]) {
         this.timers[t.id].update(t.timeout * 1000, t.message);
       } else {
@@ -50,7 +45,7 @@ export class ChannelTimer {
       }
     }
 
-    const mapped = parsed.data.map((e) => e.id);
+    const mapped = timers.map((e) => e.id);
     for (const id of Object.keys(this.timers)) {
       if (!mapped.includes(Number(id))) {
         this.timers[Number(id)].stop();
@@ -61,26 +56,26 @@ export class ChannelTimer {
     gc(false);
   }
 
-  private startFetchTimersTimer() {
-    this.fetchTimersTimer = setInterval(async () => {
+  private startSyncInterval(): void {
+    this.syncInterval = setInterval(async () => {
       await this.syncTimersWithDB();
-    }, 30000);
+    }, 30_000);
   }
 
-  private stopFetchTimersTimer() {
-    clearInterval(this.fetchTimersTimer);
-    this.fetchTimersTimer = undefined;
+  private stopFetchTimersTimer(): void {
+    clearInterval(this.syncInterval);
+    this.syncInterval = undefined;
   }
 
-  public start() {
-    if (this.fetchTimersTimer) {
+  public start(): void {
+    if (this.syncInterval) {
       return;
     }
 
-    this.startFetchTimersTimer();
+    this.startSyncInterval();
   }
 
-  public stop() {
+  public stop(): void {
     this.stopFetchTimersTimer();
   }
 }

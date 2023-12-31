@@ -34,7 +34,7 @@ export async function startBot(): Promise<void> {
     return;
   }
 
-  async function updateConnection(ch: Channel) {
+  async function updateConnection(ch: Channel): Promise<void> {
     const user = await prisma.webuiUser.findFirst({ where: { channelId: ch.id } });
     if (!user || !!connections[ch.name] || !ircClient || !mainOAuthToken) {
       return;
@@ -42,7 +42,8 @@ export async function startBot(): Promise<void> {
 
     connections[ch.name] = new ChannelConnection({
       ircClient,
-      channelName: `#${ch.name}`,
+      // NOTE: this weird is thing is done, to make sure that version with one # is passed
+      channelName: `#${ch.name.replaceAll("#", "")}`,
       ownerId: user.id,
       authToken: mainOAuthToken,
     });
@@ -72,7 +73,7 @@ export async function startBot(): Promise<void> {
     //   logger.info(`Disabling connection for channel: ${con}`);
     //   delete connections[con];
     // }
-  }, 30000);
+  }, 30_000);
 
   console.timeEnd("bootstrap");
 }
