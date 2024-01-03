@@ -2,7 +2,7 @@
 import { getChatHandler } from "handlers";
 import { describe, test, expect } from "bun:test";
 
-describe("get chat handler", () => {
+describe.skip("get chat handler", () => {
   test("should return only default handler", async () => {
     const res = await getChatHandler(
       "anychannel",

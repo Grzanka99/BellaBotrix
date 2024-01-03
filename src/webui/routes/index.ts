@@ -29,6 +29,17 @@ export const R_USERS = {
   UNMARK_AS_BOT: "/htmx/unmarkasbot",
 } as const;
 
+export const R_TIMERS = {
+  PREFIX: "/panel/timers",
+  ROOT: "/",
+  LIST: "/htmx/list",
+
+  ADD: "/htmx/add",
+  DELETE: "/htmx/delete",
+  EDIT: "/htmx/edit",
+  SAVE: "/htmx/save",
+};
+
 export const R_SETTINGS = {
   PREFIX: "/panel/settings",
   ROOT: "/",

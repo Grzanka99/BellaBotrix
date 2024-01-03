@@ -1,7 +1,4 @@
 import { Context } from "elysia";
-import { dbCommandToCommand } from "services/commands/commands.transform";
-import { prisma } from "services/db";
-import { CommandFromDBSchema, CommandSchema } from "types/schema/commands.schema";
 import { R_COMMANDS } from "webui/routes";
 import { getCommandFromDbByUniqueName } from "../helpers";
 

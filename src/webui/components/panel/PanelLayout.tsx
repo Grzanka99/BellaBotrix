@@ -1,11 +1,12 @@
-import { R_COMMANDS, R_SETTINGS, R_SOLO, R_USERS } from "webui/routes";
+import { R_COMMANDS, R_SETTINGS, R_SOLO, R_TIMERS, R_USERS } from "webui/routes";
 import { HTMLDeclarationWrapper } from "../HTMLDeclarationWrapper";
 
 type TPathPrefix =
   | typeof R_COMMANDS.PREFIX
   | typeof R_SETTINGS.PREFIX
   | typeof R_SOLO.PREFIX
-  | typeof R_USERS.PREFIX;
+  | typeof R_USERS.PREFIX
+  | typeof R_TIMERS.PREFIX;
 
 type TPanelLayoutProps = {
   children?: JSX.Element;
@@ -60,6 +61,11 @@ export const PanelLayout = ({
             />
             <HeaderLink href={`${R_SOLO.PREFIX}${R_SOLO.ROOT}`} text="solo" current={current} />
             <HeaderLink href={`${R_USERS.PREFIX}${R_USERS.ROOT}`} text="users" current={current} />
+            <HeaderLink
+              href={`${R_TIMERS.PREFIX}${R_TIMERS.ROOT}`}
+              text="timers"
+              current={current}
+            />
             <HeaderLink
               href={`${R_SETTINGS.PREFIX}${R_SETTINGS.ROOT}`}
               text="settings"

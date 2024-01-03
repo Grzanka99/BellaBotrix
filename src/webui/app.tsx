@@ -22,6 +22,7 @@ import {
   R_ROOT,
   R_SETTINGS,
   R_SOLO,
+  R_TIMERS,
   R_USERS,
 } from "./routes";
 import { TSingleUiSoloReq } from "./types";
@@ -39,6 +40,12 @@ import { MarkAsBot } from "./components/panel/users/actions/BotMarking";
 import { AddChacc } from "./components/panel/settings/actions/AddChacc";
 import { RevokeChacc } from "./components/panel/settings/actions/RemoveChacc";
 import { ChangeContext } from "./components/panel/settings/actions/ChangeContext";
+import { TimersLayout } from "./components/panel/timers/TimersLayout";
+import { TimersListContent } from "./components/panel/timers/TimersListContent";
+import { TimersEditView } from "./components/panel/timers/TimersEditView";
+import { UpdateTimer } from "./components/panel/timers/actions/UpdateTimer";
+import { RemoveTimer } from "./components/panel/timers/actions/RemoveTimer";
+import { AddTimer } from "./components/panel/timers/actions/AddTimer";
 
 const UNAUTHORIZED = "Unauthorized";
 
@@ -116,6 +123,16 @@ app.guard(
         .get(R_SOLO.ROOT, SoloLayout)
         .get(R_SOLO.LIST, async (ctx) => await SoloListContent(ctx))
         .post(R_SOLO.CLOSE, async (ctx) => SoloClose(ctx.body as TSingleUiSoloReq)),
+    );
+
+    app.group(R_TIMERS.PREFIX, (timers) =>
+      timers
+        .get(R_TIMERS.ROOT, TimersLayout)
+        .get(R_TIMERS.LIST, TimersListContent)
+        .post(R_TIMERS.EDIT, TimersEditView)
+        .post(R_TIMERS.SAVE, UpdateTimer)
+        .delete(R_TIMERS.DELETE, RemoveTimer)
+      .post(R_TIMERS.ADD, AddTimer)
     );
 
     app.group(R_SETTINGS.PREFIX, (settings) =>
