@@ -3,6 +3,8 @@
   "type": "module",
   "scripts": {
     "dev:bot": "bun --watch ./bot/src/index.ts",
-    "compile:bot": "bun build ./bot/src/index.ts --target=bun --outfile=./bin/bellatrix --compile"
+    "dev:web": "cd ./web && bun dev",
+    "build:bot": "bun build ./bot/src/index.ts --target=bun --outfile=./bin/bellatrix --compile",
+    "build:web": "cd ./web && bun run build"
   }
 }

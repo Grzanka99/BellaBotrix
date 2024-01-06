@@ -1,5 +1,5 @@
 {
-  "name": "bellatrix",
+  "name": "bellatrix-bot",
   "module": "index.ts",
   "type": "module",
   "scripts": {
@@ -21,10 +21,7 @@
     "typescript": "^5.0.0"
   },
   "dependencies": {
-    "@elysiajs/html": "^0.7.0",
-    "@elysiajs/static": "^0.7.1",
     "@prisma/client": "5.2.0",
-    "elysia": "^0.7.12",
     "zod": "^3.22.4"
   }
 }
