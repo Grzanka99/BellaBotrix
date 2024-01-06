@@ -6,8 +6,8 @@ generator client {
 }
 
 datasource db {
-  provider = "sqlite"
-  url      = env("DATABASE_URL")
+  provider = "mysql"
+  url      = env("REMOTE_DB_URL")
 }
 
 model Commands {
@@ -15,7 +15,7 @@ model Commands {
   uniqueName  String  @unique
   name        String
   enabled     Boolean
-  message     String?
+  message     Json?
   alias       String  @default("")
   channelName String  @default("")
 }
@@ -54,7 +54,7 @@ model WebuiUser {
   password  String
   token     String @default("")
   channelId Int    @default(-1)
-  settings  String @default("")
+  settings  Json
 }
 
 model ChannelAccess {
@@ -65,7 +65,7 @@ model ChannelAccess {
 }
 
 model Timers {
-  id        Int @id @default(autoincrement())
+  id        Int    @id @default(autoincrement())
   channelId Int
   timeout   Int
   message   String
