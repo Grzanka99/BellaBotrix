@@ -77,5 +77,8 @@ export class ChannelTimer {
 
   public stop(): void {
     this.stopFetchTimersTimer();
+    for (const timer of Object.keys(this.timers)) {
+      this.timers[Number(timer)].stop();
+    }
   }
 }
