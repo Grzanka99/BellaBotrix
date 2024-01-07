@@ -1,0 +1,14 @@
+{
+  "scripts": {
+    "dev": "turbo dev",
+    "build": "turbo build && ./build.sh"
+  },
+  "dependencies": {},
+  "devDependencies": {
+    "turbo": "latest"
+  },
+  "packageManager": "bun@1.0.21",
+  "workspaces": [
+    "apps/*"
+  ]
+}
