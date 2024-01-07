@@ -11,7 +11,8 @@
     "build": "bun build ./src/bot/index.ts --target=bun --outfile=./bin/bellatrix --compile",
     "compile:bot": "bun build ./src/bot/index.ts --target=bun --outfile=./bin/bellatrix --compile",
     "db:migrate": "prisma migrate dev --name",
-    "db:studio": "prisma studio"
+    "db:studio": "prisma studio",
+    "postinstall": "prisma generate"
   },
   "devDependencies": {
     "@biomejs/biome": "1.1.2",
