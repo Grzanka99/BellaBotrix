@@ -1,5 +1,7 @@
 <script setup lang="ts">
 import { SDtoCreateUser, type TDtoCreateUser } from '~/types/auth.type';
+import FormTextInput from '../ui/FormTextInput.vue';
+import FormButton from '../ui/FormButton.vue';
 
 const username = ref("");
 const password = ref("");
@@ -38,14 +40,14 @@ const register = async () => {
 </script>
 <template>
   <form id="login-form" @submit.prevent="register">
-    <UiFormTextInput label="Username" name="username" placeholder="username" v-model="username"
+    <FormTextInput label="Username" name="username" placeholder="username" v-model="username"
       :error="validate('username')" />
-    <UiFormTextInput label="Password" name="password" placeholder="password" v-model="password"
+    <FormTextInput label="Password" name="password" placeholder="password" v-model="password"
       :error="validate('password')" password />
-    <UiFormTextInput label="Confirm password" name="passwordConfirmation" placeholder="confirm password"
+    <FormTextInput label="Confirm password" name="passwordConfirmation" placeholder="confirm password"
       v-model="passwordConfirmation" :error="validate('password')" password />
-    <UiFormTextInput label="Registration token" name="regToken" placeholder="registration token" v-model="regToken"
+    <FormTextInput label="Registration token" name="regToken" placeholder="registration token" v-model="regToken"
       :error="validate('regToken')" />
-    <UiFormButton type="submit" :disabled="!passwordConfirmed || isInvalid">Register</UiFormButton>
+    <FormButton type="submit" :disabled="!passwordConfirmed || isInvalid">Register</FormButton>
   </form>
 </template>

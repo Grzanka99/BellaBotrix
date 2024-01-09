@@ -1,0 +1,3 @@
+<template>
+  solo
+</template>

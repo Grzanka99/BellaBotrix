@@ -76,7 +76,7 @@ $info: rgba(#bbbbbb, 0.2);
   --background-dark: #121211;
   --background-accent: var(--accent);
 
-  --text: #eeeeee;
+  --text: white;
   --text-darker: #cecece;
   --stroke: #333333;
   --stroke-light: #444444;
@@ -110,6 +110,7 @@ html {
 body {
   margin: 0;
   display: flex;
+  color: var(--text);
 }
 
 *,

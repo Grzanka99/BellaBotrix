@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import FormButton from '../ui/FormButton.vue';
+import FormTextInput from '../ui/FormTextInput.vue';
 import { SDtoUser, type TDtoUser } from '~/types/auth.type';
 
 const username = ref("");
@@ -31,11 +33,11 @@ const onSubmit = () => {
 </script>
 <template>
   <form id="login-form" @submit.prevent="onSubmit">
-    <UiFormTextInput label="Username" name="username" placeholder="username" v-model="username"
+    <FormTextInput label="Username" name="username" placeholder="username" v-model="username"
       :error="validate('username')" />
-    <UiFormTextInput label="Password" name="password" placeholder="password" v-model="password"
+    <FormTextInput label="Password" name="password" placeholder="password" v-model="password"
       :error="validate('password')" password />
-    <UiFormButton type="submit" :disabled="isInvalid">Login</UiFormButton>
+    <FormButton type="submit" :disabled="isInvalid">Login</FormButton>
   </form>
 </template>
 

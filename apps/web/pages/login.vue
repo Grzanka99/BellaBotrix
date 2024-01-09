@@ -1,4 +1,7 @@
 <script setup lang="ts">
+import LoginForm from '~/components/auth/LoginForm.vue';
+import RegistrationForm from '~/components/auth/RegistrationForm.vue';
+
 const formType = ref<"login" | "register">("login");
 
 definePageMeta({
@@ -16,8 +19,8 @@ definePageMeta({
   <div id="login-page-card">
     <h2 v-if="formType === 'login'">Login to existing account</h2>
     <h2 v-else>Create new account</h2>
-    <AuthLoginForm v-if="formType === 'login'" />
-    <AuthRegistrationForm v-else />
+    <LoginForm v-if="formType === 'login'" />
+    <RegistrationForm v-else />
   </div>
 </template>
 
