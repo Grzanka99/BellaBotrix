@@ -4,6 +4,7 @@ import { logger } from "utils/logger";
 import { createIrcClient } from "services/twitch-irc/IrcClient";
 import { ChannelConnection } from "./channel-connection";
 import { Channel } from "@prisma/client";
+import { gc } from "bun";
 
 export async function startBot(): Promise<void> {
   console.time("bootstrap");
@@ -64,15 +65,19 @@ export async function startBot(): Promise<void> {
       await updateConnection(ch);
     }
 
-    // TODO: Disable connections, not only add new
-    // for (const con of Object.keys(connections)) {
-    //   if (mappedIds.includes(con)) {
-    //     continue;
-    //   }
-    //
-    //   logger.info(`Disabling connection for channel: ${con}`);
-    //   delete connections[con];
-    // }
+    const mappedIds = res.map((el) => el.name);
+    for (const con of Object.keys(connections)) {
+      if (mappedIds.includes(con)) {
+        continue;
+      }
+
+      logger.info(`Disabling connection for channel: ${con}`);
+      await connections[con].setdown();
+      // @ts-ignore-next-line
+      connections[con] = undefined;
+      delete connections[con];
+      gc(true);
+    }
   }, 30_000);
 
   console.timeEnd("bootstrap");

@@ -1,0 +1,174 @@
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,300;0,400;0,700;1,300;1,400&display=swap');
+
+@mixin button-reset {
+  margin: 0;
+  padding: 0;
+  background: transparent;
+  border: none;
+  outline: none;
+}
+
+@mixin montserrat {
+  font-family: 'Montserrat', sans-serif;
+}
+
+.button-reset {
+  margin: 0;
+  padding: 0;
+  background: transparent;
+  border: none;
+  outline: none;
+}
+
+$error: #cc001f;
+$warn: #ffc100;
+$success: #196e4b;
+$info: rgba(#bbbbbb, 0.2);
+
+:root {
+  --accent: #039be5;
+  --accent-dim: #01579b;
+
+  --error: #{$error};
+  --warn: #{$warn};
+  --success: #{$success};
+  --info: #{$info};
+
+  --background: white;
+  --background-dark: #212121;
+  --background-light: #eeeeee;
+  --background-dim: #bbbbbb;
+  --background-accent: var(--accent);
+
+  --text: #343434;
+  --text-darker: #242424;
+  --stroke: #343434;
+  --stroke-light: #9e9e9e;
+  --shadow: 0px 0px 4px var(--stroke-light);
+
+  --font-light: 300;
+  --font-regular: 400;
+  --font-bold: 700;
+
+  --font-big: 2.8rem;
+  --font-size: 2rem;
+  --font-small: 1.6rem;
+  --font-tiny: 1.4rem;
+
+  --padding: 16px;
+  --padding-quarter: calc(var(--padding) / 4);
+  --padding-half: calc(var(--padding) / 2);
+  --padding-onehalf: calc(var(--padding) + var(--padding-half));
+  --padding-double: calc(2 * var(--padding));
+
+  --radius-round: 50%;
+  --radius: 8px;
+  --radius-half: calc(var(--radius) / 2);
+  --radius-double: calc(2 * var(--radius));
+
+  --default-transition: 100ms ease-in;
+}
+
+.dark {
+  --background: #09090b;
+  --background-dim: #212121;
+  --background-light: #333333;
+  --background-dark: #121211;
+  --background-accent: var(--accent);
+
+  --text: #eeeeee;
+  --text-darker: #cecece;
+  --stroke: #333333;
+  --stroke-light: #444444;
+  --shadow: 0px 0px 4px var(--stroke-light);
+}
+
+root {
+  font-family: 'Montserrat', sans-serif;
+  line-height: 1.5;
+  font-weight: var(--font-regular);
+
+  color-scheme: light dark;
+  color: var(--text);
+  background-color: var(--background);
+
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  -webkit-text-size-adjust: 100%;
+}
+
+html {
+  font-size: 62.5%;
+
+  &.dark {
+    background: var(--background);
+  }
+}
+
+body {
+  margin: 0;
+  display: flex;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  font-family: 'Montserrat', sans-serif;
+}
+
+.flex {
+  display: flex;
+}
+
+.column {
+  display: flex;
+  flex-direction: column;
+}
+
+.flex-center {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.wrap {
+  flex-wrap: wrap;
+}
+
+.flow > * + * {
+  margin-top: var(--flow-space, 1rem);
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+p {
+  margin: 0;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+p,
+input,
+button,
+a {
+  @include montserrat;
+}
+
+ul,
+li {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+

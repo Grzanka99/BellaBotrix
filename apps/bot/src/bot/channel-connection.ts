@@ -92,6 +92,7 @@ export class ChannelConnection {
   }
 
   public async setdown(): Promise<void> {
+    logger.info(`Setting down connection with channel: ${this.channelName}`);
     clearInterval(this.chattersInterval);
     this.chattersInterval = undefined;
 
@@ -100,6 +101,11 @@ export class ChannelConnection {
     this.automsgInterval = undefined;
     this.automsgTimer = undefined;
     this.isSetup = false;
+
+    // @ts-ignore-next-line
+    this._irc = undefined;
+    // @ts-ignore-next-line
+    this._api = undefined;
 
     gc(true);
   }

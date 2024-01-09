@@ -1,5 +1,5 @@
 import type { AsyncDataExecuteOptions } from "nuxt/dist/app/composables/asyncData";
-import type { TAuthSession } from "~/types/auth.type";
+import type { TAuthSession, TDtoCreateUser } from "~/types/auth.type";
 
 export const useAuth = () =>
   useNuxtApp().$auth as {
@@ -22,15 +22,16 @@ export const authLogin = async (username: string, password: string) => {
   await navigateTo(useAuth().redirectTo.value || "/");
 };
 
-export const authRegister = async (username: string, password: string) => {
+export const authRegister = async (data: TDtoCreateUser) => {
   await $fetch("/api/auth/register", {
     method: "POST",
     body: {
-      username,
-      password,
+      username: data.username,
+      password: data.password,
+      regToken: data.regToken,
     },
   });
-  return await authLogin(username, password);
+  return await authLogin(data.username, data.password);
 };
 
 export const authLogout = async () => {

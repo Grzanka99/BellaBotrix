@@ -7,4 +7,5 @@ export default defineNuxtConfig({
       password: "verysupersecretverysupersecretverysupersecret",
     },
   },
+  ssr: false,
 });

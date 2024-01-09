@@ -13,15 +13,7 @@ export async function findUserByUsername(username: string): Promise<TUser | unde
 }
 
 export async function createUser(user: TDtoUser) {
-  const parsed = SDtoUser.safeParse(user);
-
-  if (!parsed.success) {
-    throw createError({ statusCode: 400 });
-  }
-
-  const { data } = parsed;
-
-  const isUsernameTaken = await findUserByUsername(data.username);
+  const isUsernameTaken = await findUserByUsername(user.username);
 
   if (isUsernameTaken) {
     throw createError({ message: "Username already exists!", statusCode: 409 });
@@ -29,8 +21,8 @@ export async function createUser(user: TDtoUser) {
 
   const newUser = await prisma.webuiUser.create({
     data: {
-      username: data.username,
-      password: data.password,
+      username:user.username,
+      password: user.password,
       settings: {},
     },
   });
