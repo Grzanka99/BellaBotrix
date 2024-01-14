@@ -1,14 +1,17 @@
 <script setup lang="ts">
 import NavBar from '~/components/navbar/NavBar.vue';
+import TopBar from '~/components/navbar/TopBar.vue';
 </script>
 
 <template>
   <div id="panel">
     <NavBar />
-    <div id="infobar">some info</div>
-    <div id="panel-content">
-      <slot />
-    </div>
+    <ClientOnly>
+      <TopBar />
+      <div id="panel-content">
+        <slot />
+      </div>
+    </ClientOnly>
   </div>
 </template>
 
@@ -16,7 +19,7 @@ import NavBar from '~/components/navbar/NavBar.vue';
 #panel {
   display: grid;
   grid-template-areas: "info info" "nav content";
-  grid-template-rows: 50px calc(100vh - 50px);
+  grid-template-rows: 75px calc(100vh - 75px);
   grid-template-columns: 250px calc(100% - 250px);
 }
 
@@ -24,11 +27,14 @@ import NavBar from '~/components/navbar/NavBar.vue';
   grid-area: nav;
 }
 
-#infobar {
+#topbar {
   grid-area: info;
 }
 
 #panel-content {
+  padding: var(--padding);
+  height: 100%;
   grid-area: content;
+  overflow-y: auto;
 }
 </style>

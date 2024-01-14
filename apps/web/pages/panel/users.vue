@@ -1,11 +1,10 @@
 <script setup lang="ts">
-const channel = ref(1)
+import { useStorage } from '@vueuse/core'
 
+const channel = useStorage('selectedChannel', undefined);
 const { data } = useFetch(() => `/api/${channel.value}/users`);
-
 </script>
 
 <template>
-  <input type="number" v-model="channel" />
   {{ data }}
 </template>

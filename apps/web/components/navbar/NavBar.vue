@@ -23,6 +23,5 @@ const routes = computed<TRoute[]>(() => [
   padding: var(--padding-half);
   gap: var(--padding-quarter);
   border-right: 1px solid var(--stroke);
-  border-top: 1px solid var(--stroke);
 }
 </style>
