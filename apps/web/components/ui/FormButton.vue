@@ -1,13 +1,14 @@
 <script setup lang="ts">
 defineProps<{
   type: 'submit' | 'button',
-  disabled: boolean,
+  disabled?: boolean,
+  width?: `${string}px`
 }>()
 </script>
 
 <template>
-  <button class="form-button" :type="type" :disabled="disabled">
-   <slot />
+  <button class="form-button" :type="type" :disabled="disabled" :style="{ width }">
+    <slot />
   </button>
 </template>
 
@@ -26,11 +27,12 @@ defineProps<{
   transition: background 200ms;
   border-radius: var(--radius);
 
-  &:hover {
+  &:hover:not(:disabled) {
     background: var(--text-darker);
   }
 
   &:disabled {
+    cursor: not-allowed;
     opacity: 0.8;
   }
 }

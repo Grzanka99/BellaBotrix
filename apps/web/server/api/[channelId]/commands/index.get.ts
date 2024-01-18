@@ -13,10 +13,8 @@ export default defineEventHandler(async (event) => {
     where: { channelName: `#${channel.name}` },
   });
 
-  console.log(typeof commands[0].message);
-
   return commands.map((el) => ({
     ...el,
-    message: el.message ? JSON.parse(String(el.message)) : null,
+    message: typeof el.message === 'string' ? JSON.parse(el.message) : el.message,
   }));
 });

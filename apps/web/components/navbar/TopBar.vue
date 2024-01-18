@@ -4,6 +4,8 @@ import type { TOption } from '~/types/ui.type';
 import CustomSelect from '~/components/ui/CustomSelect.vue';
 
 const channel = useStorage<number | undefined>('selectedChannel', undefined);
+const channelName = useStorage<string | undefined>('selectedChannelName', undefined);
+
 const { data, refresh } = await useFetch('/api/chacc');
 
 const options = computed<TOption[]>(() => {
@@ -11,10 +13,24 @@ const options = computed<TOption[]>(() => {
     return [];
   }
 
-  return data.value.map(el => ({
+  return data.value?.map(el => ({
     value: el.id,
     displayName: el.name
   }))
+})
+
+watchEffect(() => {
+  if (!data.value || !data.value.length) {
+    return;
+  }
+
+  if (!channel.value) {
+    channel.value = data.value[0].id
+  }
+
+  if (!channelName.value) {
+    channelName.value = data.value?.find(el => el.id === Number(channel.value))?.name
+  }
 })
 
 </script>

@@ -1,6 +1,6 @@
 <script setup lang="ts">
 defineProps<{
-  centered: boolean;
+  centered?: boolean;
 }>()
 </script>
 
@@ -15,7 +15,7 @@ defineProps<{
 <style lang="scss" scoped>
 .styled-table-cell {
   border: none;
-  vertical-align: top;
+  min-width: 0;
 
   &:not(:last-child) {
     border-right: 1px solid var(--stroke);
@@ -24,6 +24,8 @@ defineProps<{
   &__content {
     padding: var(--padding);
     width: 100%;
+    min-width: 0;
+    overflow: hidden;
 
     &--centered {
       display: flex;

@@ -10,13 +10,15 @@
 .styled-table-header {
   border: none;
   position: relative;
-  vertical-align: top;
+  min-width: 0;
 
   &:not(:last-child) {
     border-right: 1px solid var(--stroke);
   }
 
   &__content {
+    overflow: hidden;
+    min-width: 0;
     padding: var(--padding);
     width: 100%;
     height: 100%;
