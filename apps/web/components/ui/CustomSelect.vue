@@ -65,6 +65,7 @@ const optionsVisible = ref(false);
     padding: var(--padding-half);
     top: calc(100% + var(--padding-half));
     left: 0;
+      z-index: 1;
 
     display: flex;
     flex-direction: column;

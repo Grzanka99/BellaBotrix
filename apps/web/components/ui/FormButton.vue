@@ -14,7 +14,7 @@ defineProps<{
 <style lang="scss" scoped>
 .form-button {
   margin: 0;
-  width: 50%;
+  width: 100%;
   padding: var(--padding-half);
   background: var(--text);
   border: none;
