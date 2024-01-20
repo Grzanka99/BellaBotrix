@@ -33,10 +33,14 @@ watchEffect(() => {
   }
 })
 
+const isDark = useDark();
+const toggleDark = useToggle(isDark);
+
 </script>
 
 <template>
   <header id="topbar">
+    <button @click="toggleDark()" type="button">{{ isDark ? 'Dark' : 'Light' }}</button>
     <CustomSelect :options="options" v-model="channel" class="channel-select" @click.native="refresh()" />
   </header>
 </template>
@@ -53,4 +57,3 @@ watchEffect(() => {
   right: var(--padding-half);
 }
 </style>
-

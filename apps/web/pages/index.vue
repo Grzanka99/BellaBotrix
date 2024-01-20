@@ -9,9 +9,9 @@ definePageMeta({
 
 <template>
   Hey there
-    <li>
-      <button type="button" @click="async () => await authLogout()">logout</button>
-    </li>
+  <li>
+    <button type="button" @click="async () => await authLogout()">logout</button>
+  </li>
   <ul>
     <li v-for="user in data">
       {{ user.id }} - {{ user.userid }}

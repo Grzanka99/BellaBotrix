@@ -6,6 +6,7 @@ defineProps<{
   placeholder?: string,
   modelValue: string,
   disabled?: boolean,
+  restore?: string;
 }>()
 
 const emit = defineEmits(['update:modelValue']);
@@ -17,7 +18,11 @@ const handleInput = (e: Event) => {
 
 <template>
   <label class="form-textarea" :title="error || undefined">
-    <span class="form-textarea__label" v-if="label">{{ label }}</span>
+    <div class="form-textarea__label-wrapper">
+      <span class="form-textarea__label" v-if="label">{{ label }}</span>
+      <button v-if="restore && restore !== modelValue" type="button"
+        @click="$emit('update:modelValue', restore)">restore</button>
+    </div>
     <textarea class="form-textarea__input" :class="{ 'invalid': !!error }" :disabled="disabled" :name="name"
       :placeholder="placeholder" :value="modelValue" @input="handleInput" />
   </label>
@@ -46,6 +51,35 @@ const handleInput = (e: Event) => {
 
     &.invalid {
       outline: 2px solid var(--error);
+    }
+  }
+}
+
+.form-textarea__label-wrapper {
+  display: flex;
+  gap: var(--padding);
+  height: 23px;
+  align-items: center;
+
+  >button {
+    margin: 0;
+    padding: var(--padding-quarter) var(--padding-half);
+    background: var(--text);
+    border: none;
+    outline: none;
+    color: var(--background);
+
+    cursor: pointer;
+    transition: background 200ms;
+    border-radius: var(--radius);
+
+    &:hover:not(:disabled) {
+      background: var(--text-darker);
+    }
+
+    &:disabled {
+      cursor: not-allowed;
+      opacity: 0.8;
     }
   }
 }

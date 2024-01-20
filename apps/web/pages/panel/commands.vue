@@ -41,6 +41,15 @@ const handleDelete = async (id: number) => {
   refresh();
 }
 
+const handleToggle = async (id: number, value: boolean) => {
+  await $fetch(`/api/${channel.value}/commands`, {
+    method: 'PUT',
+    body: { enabled: value, id }
+  })
+
+  refresh();
+}
+
 </script>
 
 <template>
@@ -55,7 +64,7 @@ const handleDelete = async (id: number) => {
         <FormButton type="button" @click="newCommandModalOpen = true">Add new command</FormButton>
       </div>
     </div>
-    <CommandsList :commands="displayData || []" @delete="(id) => handleDelete(id)" />
+    <CommandsList :commands="displayData || []" @delete="(id) => handleDelete(id)" @toggle="handleToggle" />
   </div>
 </template>
 

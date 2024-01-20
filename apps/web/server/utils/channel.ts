@@ -30,4 +30,3 @@ export async function getChannelFromEvent(event: H3Event): Promise<Channel | und
 
   return channel;
 }
-

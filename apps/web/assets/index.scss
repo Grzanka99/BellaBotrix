@@ -1,5 +1,5 @@
-@import url('https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,300;0,400;0,700;1,300;1,400&display=swap');
-@import url('https://fonts.googleapis.com/css2?family=Source+Code+Pro&display=swap');
+@import url("https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,300;0,400;0,700;1,300;1,400&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Source+Code+Pro&display=swap");
 
 @mixin button-reset {
   margin: 0;
@@ -10,7 +10,7 @@
 }
 
 @mixin montserrat {
-  font-family: 'Montserrat', sans-serif;
+  font-family: "Montserrat", sans-serif;
 }
 
 .button-reset {
@@ -85,7 +85,7 @@ $info: rgba(#bbbbbb, 0.2);
 }
 
 root {
-  font-family: 'Montserrat', sans-serif;
+  font-family: "Montserrat", sans-serif;
   line-height: 1.5;
   font-weight: var(--font-regular);
 
@@ -118,7 +118,7 @@ body {
 *::before,
 *::after {
   box-sizing: border-box;
-  font-family: 'Montserrat', sans-serif;
+  font-family: "Montserrat", sans-serif;
 }
 
 .flex {
@@ -173,4 +173,3 @@ li {
   margin: 0;
   padding: 0;
 }
-

@@ -18,11 +18,11 @@ defineProps<{
   min-width: 0;
 
   &:not(:last-child) {
-    border-right: 1px solid var(--stroke);
+    // border-right: 1px solid var(--stroke);
   }
 
   &__content {
-    padding: var(--padding);
+    padding: var(--padding-half) var(--padding);
     width: 100%;
     min-width: 0;
     overflow: hidden;
