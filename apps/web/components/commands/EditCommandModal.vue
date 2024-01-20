@@ -4,26 +4,41 @@ import FormTextarea from '../ui/FormTextarea.vue';
 import FormTextInput from '../ui/FormTextInput.vue';
 import FormButton from '../ui/FormButton.vue';
 import Modal from '../ui/Modal.vue';
+import { useCommandsStore } from '~/store/commands.store';
 
 const props = defineProps<{
   originalCommand: Commands;
 }>()
 
-defineEmits<{
+const emit = defineEmits<{
   (e: 'cancel'): void;
-  (e: 'save', v: any): void;
 }>()
 
+const commandsStore = useCommandsStore();
+
 const alias = ref(props.originalCommand.alias);
-const message = ref(props.originalCommand.message || {});
+const message = ref<Record<string, string>>({ ...(props.originalCommand.message as Record<string, string>) } || {});
+
+const handleSave = async () => {
+  await commandsStore.handleUpdate(props.originalCommand.id, {
+    alias: alias.value,
+    message: message.value
+  })
+
+  emit('cancel');
+}
 
 </script>
 
 <template>
   <Modal :header="`Edit command: ${originalCommand.name}`" open>
-    <form @submit.prevent="" class="edit-command-form">
+    <form @submit.prevent="handleSave" class="edit-command-form">
       <h3>Message</h3>
-      <FormTextarea v-for="_, key in message" :label="key" :name="`message-${key}`" v-model="message[key]"
+      <FormTextarea
+        v-for="_, key in message"
+        :label="key"
+        :name="`message-${key}`"
+        v-model="message[key]"
         :restore="originalCommand.message?.[key]" />
       <h3>Alias</h3>
       <FormTextInput type="text" name="alias" v-model="alias" />

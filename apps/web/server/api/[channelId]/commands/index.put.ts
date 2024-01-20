@@ -1,17 +1,10 @@
 import { Commands } from "@prisma/client";
-import { z } from "zod";
-
-const BodySchema = z.object({
-  id: z.coerce.number(),
-  enabled: z.coerce.boolean().optional(),
-  message: z.coerce.string().optional(),
-  aliast: z.coerce.string().optional(),
-});
+import { SUpdateCommand } from "~/types/commands.type";
 
 export default defineEventHandler(async (event) => {
   await requireAuthSession(event);
 
-  const parsed = BodySchema.safeParse(await readBody(event));
+  const parsed = SUpdateCommand.safeParse(await readBody(event));
 
   if (!parsed.success) {
     throw createError({
@@ -34,9 +27,11 @@ export default defineEventHandler(async (event) => {
       data: rest,
     });
 
-    console.log(updated);
-
-    return updated;
+    // FIXME: Fix entries in DB to always be json
+    return {
+      ...updated,
+      message: typeof updated.message === "string" ? JSON.parse(updated.message) : updated.message,
+    } as Commands;
   } catch (_) {
     throw createError({
       statusCode: 500,

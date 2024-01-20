@@ -17,11 +17,16 @@ export function useValidation<T extends string = string,>() {
     return error?.message;
   };
 
+  const clearField = (field: TLoseAutocomplete<T>): void => {
+    errors.value = errors.value.filter((el) => !el.path.includes(field));
+  };
+
   const isInvalid = computed(() => !!errors.value.length);
 
   return {
     validate,
     isInvalid,
     errors,
+    clearField,
   };
 }

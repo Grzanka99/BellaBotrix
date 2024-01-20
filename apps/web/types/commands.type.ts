@@ -6,3 +6,12 @@ export const SCreateCommand = z.object({
 });
 
 export type TCreateCommand = z.infer<typeof SCreateCommand>;
+
+export const SUpdateCommand = z.object({
+  id: z.coerce.number(),
+  enabled: z.coerce.boolean().optional(),
+  message: z.record<z.ZodString>(z.string()).optional(),
+  alias: z.coerce.string().optional(),
+});
+
+export type TUpdateCommand = z.infer<typeof SUpdateCommand>;

@@ -11,7 +11,7 @@ defineEmits(["close"])
 <template>
   <ClientOnly>
     <Teleport to="body">
-      <div class="modal-backdrop" @click.stop="$emit('close')" v-if="open">
+      <div class="modal-backdrop" @click.self="$emit('close')" v-if="open">
         <div class="modal">
           <div class="modal-header" v-if="header || description">
             <h3 v-if="header">{{ header }}</h3>
@@ -64,4 +64,3 @@ defineEmits(["close"])
   }
 }
 </style>
-

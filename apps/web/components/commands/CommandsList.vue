@@ -5,15 +5,13 @@ import CommandMessage from './CommandMessage.vue';
 import EditCommandModal from './EditCommandModal.vue'
 import FancyToggle from '../ui/FancyToggle.vue';
 import type { Commands } from '@prisma/client';
+import { useCommandsStore } from '~/store/commands.store';
 
 defineProps<{
   commands: Commands[]
 }>()
 
-defineEmits<{
-  (e: 'delete', id: number): void,
-  (e: 'toggle', id: number, value: boolean): void,
-}>()
+const commandsStore = useCommandsStore();
 
 const gridTemplate = "75px 2fr 4fr 2fr 100px 100px";
 const toEdit = ref<Commands | undefined>(undefined);
@@ -36,7 +34,9 @@ const onCancel = () => {
       <template v-if="commands.length">
         <TableRow v-for="command in commands" :grid-template="gridTemplate">
           <TableCell centered>
-            <FancyToggle :value="command.enabled" @change="(v) => $emit('toggle', command.id, v)" />
+            <FancyToggle
+              :value="command.enabled"
+              @change="(enabled) => commandsStore.handleUpdate(command.id, { enabled })" />
           </TableCell>
           <TableCell>{{ command.name }}</TableCell>
           <TableCell>
@@ -47,7 +47,7 @@ const onCancel = () => {
             <FormButton type="button" @click.native="toEdit = command" smaller>edit</FormButton>
           </TableCell>
           <TableCell centered>
-            <FormButton @click.native="$emit('delete', command.id)" type="button" smaller>delete</FormButton>
+            <FormButton @click.native="commandsStore.handleDelete(command.id)" type="button" smaller>delete</FormButton>
           </TableCell>
         </TableRow>
       </template>

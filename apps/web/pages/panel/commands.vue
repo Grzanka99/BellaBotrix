@@ -3,68 +3,46 @@ import FormTextInput from '~/components/ui/FormTextInput.vue';
 import FormButton from '~/components/ui/FormButton.vue';
 import NewCommandModal from '~/components/commands/NewCommandModal.vue';
 import CommandsList from '~/components/commands/CommandsList.vue';
-import { useStorage } from '@vueuse/core'
+import { useCommandsStore } from '~/store/commands.store';
 
-const channel = useStorage('selectedChannel', undefined);
-const { data, refresh } = useFetch(() => `/api/${channel.value}/commands`);
+const commands = useCommandsStore();
 
-const refreshInterval = ref<NodeJS.Timeout>();
 onMounted(() => {
-  refreshInterval.value = setInterval(refresh, 10000)
-})
+  commands.startRefresh();
+});
 onUnmounted(() => {
-  clearInterval(refreshInterval.value)
-})
-
-const query = ref("");
-
-const displayData = computed(() => {
-  if (!query.value.length) {
-    return data.value;
-  }
-
-  return data.value?.filter(el => el.name.includes(query.value) || el.alias.includes(query.value));
-})
+  commands.stopRefresh();
+});
 
 const newCommandModalOpen = ref(false);
-const handleNewCommandSuccess = () => {
-  refresh();
-  newCommandModalOpen.value = false
-}
-
-const handleDelete = async (id: number) => {
-  await $fetch(`/api/${channel.value}/commands`, {
-    method: 'DELETE',
-    body: { id }
-  })
-
-  refresh();
-}
-
-const handleToggle = async (id: number, value: boolean) => {
-  await $fetch(`/api/${channel.value}/commands`, {
-    method: 'PUT',
-    body: { enabled: value, id }
-  })
-
-  refresh();
-}
-
 </script>
 
 <template>
   <div id="commands-page">
-    <NewCommandModal :open="newCommandModalOpen" @success="handleNewCommandSuccess" />
+    <NewCommandModal
+      :open="newCommandModalOpen"
+      @submit="(p) => {
+        commands.handleCreate(p);
+        newCommandModalOpen = false;
+      }"
+      @cancel="newCommandModalOpen = false" />
     <div id="commands-page-controls">
       <div id="commands-page-controls__search">
-        <FormTextInput name="query" placeholder="Search by name..." v-model="query" />
-        <FormButton type="button" @click="query = ''">clear</FormButton>
+        <FormTextInput
+          name="query"
+          placeholder="Search by name..."
+          v-model="commands.queryFileter" />
+        <FormButton
+          type="button"
+          @click="commands.queryFileter = ''">clear</FormButton>
       </div>
       <div id="commands-page-controls__new-cmd">
-        <FormButton type="button" @click="newCommandModalOpen = true">Add new command</FormButton>
+        <FormButton
+          type="button"
+          @click="newCommandModalOpen = true">Add new command</FormButton>
       </div>
     </div>
-    <CommandsList :commands="displayData || []" @delete="(id) => handleDelete(id)" @toggle="handleToggle" />
+    <CommandsList :commands="commands.filteredCommands" />
   </div>
 </template>
 

@@ -4,7 +4,9 @@ const props = defineProps<{
   disabled?: boolean;
 }>()
 
-const emit = defineEmits(["change"])
+const emit = defineEmits<{
+  (e: 'change', v: boolean): void;
+}>()
 
 const handleClick = (e: MouseEvent) => {
   if (props.disabled) {

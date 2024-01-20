@@ -25,7 +25,8 @@ export default defineEventHandler(async (event) => {
   const { id } = parsed.data;
 
   try {
-    await prisma.commands.delete({ where: { id } });
+    const res = await prisma.commands.delete({ where: { id } });
+    return res.id;
   } catch (_) {
     throw createError({
       statusCode: 500,

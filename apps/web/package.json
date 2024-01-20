@@ -18,8 +18,10 @@
     "vue-router": "^4.2.5"
   },
   "dependencies": {
+    "@pinia/nuxt": "^0.5.1",
     "@prisma/client": "5.7.1",
     "argon2": "^0.31.2",
+    "pinia": "^2.1.7",
     "prisma": "^5.7.1",
     "sass": "^1.69.7",
     "zod": "^3.22.4"
