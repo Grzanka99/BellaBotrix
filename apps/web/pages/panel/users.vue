@@ -4,16 +4,17 @@ import FormTextInput from '~/components/ui/FormTextInput.vue';
 import FormButton from '~/components/ui/FormButton.vue';
 import FancyToggle from '~/components/ui/FancyToggle.vue';
 import { useStorage } from '@vueuse/core'
+import { useChattersStore } from '~/store/chatters.store';
 
 const channel = useStorage('selectedChannel', undefined);
 const { data, refresh } = await useFetch(() => `/api/${channel.value}/users`);
 
-const refreshInterval = ref<NodeJS.Timeout>();
+const chatters = useChattersStore();
 onMounted(() => {
-  refreshInterval.value = setInterval(refresh, 10000)
+  chatters.startRefresh();
 })
 onUnmounted(() => {
-  clearInterval(refreshInterval.value)
+  chatters.stopRefresh();
 })
 
 const gridTemplate = "100px 4fr 1fr 1fr";
@@ -33,8 +34,13 @@ const displayData = computed(() => {
   <div id="users-page">
     <div id="users-page-controls">
       <div id="users-page-controls__search">
-        <FormTextInput name="query" placeholder="Search by username..." v-model="query" />
-        <FormButton type="button" @click="query = ''">clear</FormButton>
+        <FormTextInput
+          name="query"
+          placeholder="Search by username..."
+          v-model="chatters.queryFilter" />
+        <FormButton
+          type="button"
+          @click="chatters.queryFilter = ''">clear</FormButton>
       </div>
     </div>
     <Table>
@@ -45,11 +51,16 @@ const displayData = computed(() => {
         <TableHeader>points</TableHeader>
       </TableHead>
       <TableBody>
-        <template v-if="data?.length">
-          <TableRow v-for="user in displayData?.toReversed()" :grid-template="gridTemplate"
+        <template v-if="chatters.chatters.length">
+          <TableRow v-for="user in chatters.filtered.toReversed()" :grid-template="gridTemplate"
             :class="{ isBot: user.isBot }">
             <TableCell centered>
-              <FancyToggle :value="user.isBot" />
+              <FancyToggle
+                :value="user.isBot"
+                @change="chatters.handleUpdate({
+                  id: user.id,
+                  isBot: !user.isBot
+                })" />
             </TableCell>
             <TableCell>
               <span :title="user.userid">
