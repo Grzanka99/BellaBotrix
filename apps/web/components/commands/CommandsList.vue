@@ -13,7 +13,7 @@ defineProps<{
 
 const commandsStore = useCommandsStore();
 
-const gridTemplate = "75px 2fr 4fr 2fr 100px 100px";
+const gridTemplate = "100px 2fr 4fr 2fr 100px 100px";
 const toEdit = ref<Commands | undefined>(undefined);
 
 const onCancel = () => {

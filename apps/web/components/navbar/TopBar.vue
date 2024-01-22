@@ -28,13 +28,14 @@ watchEffect(() => {
     channel.value = data.value[0].id
   }
 
-  if (!channelName.value) {
-    channelName.value = data.value?.find(el => el.id === Number(channel.value))?.name
-  }
+  channelName.value = data.value?.find(el => el.id === Number(channel.value))?.name
 })
-
 const isDark = useDark();
 const toggleDark = useToggle(isDark);
+
+watch(channel, () => {
+  window.location.reload()
+})
 
 </script>
 

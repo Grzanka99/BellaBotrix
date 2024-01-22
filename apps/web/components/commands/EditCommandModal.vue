@@ -17,7 +17,9 @@ const emit = defineEmits<{
 const commandsStore = useCommandsStore();
 
 const alias = ref(props.originalCommand.alias);
-const message = ref<Record<string, string>>({ ...(props.originalCommand.message as Record<string, string>) } || {});
+const message = ref<Record<string, string>>({
+  ...(props.originalCommand.message as Record<string, string>)
+} || {});
 
 const handleSave = async () => {
   await commandsStore.handleUpdate(props.originalCommand.id, {
@@ -31,7 +33,7 @@ const handleSave = async () => {
 </script>
 
 <template>
-  <Modal :header="`Edit command: ${originalCommand.name}`" open>
+  <Modal :header="`Edit command: ${originalCommand.name}`" @close="$emit('cancel')" open>
     <form @submit.prevent="handleSave" class="edit-command-form">
       <h3>Message</h3>
       <FormTextarea

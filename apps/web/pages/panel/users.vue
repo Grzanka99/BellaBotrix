@@ -3,11 +3,7 @@ import { Table, TableHead, TableHeader, TableRow, TableBody, TableCell } from '@
 import FormTextInput from '~/components/ui/FormTextInput.vue';
 import FormButton from '~/components/ui/FormButton.vue';
 import FancyToggle from '~/components/ui/FancyToggle.vue';
-import { useStorage } from '@vueuse/core'
 import { useChattersStore } from '~/store/chatters.store';
-
-const channel = useStorage('selectedChannel', undefined);
-const { data, refresh } = await useFetch(() => `/api/${channel.value}/users`);
 
 const chatters = useChattersStore();
 onMounted(() => {
@@ -17,17 +13,17 @@ onUnmounted(() => {
   chatters.stopRefresh();
 })
 
-const gridTemplate = "100px 4fr 1fr 1fr";
-
-const query = ref("");
-
-const displayData = computed(() => {
-  if (!query.value.length) {
-    return data.value;
-  }
-
-  return data.value?.filter(el => el.username.includes(query.value));
+const totalPoints = computed(() => {
+  return chatters.chatters.reduce((prev, cur) => {
+    if (cur.isBot) {
+      return prev;
+    }
+    const sum = prev + cur.points;
+    return sum;
+  }, 0)
 })
+
+const gridTemplate = "100px 4fr 1fr 1fr";
 </script>
 
 <template>
@@ -41,6 +37,10 @@ const displayData = computed(() => {
         <FormButton
           type="button"
           @click="chatters.queryFilter = ''">clear</FormButton>
+      </div>
+      <div id="users-page-controls__info">
+        <h5>Total users: {{ chatters.chatters.length }}</h5>
+        <h5>Total points: {{ totalPoints }}</h5>
       </div>
     </div>
     <Table>
@@ -93,6 +93,13 @@ const displayData = computed(() => {
     display: flex;
     width: 400px;
     gap: var(--padding);
+  }
+
+  &__info {
+    display: flex;
+    gap: var(--padding);
+    align-items: center;
+    padding: var(--padding-half);
   }
 }
 </style>

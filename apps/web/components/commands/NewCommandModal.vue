@@ -29,14 +29,13 @@ const parsed = computed(() => {
 
   if (!payload.name || !payload.message) {
     return {
-      success: true,
+      success: true as const,
       data: payload,
     };
   }
 
   return SCreateCommand.safeParse(payload)
-}
-)
+})
 
 const { validate, isInvalid, errors, clearField } = useValidation<keyof TCreateCommand>();
 

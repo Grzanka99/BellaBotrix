@@ -31,7 +31,9 @@ export const useCommandsStore = defineStore("commands", () => {
     }
 
     return commands.value.filter(
-      (el) => el.name.includes(queryFileter.value) || el.alias.includes(queryFileter.value),
+      (el) =>
+        el.name.toLowerCase().includes(queryFileter.value.toLowerCase()) ||
+        el.alias.toLowerCase().includes(queryFileter.value.toLowerCase()),
     );
   });
 

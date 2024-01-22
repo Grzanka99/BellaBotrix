@@ -1,4 +1,4 @@
-import { User } from "@prisma/client";
+import type { User } from "@prisma/client";
 import { useStorage } from "@vueuse/core";
 import type { TUpdateChatter } from "~/types/chatters.type";
 
@@ -30,7 +30,9 @@ export const useChattersStore = defineStore("chatters", () => {
       return chatters.value;
     }
 
-    return chatters.value.filter((el) => el.username.includes(queryFilter.value));
+    return chatters.value.filter((el) =>
+      el.username.toLowerCase().includes(queryFilter.value.toLowerCase()),
+    );
   });
 
   const handleUpdate = async (payload: TUpdateChatter) => {
