@@ -1,18 +1,21 @@
 <script setup lang="ts">
-import type { TOption } from '~/types/ui.type';
+import type { TOption } from "~/types/ui.type";
 
 const props = defineProps<{
-  modelValue: string | number,
-  options: TOption[],
-}>()
+  icon?: string;
+  modelValue: string | number;
+  options: TOption[];
+}>();
 
-const emit = defineEmits(['update:modelValue'])
+const emit = defineEmits(["update:modelValue"]);
 
-const val = computed(() => props.options.find(el => el.value === Number(props.modelValue)))
+const val = computed(() =>
+  props.options.find((el) => el.value === Number(props.modelValue)),
+);
 
 const handleChange = (option: string | number) => {
-  emit('update:modelValue', option)
-}
+  emit("update:modelValue", option);
+};
 
 const optionsVisible = ref(false);
 </script>
@@ -20,12 +23,14 @@ const optionsVisible = ref(false);
 <template>
   <label class="custom-select" @click="optionsVisible = !optionsVisible">
     <span class="custom-select__label">
-
+      <Icon v-if="icon" :name="icon" />
       {{ val?.displayName }}
     </span>
     <Transition>
       <ul class="custom-select__options" v-if="optionsVisible">
-        <li v-for="option in options" @click="handleChange(option.value)">{{ option.displayName }}</li>
+        <li v-for="option in options" @click="handleChange(option.value)">
+          {{ option.displayName }}
+        </li>
       </ul>
     </Transition>
   </label>
@@ -54,6 +59,8 @@ const optionsVisible = ref(false);
     display: flex;
     align-items: center;
     font-weight: bold;
+    gap: var(--padding-half);
+    align-items: center;
   }
 
   &__options {
@@ -65,14 +72,14 @@ const optionsVisible = ref(false);
     padding: var(--padding-half);
     top: calc(100% + var(--padding-half));
     left: 0;
-      z-index: 1;
+    z-index: 1;
 
     display: flex;
     flex-direction: column;
     gap: var(--padding-quarter);
     overflow: hidden;
 
-    >li {
+    > li {
       padding: var(--padding-half);
       border-radius: var(--radius-half);
 

@@ -12,7 +12,7 @@
     "compile:bot": "bun build ./src/bot/index.ts --target=bun --outfile=./bin/bellatrix --compile",
     "db:migrate": "prisma migrate dev --name",
     "db:studio": "prisma studio",
-    "postinstall": "prisma generate"
+    "postinstall": "bunx prisma generate"
   },
   "devDependencies": {
     "@biomejs/biome": "1.1.2",
@@ -26,7 +26,7 @@
   "dependencies": {
     "@elysiajs/html": "^0.7.0",
     "@elysiajs/static": "^0.7.1",
-    "@prisma/client": "5.2.0",
+    "@prisma/client": "5.7.1",
     "elysia": "^0.7.12",
     "zod": "^3.22.4"
   }

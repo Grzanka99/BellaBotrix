@@ -16,4 +16,5 @@ export type TDtoCreateUser = z.infer<typeof SDtoCreateUser>;
 export type TAuthSession = {
   id: number;
   username: string;
+  channelId: number;
 };

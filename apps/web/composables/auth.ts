@@ -19,7 +19,7 @@ export const authLogin = async (username: string, password: string) => {
   });
   useAuth().redirectTo.value = null;
   await useAuth().updateSession();
-  await navigateTo(useAuth().redirectTo.value || "/");
+  await navigateTo(useAuth().redirectTo.value || "/panel");
 };
 
 export const authRegister = async (data: TDtoCreateUser) => {
@@ -37,4 +37,5 @@ export const authRegister = async (data: TDtoCreateUser) => {
 export const authLogout = async () => {
   await $fetch("/api/auth/logout", { method: "POST" });
   await useAuth().updateSession();
+  useRouter().push("/login");
 };

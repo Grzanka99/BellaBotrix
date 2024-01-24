@@ -33,6 +33,7 @@ export default defineEventHandler(async (event) => {
   await session.update({
     id: user.id,
     username: user.username,
+    channelId: user.id,
   });
 
   return session;

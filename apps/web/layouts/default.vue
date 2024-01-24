@@ -1,6 +1,25 @@
 <script setup lang="ts">
-import NavBar from '~/components/navbar/NavBar.vue';
-import TopBar from '~/components/navbar/TopBar.vue';
+import NavBar from "~/components/navbar/NavBar.vue";
+import TopBar from "~/components/navbar/TopBar.vue";
+import { useStorage } from "@vueuse/core";
+
+const auth = useAuth();
+const router = useRouter();
+
+onMounted(() => {
+  if (!auth.loggedIn.value) {
+    router.push("/login");
+  }
+});
+
+const channelName = useStorage<string | undefined>(
+  "selectedChannelName",
+  undefined,
+);
+
+useHead({
+  titleTemplate: (titleChunk) => `${titleChunk} - ${channelName.value}`,
+});
 </script>
 
 <template>

@@ -1,15 +1,20 @@
 <script setup lang="ts">
 defineProps<{
-  type: 'submit' | 'button',
-  disabled?: boolean,
-  width?: `${string}px`
+  type: "submit" | "button";
+  disabled?: boolean;
+  width?: `${string}px`;
   smaller?: boolean;
-}>()
+}>();
 </script>
 
 <template>
-  <button class="form-button" :class="{ 'form-button--smaller': smaller }" :type="type" :disabled="disabled"
-    :style="{ width }">
+  <button
+    class="form-button"
+    :class="{ 'form-button--smaller': smaller }"
+    :type="type"
+    :disabled="disabled"
+    :style="{ width }"
+  >
     <slot />
   </button>
 </template>
@@ -28,6 +33,11 @@ defineProps<{
   cursor: pointer;
   transition: background 200ms;
   border-radius: var(--radius);
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--padding-half);
 
   &--smaller {
     padding: var(--padding-quarter);

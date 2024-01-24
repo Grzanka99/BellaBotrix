@@ -1,11 +1,16 @@
 <script setup lang="ts">
-import type { TRoute } from '~/types/ui.type';
+import type { TRoute } from "~/types/ui.type";
 
-defineProps<TRoute>()
+defineProps<TRoute>();
 </script>
 
 <template>
-  <NuxtLink :to="to" class="nav-link" :class="`nav-link${to.replaceAll('/', '_')}`">
+  <NuxtLink
+    :to="to"
+    class="nav-link"
+    :class="`nav-link${to.replaceAll('/', '_')}`"
+  >
+    <Icon :name="icon" />
     {{ displayName }}
   </NuxtLink>
 </template>
@@ -23,20 +28,20 @@ defineProps<TRoute>()
   border-radius: var(--radius);
 
   &:hover {
-    background: var(--background-light)
+    background: var(--background-light);
   }
 
   display: flex;
   align-items: center;
   gap: var(--padding-half);
 
-  >svg {
+  > svg {
     fill: var(--text);
   }
 }
 
 .router-link-active,
 .router-link-exac-active {
-  background: var(--background-light)
+  background: var(--background-light);
 }
 </style>

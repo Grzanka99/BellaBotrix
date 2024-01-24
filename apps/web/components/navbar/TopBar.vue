@@ -1,48 +1,64 @@
 <script setup lang="ts">
-import { useStorage } from '@vueuse/core'
-import type { TOption } from '~/types/ui.type';
-import CustomSelect from '~/components/ui/CustomSelect.vue';
+import { useStorage } from "@vueuse/core";
+import type { TOption } from "~/types/ui.type";
+import CustomSelect from "~/components/ui/CustomSelect.vue";
+import FormButton from "../ui/FormButton.vue";
 
-const channel = useStorage<number | undefined>('selectedChannel', undefined);
-const channelName = useStorage<string | undefined>('selectedChannelName', undefined);
+const channel = useStorage<number | undefined>("selectedChannel", undefined);
+const channelName = useStorage<string | undefined>(
+  "selectedChannelName",
+  undefined,
+);
 
-const { data, refresh } = await useFetch('/api/chacc');
+const { data, refresh } = await useFetch("/api/chacc");
+const auth = useAuth();
+
+onBeforeMount(() => {
+  if (!channel.value) {
+    channel.value = auth.session.value?.id;
+  }
+});
 
 const options = computed<TOption[]>(() => {
   if (!data.value) {
     return [];
   }
 
-  return data.value?.map(el => ({
+  return data.value?.map((el) => ({
     value: el.id,
-    displayName: el.name
-  }))
-})
+    displayName: el.name,
+  }));
+});
 
 watchEffect(() => {
   if (!data.value || !data.value.length) {
     return;
   }
 
-  if (!channel.value) {
-    channel.value = data.value[0].id
-  }
-
-  channelName.value = data.value?.find(el => el.id === Number(channel.value))?.name
-})
+  channelName.value = data.value?.find((el) => el.id === Number(channel.value))
+    ?.name;
+});
 const isDark = useDark();
 const toggleDark = useToggle(isDark);
 
 watch(channel, () => {
-  window.location.reload()
-})
-
+  window.location.reload();
+});
 </script>
 
 <template>
   <header id="topbar">
-    <button @click="toggleDark()" type="button">{{ isDark ? 'Dark' : 'Light' }}</button>
-    <CustomSelect :options="options" v-model="channel" class="channel-select" @click.native="refresh()" />
+    <FormButton @click="toggleDark()" type="button" width="50px">
+      <Icon v-if="isDark" name="material-symbols:dark-mode" />
+      <Icon v-else name="material-symbols:light-mode"></Icon>
+    </FormButton>
+    <CustomSelect
+      icon="material-symbols:video-library"
+      :options="options"
+      v-model="channel"
+      class="channel-select"
+      @click.native="refresh()"
+    />
   </header>
 </template>
 
@@ -51,10 +67,8 @@ watch(channel, () => {
   display: flex;
   border-bottom: 1px solid var(--stroke);
   align-items: center;
-}
-
-.channel-select {
-  position: absolute;
-  right: var(--padding-half);
+  justify-content: flex-end;
+  gap: var(--padding);
+  padding: var(--padding);
 }
 </style>

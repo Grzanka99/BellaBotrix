@@ -9,6 +9,9 @@
   "devDependencies": {
     "turbo": "latest"
   },
+  "packages": [
+    "packages/*"
+  ],
   "packageManager": "bun@1.0.21",
   "workspaces": [
     "apps/*"

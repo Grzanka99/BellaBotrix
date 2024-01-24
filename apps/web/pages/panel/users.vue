@@ -1,17 +1,24 @@
 <script setup lang="ts">
-import { Table, TableHead, TableHeader, TableRow, TableBody, TableCell } from '@/components/ui/Table';
-import FormTextInput from '~/components/ui/FormTextInput.vue';
-import FormButton from '~/components/ui/FormButton.vue';
-import FancyToggle from '~/components/ui/FancyToggle.vue';
-import { useChattersStore } from '~/store/chatters.store';
+import {
+  Table,
+  TableHead,
+  TableHeader,
+  TableRow,
+  TableBody,
+  TableCell,
+} from "@/components/ui/Table";
+import FormTextInput from "~/components/ui/FormTextInput.vue";
+import FormButton from "~/components/ui/FormButton.vue";
+import FancyToggle from "~/components/ui/FancyToggle.vue";
+import { useChattersStore } from "~/store/chatters.store";
 
 const chatters = useChattersStore();
 onMounted(() => {
   chatters.startRefresh();
-})
+});
 onUnmounted(() => {
   chatters.stopRefresh();
-})
+});
 
 const totalPoints = computed(() => {
   return chatters.chatters.reduce((prev, cur) => {
@@ -20,10 +27,14 @@ const totalPoints = computed(() => {
     }
     const sum = prev + cur.points;
     return sum;
-  }, 0)
-})
+  }, 0);
+});
 
 const gridTemplate = "100px 4fr 1fr 1fr";
+
+useHead({
+  title: "Users",
+});
 </script>
 
 <template>
@@ -33,10 +44,11 @@ const gridTemplate = "100px 4fr 1fr 1fr";
         <FormTextInput
           name="query"
           placeholder="Search by username..."
-          v-model="chatters.queryFilter" />
-        <FormButton
-          type="button"
-          @click="chatters.queryFilter = ''">clear</FormButton>
+          v-model="chatters.queryFilter"
+        />
+        <FormButton type="button" @click="chatters.queryFilter = ''"
+          >clear</FormButton
+        >
       </div>
       <div id="users-page-controls__info">
         <h5>Total users: {{ chatters.chatters.length }}</h5>
@@ -52,15 +64,21 @@ const gridTemplate = "100px 4fr 1fr 1fr";
       </TableHead>
       <TableBody>
         <template v-if="chatters.chatters.length">
-          <TableRow v-for="user in chatters.filtered.toReversed()" :grid-template="gridTemplate"
-            :class="{ isBot: user.isBot }">
+          <TableRow
+            v-for="user in chatters.filtered.toReversed()"
+            :grid-template="gridTemplate"
+            :class="{ isBot: user.isBot }"
+          >
             <TableCell centered>
               <FancyToggle
                 :value="user.isBot"
-                @change="chatters.handleUpdate({
-                  id: user.id,
-                  isBot: !user.isBot
-                })" />
+                @change="
+                  chatters.handleUpdate({
+                    id: user.id,
+                    isBot: !user.isBot,
+                  })
+                "
+              />
             </TableCell>
             <TableCell>
               <span :title="user.userid">

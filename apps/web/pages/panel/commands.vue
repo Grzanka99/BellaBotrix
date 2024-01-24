@@ -1,9 +1,9 @@
 <script setup lang="ts">
-import FormTextInput from '~/components/ui/FormTextInput.vue';
-import FormButton from '~/components/ui/FormButton.vue';
-import NewCommandModal from '~/components/commands/NewCommandModal.vue';
-import CommandsList from '~/components/commands/CommandsList.vue';
-import { useCommandsStore } from '~/store/commands.store';
+import FormTextInput from "~/components/ui/FormTextInput.vue";
+import FormButton from "~/components/ui/FormButton.vue";
+import NewCommandModal from "~/components/commands/NewCommandModal.vue";
+import CommandsList from "~/components/commands/CommandsList.vue";
+import { useCommandsStore } from "~/store/commands.store";
 
 const commands = useCommandsStore();
 
@@ -15,31 +15,39 @@ onUnmounted(() => {
 });
 
 const newCommandModalOpen = ref(false);
+
+useHead({
+  title: "Commands",
+});
 </script>
 
 <template>
   <div id="commands-page">
     <NewCommandModal
       :open="newCommandModalOpen"
-      @submit="(p) => {
-        commands.handleCreate(p);
-        newCommandModalOpen = false;
-      }"
-      @cancel="newCommandModalOpen = false" />
+      @submit="
+        (p) => {
+          commands.handleCreate(p);
+          newCommandModalOpen = false;
+        }
+      "
+      @cancel="newCommandModalOpen = false"
+    />
     <div id="commands-page-controls">
       <div id="commands-page-controls__search">
         <FormTextInput
           name="query"
           placeholder="Search by name..."
-          v-model="commands.queryFileter" />
-        <FormButton
-          type="button"
-          @click="commands.queryFileter = ''">clear</FormButton>
+          v-model="commands.queryFileter"
+        />
+        <FormButton type="button" @click="commands.queryFileter = ''">
+          clear
+        </FormButton>
       </div>
       <div id="commands-page-controls__new-cmd">
-        <FormButton
-          type="button"
-          @click="newCommandModalOpen = true">Add new command</FormButton>
+        <FormButton type="button" @click="newCommandModalOpen = true">
+          Add new command
+        </FormButton>
       </div>
     </div>
     <CommandsList :commands="commands.filteredCommands" />

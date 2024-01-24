@@ -1,28 +1,39 @@
 <script setup lang="ts">
-import { Table, TableHead, TableHeader, TableRow, TableBody, TableCell } from '@/components/ui/Table';
-import FormButton from '~/components/ui/FormButton.vue';
-import CommandMessage from './CommandMessage.vue';
-import EditCommandModal from './EditCommandModal.vue'
-import FancyToggle from '../ui/FancyToggle.vue';
-import type { Commands } from '@prisma/client';
-import { useCommandsStore } from '~/store/commands.store';
+import {
+  Table,
+  TableHead,
+  TableHeader,
+  TableRow,
+  TableBody,
+  TableCell,
+} from "@/components/ui/Table";
+import FormButton from "~/components/ui/FormButton.vue";
+import CommandMessage from "./CommandMessage.vue";
+import EditCommandModal from "./EditCommandModal.vue";
+import FancyToggle from "../ui/FancyToggle.vue";
+import type { Commands } from "@prisma/client";
+import { useCommandsStore } from "~/store/commands.store";
 
 defineProps<{
-  commands: Commands[]
-}>()
+  commands: Commands[];
+}>();
 
 const commandsStore = useCommandsStore();
 
-const gridTemplate = "100px 2fr 4fr 2fr 100px 100px";
+const gridTemplate = "100px 2fr 4fr 2fr 120px 120px";
 const toEdit = ref<Commands | undefined>(undefined);
 
 const onCancel = () => {
   toEdit.value = undefined;
-}
+};
 </script>
 
 <template>
-  <EditCommandModal v-if="toEdit" :original-command="toEdit" @cancel="onCancel" />
+  <EditCommandModal
+    v-if="toEdit"
+    :original-command="toEdit"
+    @cancel="onCancel"
+  />
   <Table>
     <TableHead :grid-template="gridTemplate">
       <TableHeader></TableHeader>
@@ -36,7 +47,10 @@ const onCancel = () => {
           <TableCell centered>
             <FancyToggle
               :value="command.enabled"
-              @change="(enabled) => commandsStore.handleUpdate(command.id, { enabled })" />
+              @change="
+                (enabled) => commandsStore.handleUpdate(command.id, { enabled })
+              "
+            />
           </TableCell>
           <TableCell>{{ command.name }}</TableCell>
           <TableCell>
@@ -44,10 +58,20 @@ const onCancel = () => {
           </TableCell>
           <TableCell>{{ command.alias }}</TableCell>
           <TableCell centered>
-            <FormButton type="button" @click.native="toEdit = command" smaller>edit</FormButton>
+            <FormButton type="button" @click.native="toEdit = command" smaller>
+              <Icon name="material-symbols:edit" />
+              edit
+            </FormButton>
           </TableCell>
           <TableCell centered>
-            <FormButton @click.native="commandsStore.handleDelete(command.id)" type="button" smaller>delete</FormButton>
+            <FormButton
+              @click.native="commandsStore.handleDelete(command.id)"
+              type="button"
+              smaller
+            >
+              <Icon name="material-symbols:delete-forever" />
+              delete
+            </FormButton>
           </TableCell>
         </TableRow>
       </template>

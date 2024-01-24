@@ -10,7 +10,7 @@
   max-width: 100%;
   height: 100%;
   overflow: hidden;
-  padding-top: 50px;
+  padding-top: 55px;
   position: relative;
 }
 </style>

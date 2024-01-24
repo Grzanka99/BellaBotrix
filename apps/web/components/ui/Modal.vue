@@ -3,9 +3,9 @@ defineProps<{
   open: boolean;
   header?: string;
   description?: string;
-}>()
+}>();
 
-defineEmits(["close"])
+defineEmits(["close"]);
 </script>
 
 <template>
@@ -13,6 +13,12 @@ defineEmits(["close"])
     <Teleport to="body">
       <div class="modal-backdrop" @click.self="$emit('close')" v-if="open">
         <div class="modal">
+          <Icon
+            name="material-symbols:close-rounded"
+            class="modal__close-icon"
+            @click.self="$emit('close')"
+            size="20px"
+          />
           <div class="modal-header" v-if="header || description">
             <h3 v-if="header">{{ header }}</h3>
             <h5 v-if="description">{{ description }}</h5>
@@ -39,6 +45,7 @@ defineEmits(["close"])
 }
 
 .modal {
+  position: relative;
   display: flex;
   width: fit-content;
   min-width: 100px;
@@ -51,6 +58,13 @@ defineEmits(["close"])
   border-radius: var(--radius);
   flex-direction: column;
   gap: var(--padding);
+
+  &__close-icon {
+    position: absolute;
+    top: var(--padding);
+    right: var(--padding);
+    cursor: pointer;
+  }
 }
 
 .modal-header {
