@@ -1,0 +1,12 @@
+{
+  "name": "bellatrix",
+  "version": "0.0.1",
+  "private": "true",
+  "exports": {
+    ".": "./index.d.ts"
+  },
+  "dependencies": {
+    "typescript": "latest",
+    "zod": "^3.22.4"
+  }
+}

@@ -1,5 +1,4 @@
 import type { ChannelAccess } from "@prisma/client";
-import { SettingsSchema } from "commontypes";
 
 export const useChaccStore = defineStore("chacc", () => {
   const auth = useAuth();

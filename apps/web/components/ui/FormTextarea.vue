@@ -1,30 +1,42 @@
 <script setup lang="ts">
 defineProps<{
-  label?: string,
-  error?: false | string,
+  label?: string;
+  error?: false | string;
   name: string;
-  placeholder?: string,
-  modelValue: string,
-  disabled?: boolean,
+  placeholder?: string;
+  modelValue: string;
+  disabled?: boolean;
   restore?: string;
-}>()
+}>();
 
-const emit = defineEmits(['update:modelValue']);
+const emit = defineEmits<{
+  (e: "update:modelValue", v: string): void;
+}>();
 
 const handleInput = (e: Event) => {
-  emit('update:modelValue', (e.target as HTMLInputElement).value);
-}
+  emit("update:modelValue", (e.target as HTMLInputElement).value);
+};
 </script>
 
 <template>
   <label class="form-textarea" :title="error || undefined">
-    <div class="form-textarea__label-wrapper">
+    <div class="form-textarea__label-wrapper" v-if="label || restore">
       <span class="form-textarea__label" v-if="label">{{ label }}</span>
-      <button v-if="restore && restore !== modelValue" type="button"
-        @click="$emit('update:modelValue', restore)">restore</button>
+      <button
+        v-if="restore && restore !== modelValue"
+        type="button"
+        @click="$emit('update:modelValue', restore)">
+        restore
+      </button>
     </div>
-    <textarea class="form-textarea__input" :class="{ 'invalid': !!error }" :disabled="disabled" :name="name"
-      :placeholder="placeholder" :value="modelValue" @input="handleInput" />
+    <textarea
+      class="form-textarea__input"
+      :class="{ invalid: !!error }"
+      :disabled="disabled"
+      :name="name"
+      :placeholder="placeholder"
+      :value="modelValue"
+      @input="handleInput" />
   </label>
 </template>
 

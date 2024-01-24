@@ -37,6 +37,7 @@ useHead({
             <TableCell>{{ chacc.accessLevel }}</TableCell>
             <TableCell>
               <FormButton
+                type="button"
                 smaller
                 :disabled="chacc.userid === $auth.session.value?.id">
                 <Icon name="material-symbols:delete-forever" />

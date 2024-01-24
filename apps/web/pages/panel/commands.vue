@@ -25,21 +25,18 @@ useHead({
   <div id="commands-page">
     <NewCommandModal
       :open="newCommandModalOpen"
-      @submit="
-        (p) => {
-          commands.handleCreate(p);
-          newCommandModalOpen = false;
-        }
-      "
-      @cancel="newCommandModalOpen = false"
-    />
+      @submit="(p) => {
+        commands.handleCreate(p);
+        newCommandModalOpen = false;
+      }
+        "
+      @cancel="newCommandModalOpen = false" />
     <div id="commands-page-controls">
       <div id="commands-page-controls__search">
         <FormTextInput
           name="query"
           placeholder="Search by name..."
-          v-model="commands.queryFileter"
-        />
+          v-model="commands.queryFileter" />
         <FormButton type="button" @click="commands.queryFileter = ''">
           clear
         </FormButton>
