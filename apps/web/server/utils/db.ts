@@ -1,5 +1,5 @@
 import { PrismaClient } from "@prisma/client";
-import { SDtoUser, TDtoUser, TUser } from "~/types/auth.type";
+import { TDtoUser, TUser } from "~/types/auth.type";
 
 export const prisma = new PrismaClient();
 
@@ -21,7 +21,7 @@ export async function createUser(user: TDtoUser) {
 
   const newUser = await prisma.webuiUser.create({
     data: {
-      username:user.username,
+      username: user.username,
       password: user.password,
       settings: {},
     },

@@ -57,8 +57,7 @@ watch(channel, () => {
       :options="options"
       v-model="channel"
       class="channel-select"
-      @click.native="refresh()"
-    />
+      @click.native="refresh()" />
   </header>
 </template>
 

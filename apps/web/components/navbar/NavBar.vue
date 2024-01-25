@@ -40,6 +40,12 @@ const routes = computed<TRoute[]>(() => [
     icon: "material-symbols:security",
   },
 ]);
+
+const handleAuthRefirect = () => {
+  // @ts-ignore
+  window.location = "/api/auth-redirect";
+}
+
 </script>
 <template>
   <nav id="navbar">
@@ -50,10 +56,16 @@ const routes = computed<TRoute[]>(() => [
         :display-name="route.displayName"
         :icon="route.icon" />
     </div>
-    <FormButton type="button" @click="authLogout()">
-      <Icon name="material-symbols:logout" />
-      Logout
-    </FormButton>
+    <div class="routes">
+      <FormButton type="button" @click="handleAuthRefirect">
+        <Icon name="material-symbols:security" />
+        authorize
+      </FormButton>
+      <FormButton type="button" @click="authLogout()">
+        <Icon name="material-symbols:logout" />
+        Logout
+      </FormButton>
+    </div>
   </nav>
 </template>
 
