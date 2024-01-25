@@ -4,7 +4,7 @@ export type TRoute = {
   icon: string;
 };
 
-export type TOption = {
+export type TSelectOption = {
   value: string | number,
   displayName: string,
 }

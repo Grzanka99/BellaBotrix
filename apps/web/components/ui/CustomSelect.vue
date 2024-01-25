@@ -1,16 +1,16 @@
 <script setup lang="ts">
-import type { TOption } from "~/types/ui.type";
+import type { TSelectOption } from "~/types/ui.type";
 
 const props = defineProps<{
   icon?: string;
   modelValue: string | number;
-  options: TOption[];
+  options: TSelectOption[];
 }>();
 
 const emit = defineEmits(["update:modelValue"]);
 
 const val = computed(() =>
-  props.options.find((el) => el.value === Number(props.modelValue)),
+  props.options.find((el) => el.value === props.modelValue),
 );
 
 const handleChange = (option: string | number) => {
@@ -79,7 +79,7 @@ const optionsVisible = ref(false);
     gap: var(--padding-quarter);
     overflow: hidden;
 
-    > li {
+    >li {
       padding: var(--padding-half);
       border-radius: var(--radius-half);
 

@@ -8,7 +8,7 @@ export default defineNuxtConfig({
       password: "verysupersecretverysupersecretverysupersecret",
     },
   },
-  ssr: true,
+  ssr: false,
   components: {
     dirs: [],
   },

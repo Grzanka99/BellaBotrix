@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { useStorage } from "@vueuse/core";
-import type { TOption } from "~/types/ui.type";
+import type { TSelectOption } from "~/types/ui.type";
 import CustomSelect from "~/components/ui/CustomSelect.vue";
 import FormButton from "../ui/FormButton.vue";
 
@@ -19,13 +19,13 @@ onBeforeMount(() => {
   }
 });
 
-const options = computed<TOption[]>(() => {
+const options = computed<TSelectOption[]>(() => {
   if (!data.value) {
     return [];
   }
 
   return data.value?.map((el) => ({
-    value: el.id,
+    value: String(el.id),
     displayName: el.name,
   }));
 });
