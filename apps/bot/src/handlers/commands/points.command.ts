@@ -16,7 +16,7 @@ export async function getTop(
       take: 10,
       where: {
         channel,
-        isBot: false
+        isBot: false,
       },
       orderBy: {
         points: "desc",
@@ -34,7 +34,7 @@ export async function getTop(
     msg += `${i + 1}. ${top[i].username} has ${top[i].points}, `;
   }
 
-  return interpolate(actionMessage.base || '', {
+  return interpolate(actionMessage.base || "", {
     result: msg,
   });
 }
@@ -133,6 +133,7 @@ export async function addPoints(
     points,
   });
 }
+
 export async function removePoints(
   { original, actionMessage }: TWithCommandHandler,
   channel: string,

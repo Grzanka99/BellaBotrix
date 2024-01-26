@@ -22,7 +22,7 @@ export type TWithCommandHandler = {
 export type THandlerArgs = {
   message: string;
   tags: TTwitchMessageInfo;
-  client: TwitchIrc;
+  send: (msg: string) => void;
   channel: string;
   settings: TSettings | undefined;
 };

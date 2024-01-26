@@ -1,18 +1,14 @@
 {
+  "devDependencies": {
+    "turbo": "latest"
+  },
+  "packageManager": "bun@1.0.21",
   "scripts": {
     "dev": "turbo dev",
     "dev:web": "turbo dev --scope=web",
     "dev:bot": "turbo dev --scope=bot",
     "build": "turbo build && ./build.sh"
   },
-  "dependencies": { "lodash.merge": "^4.6.2" },
-  "devDependencies": {
-    "@types/lodash.merge": "^4.6.9",
-    "@types/lodash.mergewith": "^4.6.9",
-    "lodash.mergewith": "^4.6.2",
-    "turbo": "latest"
-  },
-  "packageManager": "bun@1.0.21",
   "workspaces": [
     "apps/*",
     "packages/*"

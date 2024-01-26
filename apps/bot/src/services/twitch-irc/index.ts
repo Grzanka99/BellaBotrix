@@ -1,96 +1,66 @@
-import { logger } from "utils/logger";
-import { TOption } from "types";
-import { parseMessageInfo } from "./parsers";
 import { EEvenType, TTwitchIrcContext } from "services/types";
-import { TSettings } from "types/schema/settings.schema";
-import { getSettings } from "services/settings";
-import { interpolate } from "utils/interpolate-string";
+import { TOption } from "types";
+import { logger } from "utils/logger";
+import { MessageEvent, WebSocket } from "ws";
+import { parseMessageInfo } from "./parsers";
 
 export class TwitchIrc {
   private ws: WebSocket;
-  private _channel: string;
-  private _connected = false;
-  private ownerId: number;
-  private _settings: TSettings | undefined = undefined;
+  private nick: string;
+  private password: string;
+  private handlers: Map<string, (msg: TTwitchIrcContext) => void> = new Map();
 
-  private get logger() {
-    return {
-      info: (msg: string) => logger.info(`CH: ${this.channel}: ${msg}`),
-      warning: (msg: string) => logger.warning(`CH: ${this.channel}: ${msg}`),
-      error: (msg: string) => logger.error(`CH: ${this.channel}: ${msg}`),
-    };
+  constructor(url: string, nick: string, password: string) {
+    this.nick = nick;
+    this.password = password;
+    this.ws = new WebSocket(url);
   }
 
-  private async fetchSettings() {
-    this._settings = await getSettings(this.ownerId);
-
-    return this._settings;
-  }
-
-  constructor(
-    ws: WebSocket,
-    channel: `#${string}`,
-    ownerId: number,
-    onConnect?: (it: TwitchIrc) => void,
-  ) {
-    this.ws = ws;
-    this._channel = channel;
-    this.ws.send(`JOIN ${channel}`);
-    this.logger.info("Connecting");
-    this.ownerId = ownerId;
-
-    this.fetchSettings().then(() => {
-      this.logger.info("Scheduling settings refresh for 10 seconds");
-
-      setInterval(async () => {
-        await this.fetchSettings();
-      }, 10000);
-    });
-    this.ws.addEventListener("message", (r) => {
-      if (r.data.includes(`:bellabotrix!bellabotrix@bellabotrix.tmi.twitch.tv JOIN ${channel}`)) {
-        this.logger.info("Connected");
-        this._connected = true;
-        if (onConnect) {
-          onConnect(this);
-        }
+  public async connect(): Promise<TOption<TwitchIrc>> {
+    return new Promise((res) => {
+      try {
+        this.ws.addEventListener("open", () => {
+          this.onOpen(res);
+        });
+        this.ws.addEventListener("message", (res) => this.onMessage(res));
+      } catch (_) {
+        res(undefined);
       }
     });
   }
 
-  public send(msg: string) {
-    const chunkSize = 500;
-    if (msg.length > chunkSize) {
-      let currentChunk = "";
-      for (let i = 0; i < msg.length; i += chunkSize) {
-        currentChunk = msg.slice(i, i + chunkSize);
-        this.ws.send(`PRIVMSG ${this._channel} :${currentChunk}`);
-      }
-    } else {
-      this.ws.send(`PRIVMSG ${this._channel} :${msg}`);
+  private onOpen(res: {
+    (value: TOption<TwitchIrc> | PromiseLike<TOption<TwitchIrc>>): void;
+  }): void {
+    this.ws.send("CAP REQ :twitch.tv/membership twitch.tv/tags twitch.tv/commands");
+    this.ws.send(`PASS ${this.password}`);
+    this.ws.send(`NICK ${this.nick}`);
+    res(this);
+  }
+
+  private handlePingMessage(msg: string): void {
+    if (msg.startsWith("PING :")) {
+      logger.info(`Received ping: ${msg.substring("PING: ".length)}`);
+      const pong = `PONG: ${msg.substring("PING: ".length)}`;
+      logger.info(`Sending pong: ${pong}`);
+      this.ws.send(pong);
     }
   }
 
-  public say = this.send;
-
-  public parseMessageToCtx(msg: string): TOption<TTwitchIrcContext> {
+  private parsedMessageToCtx(msg: string): TOption<TTwitchIrcContext> {
     const splited = msg.split(" ");
-
-    if (!splited.includes(this._channel)) {
-      return;
-    }
 
     if (splited.includes("PRIVMSG")) {
       const messageinfo = splited[0];
       // const _idk = splited[1];
-      // const channel = splited[3];
+      const channel = splited[3];
       const message = splited.slice(4, splited.length).join(" ").substring(1).trim();
       const tags = parseMessageInfo(messageinfo, message);
 
       return {
         type: EEvenType.Message,
-        channel: this._channel,
+        channel: channel,
         message,
-        isCommand: this.isCommand(message),
         tags,
         // TODO: Better logic;
         self: tags.displayName.toLowerCase() === "bellabotrix",
@@ -98,75 +68,65 @@ export class TwitchIrc {
     } else if (splited.includes("ROOMSTATE")) {
       // return { type: EEvenType.Roomstate };
       //
+    } else if (splited.indexOf("JOIN")) {
+      // return { type: EEvenType.Join };
+      //
     }
 
     return undefined;
   }
 
-  public onMessage(handler: (ctx: TTwitchIrcContext, it: TwitchIrc) => void) {
-    this.ws.addEventListener("message", (res) => {
-      if (typeof res.data !== "string") {
-        return;
-      }
-
-      const newCtx = this.parseMessageToCtx(res.data);
-      if (!newCtx) {
-        return;
-      }
-
-      logger.message(`${newCtx.tags.displayName}@${this.channel}: ${newCtx.message}`);
-
-      handler(newCtx, this);
-    });
-  }
-
-  public onJoin(handler: (username: string, it: TwitchIrc) => void) {
-    this.ws.addEventListener("message", (res) => {
-      if (typeof res.data !== "string") {
-        return;
-      }
-
-      const isJoinMessage = res.data.includes(`JOIN ${this.channel}`);
-
-      if (!isJoinMessage) {
-        return;
-      }
-
-      const username = res.data.substring(1, res.data.indexOf("!"));
-
-      if (this.settings?.joinMessage.forAllUsers.enabled.value) {
-        this.say(interpolate(this.settings.joinMessage.forAllUsers.message.value, { username }));
-      }
-
-      if (this.settings?.joinMessage.forSpecificUsers.enabled.value) {
-        if (this.settings.joinMessage.forSpecificUsers.users.value.includes(username)) {
-          this.say(
-            interpolate(this.settings.joinMessage.forSpecificUsers.message.value, { username }),
-          );
-        }
-      }
-
-      handler(username, this);
-    });
-  }
-
-  public isCommand(msg: string): boolean {
-    if (msg[0] === "!" && msg[1] !== " ") {
-      return true;
+  private onMessage(res: MessageEvent): void {
+    if (!res.data || typeof res.data !== "string") {
+      return;
     }
 
-    return false;
+    this.handlePingMessage(res.data);
+
+    const ctx = this.parsedMessageToCtx(res.data);
+
+    if (!ctx) {
+      return;
+    }
+
+    const handler = this.handlers.get(ctx.channel);
+
+    if (!handler) {
+      return;
+    }
+
+    logger.message(`[${ctx.channel}] ${ctx.tags.displayName}: ${ctx.message}`);
+    handler(ctx);
   }
 
-  public get channel() {
-    return this._channel;
+  public addHandler(channel: string, handler: (msg: TTwitchIrcContext) => void) {
+    logger.info(`Joining room: ${channel}`);
+    if (this.handlers.has(channel)) {
+      this.handlers.delete(channel);
+    }
+
+    this.ws.send(`JOIN ${channel}`);
+    this.handlers.set(channel, handler);
+    logger.info(`Joined room: ${channel}`);
   }
 
-  public get connected() {
-    return this._connected;
+  public removeHandler(channel: string) {
+    logger.info(`Parting room: ${channel}`);
+    this.handlers.delete(channel);
+    this.ws.send(`PART ${channel}`);
+    logger.info(`Parted room: ${channel}`);
   }
 
-  public get settings() {
-    return this._settings;
+  public send(channel: string, message: string): void {
+    const chunkSize = 500;
+    if (message.length > chunkSize) {
+      let currentChunk = "";
+      for (let i = 0; i < message.length; i += chunkSize) {
+        currentChunk = message.slice(i, i + chunkSize);
+        this.ws.send(`PRIVMSG ${channel} :${currentChunk}`);
+      }
+    } else {
+      this.ws.send(`PRIVMSG ${channel} :${message}`);
+    }
   }
 }

@@ -24,6 +24,7 @@ useHead({
 
 <template>
   <div id="settings-page">
+    <h3>Update of settings may take up to 10 seconds</h3>
     <SettingsGroup group-name="Commands" v-if="commands">
       <SingleSetting name="enabled" :option="commands.enabled">
         <FancyToggle

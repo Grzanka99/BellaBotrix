@@ -1,7 +1,6 @@
 import { WebuiUser } from "@prisma/client";
 import { prisma } from "services/db";
 import { DEFAULT_SETTINGS } from "./constants/settings";
-import { TOption } from "types";
 import { SettingSchema, TSettings } from "types/schema/settings.schema";
 
 const getDefaults = () => {
@@ -32,28 +31,26 @@ export async function getSettings(unameorid: number | string): Promise<TSettings
     if (user.settings === "") {
       await prisma.webuiUser.update({
         where: { id },
-        data: { settings: JSON.stringify(defaults) },
+        data: { settings: defaults },
       });
 
       return defaults;
     }
 
-    const jsObj = JSON.parse(user.settings);
-
-    if (!jsObj) {
+    if (!user.settings) {
       await prisma.webuiUser.update({
         where: { id },
-        data: { settings: JSON.stringify(defaults) },
+        data: { settings: defaults },
       });
 
       return defaults;
     }
 
-    const parsed = SettingSchema.safeParse(jsObj);
+    const parsed = SettingSchema.safeParse(user.settings);
     if (!parsed.success) {
       await prisma.webuiUser.update({
         where: { id },
-        data: { settings: JSON.stringify(defaults) },
+        data: { settings: defaults },
       });
 
       return defaults;
@@ -62,62 +59,5 @@ export async function getSettings(unameorid: number | string): Promise<TSettings
     return parsed.data;
   } catch (err) {
     return defaults;
-  }
-}
-
-// NOTE: At this point, we assume that "data" was verified
-export async function updateSettings(
-  id: number | string,
-  data: TSettings,
-): Promise<TOption<TSettings>> {
-  try {
-    let res: WebuiUser | null = null;
-
-    if (typeof id === "number") {
-      res = await prisma.webuiUser.update({
-        where: { id },
-        data: { settings: JSON.stringify(data) },
-      });
-    } else {
-      res = await prisma.webuiUser.update({
-        where: { username: id },
-        data: { settings: JSON.stringify(data) },
-      });
-    }
-
-    if (!res) {
-      return undefined;
-    }
-
-    const parsed = SettingSchema.safeParse(JSON.parse(res.settings));
-
-    if (!parsed.success) {
-      return undefined;
-    }
-
-    return parsed.data;
-  } catch (err) {
-    return undefined;
-  }
-}
-
-export async function resetSettingsToDefaults(id: number): Promise<TOption<TSettings>> {
-  try {
-    const defaults = getDefaults();
-
-    const res = await prisma.webuiUser.update({
-      where: { id },
-      data: { settings: JSON.stringify(defaults) },
-    });
-
-    const parsed = SettingSchema.safeParse(JSON.parse(res.settings));
-
-    if (!parsed.success) {
-      return undefined;
-    }
-
-    return parsed.data;
-  } catch (err) {
-    return undefined;
   }
 }

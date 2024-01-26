@@ -8,7 +8,7 @@ import { getCanRun } from "./utils/can-run";
 import { spit } from "./spit.command";
 
 export function createCommandHandler(command: TWithCommandHandler, api: TwitchApi): TUseHandler {
-  return async function ({ client, channel, tags, settings }): Promise<void> {
+  return async function ({ send, channel, tags, settings }): Promise<void> {
     if (!settings) {
       return;
     }
@@ -25,9 +25,10 @@ export function createCommandHandler(command: TWithCommandHandler, api: TwitchAp
         if (!(await canRun()) || !api) {
           return;
         }
+
         const res = await addPoints(command, channel, tags, api);
         if (res) {
-          client.say(res);
+          send(res);
         }
         return;
       }
@@ -37,14 +38,14 @@ export function createCommandHandler(command: TWithCommandHandler, api: TwitchAp
         }
         const res = await removePoints(command, channel, tags, api);
         if (res) {
-          client.say(res);
+          send(res);
         }
         return;
       }
       case "givepoints": {
         const res = await givePoints(command, channel, tags);
         if (res) {
-          client.say(res);
+          send(res);
         }
 
         return;
@@ -52,14 +53,14 @@ export function createCommandHandler(command: TWithCommandHandler, api: TwitchAp
       case "points": {
         const res = await getUserPoints(command, channel, tags.username);
         if (res) {
-          client.say(res);
+          send(res);
         }
         return;
       }
       case "winrate": {
         const res = await getUserWinrate(command, channel, tags.username);
         if (res) {
-          client.say(res);
+          send(res);
         }
 
         return;
@@ -67,42 +68,42 @@ export function createCommandHandler(command: TWithCommandHandler, api: TwitchAp
       case "gamble": {
         const res = await gamble(command, channel, tags, settings);
         if (res) {
-          client.say(res);
+          send(res);
         }
         return;
       }
       case "solo": {
         const res = await startSolo(command, channel, tags);
         if (res) {
-          client.say(res);
+          send(res);
         }
         return;
       }
       case "nope": {
         const res = await soloNope(command, channel, tags);
         if (res) {
-          client.say(res);
+          send(res);
         }
         return;
       }
       case "yes": {
         const res = await soloYes(command, channel, tags);
         if (res) {
-          client.say(res);
+          send(res);
         }
         return;
       }
       case "htfu": {
         const res = await spit(command, tags, api);
         if (res) {
-          client.say(res);
+          send(res);
         }
         return;
       }
       case "top": {
         const res = await getTop(command, channel);
         if (res) {
-          client.say(res);
+          send(res);
         }
         return;
       }
@@ -116,7 +117,7 @@ export function createCommandHandler(command: TWithCommandHandler, api: TwitchAp
           channel,
         });
 
-        client.say(res);
+        send(res);
         return;
       }
     }

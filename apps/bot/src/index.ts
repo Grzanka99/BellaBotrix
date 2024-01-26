@@ -1,10 +1,10 @@
 import { getOAuthToken } from "services/twitch-api/api-connector";
 import { prisma } from "services/db";
 import { logger } from "utils/logger";
-import { createIrcClient } from "services/twitch-irc/IrcClient";
 import { ChannelConnection } from "services/channel-connection";
 import { Channel } from "@prisma/client";
 import { gc } from "bun";
+import { TwitchIrc } from "services/twitch-irc";
 
 export async function startBot(): Promise<void> {
   console.time("bootstrap");
@@ -25,11 +25,11 @@ export async function startBot(): Promise<void> {
 
   logger.info(`Creating Twitch IRC client for ${channels.length} channel`);
 
-  const ircClient = await createIrcClient(
+  const ircClient = await new TwitchIrc(
     "ws://irc-ws.chat.twitch.tv:80",
     Bun.env.CLIENT_ID || "",
     Bun.env.PASSWORD || "",
-  );
+  ).connect();
 
   if (!ircClient) {
     return;
