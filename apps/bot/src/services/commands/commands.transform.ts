@@ -11,7 +11,11 @@ import {
 
 export function dbCommandToCommand(dbCommand: TCommandFromDB): TOption<TCommand> {
   const parsedMessage = CommandMessageSchema.safeParse(
-    dbCommand.message ? JSON.parse(dbCommand.message) : { base: "" },
+    dbCommand.message
+      ? typeof dbCommand.message === "object"
+        ? dbCommand.message
+        : JSON.parse(dbCommand.message)
+      : { base: "" },
   );
 
   if (!parsedMessage.success) {
