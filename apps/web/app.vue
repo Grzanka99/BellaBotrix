@@ -1,5 +1,22 @@
 <script setup lang="ts">
-useDark()
+useDark();
+
+const auth = useAuth();
+const route = useRoute();
+
+watch(auth.loggedIn, () => {
+  if (!auth.loggedIn.value && route.path !== "/login") {
+    // @ts-expect-error
+    window.location = "/login";
+  }
+});
+
+onBeforeMount(() => {
+  if (!auth.loggedIn.value && route.path !== "/login") {
+    // @ts-expect-error
+    window.location = "/login";
+  }
+});
 </script>
 
 <template>

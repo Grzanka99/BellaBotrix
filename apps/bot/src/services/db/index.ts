@@ -1,4 +1,4 @@
-import { PrismaClient } from "@prisma/client";
+import { PrismaClient } from "database";
 import { AsyncQueue } from "utils/async-queue";
 
 export const prisma = new PrismaClient();
@@ -9,4 +9,3 @@ if (prisma) {
     await prismaQueue.enqueue(() => prisma.commands.deleteMany());
   }
 }
-
