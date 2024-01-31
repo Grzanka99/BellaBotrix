@@ -1,4 +1,4 @@
-import { Channel } from "@prisma/client";
+import { Channel } from "database";
 import type { H3Event } from "h3";
 
 export async function getChannelFromEvent(event: H3Event): Promise<Channel | undefined> {

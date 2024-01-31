@@ -1,4 +1,4 @@
-import type { User, WebuiUser } from "@prisma/client";
+import type { User, WebuiUser } from "database";
 import { z } from "zod";
 
 export type TChatUser = User;

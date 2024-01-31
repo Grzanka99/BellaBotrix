@@ -1,4 +1,4 @@
-import type { User } from "@prisma/client";
+import type { User } from "database";
 import { useStorage } from "@vueuse/core";
 import type { TUpdateChatter } from "~/types/chatters.type";
 

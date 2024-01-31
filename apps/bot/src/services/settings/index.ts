@@ -1,4 +1,4 @@
-import { WebuiUser } from "@prisma/client";
+import { WebuiUser } from "database";
 import { prisma } from "services/db";
 import { DEFAULT_SETTINGS } from "./constants/settings";
 import { SettingSchema, TSettings } from "types/schema/settings.schema";

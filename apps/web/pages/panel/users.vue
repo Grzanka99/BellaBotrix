@@ -44,11 +44,8 @@ useHead({
         <FormTextInput
           name="query"
           placeholder="Search by username..."
-          v-model="chatters.queryFilter"
-        />
-        <FormButton type="button" @click="chatters.queryFilter = ''"
-          >clear</FormButton
-        >
+          v-model="chatters.queryFilter" />
+        <FormButton type="button" @click="chatters.queryFilter = ''">clear</FormButton>
       </div>
       <div id="users-page-controls__info">
         <h5>Total users: {{ chatters.chatters.length }}</h5>
@@ -67,8 +64,7 @@ useHead({
           <TableRow
             v-for="user in chatters.filtered.toReversed()"
             :grid-template="gridTemplate"
-            :class="{ isBot: user.isBot }"
-          >
+            :class="{ isBot: user.isBot }">
             <TableCell centered>
               <FancyToggle
                 :value="user.isBot"
@@ -77,8 +73,7 @@ useHead({
                     id: user.id,
                     isBot: !user.isBot,
                   })
-                "
-              />
+                  " />
             </TableCell>
             <TableCell>
               <span :title="user.userid">

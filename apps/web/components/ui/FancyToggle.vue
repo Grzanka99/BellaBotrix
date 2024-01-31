@@ -2,11 +2,11 @@
 const props = defineProps<{
   value: boolean;
   disabled?: boolean;
-}>()
+}>();
 
 const emit = defineEmits<{
-  (e: 'change', v: boolean): void;
-}>()
+  (e: "change", v: boolean): void;
+}>();
 
 const handleClick = (e: MouseEvent) => {
   if (props.disabled) {
@@ -14,21 +14,25 @@ const handleClick = (e: MouseEvent) => {
     return;
   }
 
-  emit('change', !props.value);
+  emit("change", !props.value);
 };
 </script>
 
 <template>
-  <label class="flex fancy-toggle" :class="{ 'fancy-toggle--disabled': disabled, 'fancy-toggle--on': value }"
+  <label
+    class="flex fancy-toggle"
+    :class="{ 'fancy-toggle--disabled': disabled, 'fancy-toggle--on': value }"
     @click="handleClick">
-    <div class="fancy-toggle__orb" :class="{ 'fancy-toggle__orb--on': value }"></div>
+    <div
+      class="fancy-toggle__orb"
+      :class="{ 'fancy-toggle__orb--on': value }"></div>
   </label>
 </template>
 
 <style lang="scss" scoped>
 .fancy-toggle {
   --base: 20px;
-  --offset: 3px;
+  --offset: -3px;
 
   width: calc(var(--base) * 2);
   height: var(--base);

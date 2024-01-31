@@ -1,4 +1,4 @@
-import type { Commands } from "@prisma/client";
+import { type Commands } from "database";
 import { useStorage } from "@vueuse/core";
 import type { TCreateCommand, TUpdateCommand } from "~/types/commands.type";
 
@@ -8,7 +8,7 @@ export const useCommandsStore = defineStore("commands", () => {
   const commands = ref<Commands[]>([]);
   const queryFileter = ref("");
 
-  const { data, refresh } = useFetch(() => `/api/${channel.value}/commands`);
+  const { data, refresh } = useFetch<Commands[]>(() => `/api/${channel.value}/commands`);
 
   watch(data, () => {
     commands.value = data.value || [];

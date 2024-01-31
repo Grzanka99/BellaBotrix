@@ -1,4 +1,4 @@
-import type { Timers } from "@prisma/client";
+import type { Timers } from "database";
 import { useStorage } from "@vueuse/core";
 import type { TCreateTimer, TUpdateTimer } from "~/types/timers.type";
 
