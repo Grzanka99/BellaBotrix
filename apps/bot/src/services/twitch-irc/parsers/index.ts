@@ -1,52 +1,54 @@
-import { TTwitchMessageInfo } from "services/types";
-import { parseEmotes } from "./emotes.parser";
-import { parseBadges } from "./badges.parser";
+import { TOption } from "bellatrix";
+import { parseCommandComponent } from "./command-component.parse";
+import { parseTags } from "./tags.parser";
+import { parseSourceComponent } from "./source-components.parser";
+import { TTwitchIrcContext } from "services/types";
 
-export function parseMessageInfo(data: string, message: string) {
-  const splitted = data.split(";");
-  const userInfo: TTwitchMessageInfo = {
-    clientNonce: "",
-    color: "",
-    displayName: "",
-    emotes: [],
-    firstMessage: false,
-    isMod: false,
-    roomId: -1,
-    isSubsriber: false,
-    userId: '',
-    userType: "",
-    badges: {},
-    username: "",
-  };
+export function parseMessage(rawMessage: string): TOption<TTwitchIrcContext> {
+  let idx = 0;
+  let endIdx = 0;
 
-  for (let i = 0; i < splitted.length; i++) {
-    const curr = splitted[i];
-    if (curr.startsWith("badges=")) {
-      userInfo.badges = parseBadges(curr.substring("badges=".length).split(","));
-    } else if (curr.startsWith("client-nonce=")) {
-      userInfo.clientNonce = curr.substring("client-nonce=".length);
-    } else if (curr.startsWith("color=")) {
-      userInfo.color = curr.substring("color=".length);
-    } else if (curr.startsWith("display-name=")) {
-      const uname = curr.substring("display-name=".length);
-      userInfo.displayName = uname;
-      userInfo.username = uname.toLowerCase();
-    } else if (curr.startsWith("emotes=")) {
-      userInfo.emotes = parseEmotes(curr.substring("emotes=".length), message);
-    } else if (curr.startsWith("first-msg=")) {
-      userInfo.firstMessage = curr.substring("first-msg=".length) === "1";
-    } else if (curr.startsWith("mod=")) {
-      userInfo.isMod = curr.substring("mod=".length) === "1";
-    } else if (curr.startsWith("room-id=")) {
-      userInfo.roomId = Number(curr.substring("room-id=".length));
-    } else if (curr.startsWith("subscriber=")) {
-      userInfo.isSubsriber = curr.substring("subscriber=".length) === "1";
-    } else if (curr.startsWith("user-id=")) {
-      userInfo.userId = curr.substring("user-id=".length);
-    } else if (curr.startsWith("user-type=")) {
-      userInfo.userType = curr.substring("user-type=".length);
-    }
+  let rawTagsComponent: TOption<string> = undefined;
+  let rawSourceComponent: TOption<string> = undefined;
+  let rawCommandComponent: TOption<string> = undefined;
+  let rawParametersComponent: TOption<string> = undefined;
+
+  if (rawMessage[idx] === "@") {
+    endIdx = rawMessage.indexOf(" ");
+    rawTagsComponent = rawMessage.slice(1, endIdx);
+    idx = endIdx + 1;
   }
 
-  return userInfo;
+  if (rawMessage[idx] === ":") {
+    idx += 1;
+    endIdx = rawMessage.indexOf(" ", idx);
+    rawSourceComponent = rawMessage.slice(idx, endIdx);
+    idx = endIdx + 1;
+  }
+
+  endIdx = rawMessage.indexOf(":", idx);
+  if (endIdx === -1) {
+    endIdx = rawMessage.length;
+  }
+
+  rawCommandComponent = rawMessage.slice(idx, endIdx).trim();
+
+  if (endIdx !== rawMessage.length) {
+    idx = endIdx + 1;
+    rawParametersComponent = rawMessage.slice(idx);
+  }
+
+  const command = parseCommandComponent(rawCommandComponent);
+  const message = command.command === "PRIVMSG" ? rawParametersComponent?.trim() : undefined;
+  const tags = rawTagsComponent ? parseTags(rawTagsComponent, message || "") : undefined;
+
+  return {
+    self: tags?.username === "bellabotrix",
+    type: command.command,
+    channel: command.channel,
+    command,
+    message,
+    tags,
+    source: parseSourceComponent(rawSourceComponent),
+  };
 }

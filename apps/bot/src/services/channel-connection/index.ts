@@ -7,6 +7,7 @@ import { ChannelTimer } from "services/timers";
 import { TwitchApi } from "services/twitch-api";
 import { TwitchIrc } from "services/twitch-irc";
 import { TSettings } from "types/schema/settings.schema";
+import { interpolate } from "utils/interpolate-string";
 import { logger } from "utils/logger";
 
 type TArgs = {
@@ -86,27 +87,61 @@ export class ChannelConnection {
     this.fetchSettings();
     this.settingsInterval = setInterval(() => this.fetchSettings(), 10_000);
 
-    this.irc.addHandler(this.channelName, async ({ self, channel, tags, message }) => {
-      if (self) {
+    this.irc.addHandler(this.channelName, async (ctx) => {
+      if (ctx.self) {
         return;
       }
 
-      const handler = await getChatHandler({
-        channel,
-        tags,
-        message,
-        settings: this.settings,
-        api: this.api,
-      });
+      switch (ctx.type) {
+        case "PRIVMSG": {
+          if (!ctx.channel || !ctx.tags || !ctx.message) {
+            break;
+          }
 
-      for (const h of handler) {
-        await h.useHandler({
-          channel,
-          tags,
-          message,
-          send: this.send.bind(this),
-          settings: this.settings,
-        });
+          const handler = await getChatHandler({
+            channel: ctx.channel,
+            tags: ctx.tags,
+            message: ctx.message,
+            settings: this.settings,
+            api: this.api,
+          });
+
+          for (const h of handler) {
+            await h.useHandler({
+              channel: ctx.channel,
+              tags: ctx.tags,
+              message: ctx.message,
+              send: this.send.bind(this),
+              settings: this.settings,
+            });
+          }
+          break;
+        }
+        case "JOIN": {
+          if (this.settings?.joinMessage.forAllUsers.enabled.value) {
+            this.send(
+              interpolate(this.settings.joinMessage.forAllUsers.message.value, {
+                username: ctx.tags?.displayName || ctx.source?.username || "",
+              }),
+            );
+          }
+
+          if (this.settings?.joinMessage.forSpecificUsers.enabled.value && ctx.source?.username) {
+            if (
+              this.settings.joinMessage.forSpecificUsers.users.value.includes(
+                ctx.tags?.displayName || ctx.source.username,
+              )
+            ) {
+              this.send(
+                interpolate(this.settings.joinMessage.forSpecificUsers.message.value, {
+                  username: ctx.tags?.displayName || ctx.source.username,
+                }),
+              );
+            }
+          }
+
+          break;
+        }
       }
 
       gc(false);

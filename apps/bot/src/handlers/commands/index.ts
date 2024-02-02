@@ -8,7 +8,7 @@ import { getCanRun } from "./utils/can-run";
 import { spit } from "./spit.command";
 
 export function createCommandHandler(command: TWithCommandHandler, api: TwitchApi): TUseHandler {
-  return async function ({ send, channel, tags, settings }): Promise<void> {
+  return async ({ send, channel, tags, settings }): Promise<void> => {
     if (!settings) {
       return;
     }

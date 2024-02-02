@@ -1,3 +1,5 @@
+import { TOption } from "bellatrix";
+
 export type TTwitchApiUser = {
   id: string;
   login: string;
@@ -86,11 +88,50 @@ export type TTwitchMessageInfo = {
   };
 };
 
+export type TTwitchIrcCommand =
+  | "JOIN"
+  | "PART"
+  | "NOTICE"
+  | "CLEARCHAT"
+  | "HOSTTARGET"
+  | "PRIVMSG"
+  | "PING"
+  | "CAP"
+  | "GLOBALUSERSTATE"
+  | "USERSTATE"
+  | "ROOMSTATE"
+  | "RECONNECT"
+  | "421"
+  | "001"
+  | "002"
+  | "003"
+  | "004"
+  | "353"
+  | "366"
+  | "372"
+  | "375"
+  | "376"
+  | "UNKNOWN"
+  | (string & {});
+
+export type TParsedCommandType = {
+  command: TTwitchIrcCommand;
+  channel: TOption<string>;
+  isCapRequestEnabled: boolean;
+};
+
+export type TTwitchIrcSource = {
+  username: TOption<string>;
+  host: string;
+};
+
 export type TTwitchIrcContext = {
-  type: EEvenType;
-  channel: string;
-  message: string;
+  type: TTwitchIrcCommand;
+  command: TParsedCommandType;
+  channel: TOption<string>;
+  message: TOption<string>;
   isCommand?: boolean;
   self: boolean;
-  tags: TTwitchMessageInfo;
+  tags: TOption<TTwitchMessageInfo>;
+  source: TOption<TTwitchIrcSource>;
 };
