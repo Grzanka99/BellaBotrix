@@ -1,7 +1,7 @@
 import { exec } from "child_process";
 
 // NOTE: Quick one just to allow quick restart till better approach
-const ALLOWED = ["cezary", "trejekk"];
+const ALLOWED = ["cezary", "Trejekk"];
 
 export default defineEventHandler(async (event) => {
   const auth = await requireAuthSession(event);

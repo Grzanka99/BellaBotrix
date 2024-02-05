@@ -14,7 +14,7 @@ const { data, refresh } = await useFetch("/api/chacc");
 const auth = useAuth();
 
 // NOTE: Quick one just to allow quick restart till better approach
-const ALLOWED = ["trejekk", "cezary"];
+const ALLOWED = ["Trejekk", "cezary"];
 const isAllowed = computed(() =>
   ALLOWED.includes(auth.session.value?.username || ""),
 );
