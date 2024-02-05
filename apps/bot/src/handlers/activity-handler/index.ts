@@ -2,7 +2,7 @@ import { TUseHandler } from "handlers/types";
 import { prisma, prismaQueue } from "services/db";
 
 export function createActivityHandler(): TUseHandler {
-  return async function ({ tags, channel }) {
+  return async ({ tags, channel }) => {
     if (!tags.username || !tags.userId) {
       return;
     }

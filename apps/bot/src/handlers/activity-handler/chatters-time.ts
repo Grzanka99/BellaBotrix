@@ -2,10 +2,7 @@ import { prisma, prismaQueue } from "services/db";
 import { TTwitchApiChatter } from "services/types";
 import { logger } from "utils/logger";
 
-async function handleSingleChatter(
-  chatter: TTwitchApiChatter,
-  channel: string,
-): Promise<boolean> {
+async function handleSingleChatter(chatter: TTwitchApiChatter, channel: string): Promise<boolean> {
   try {
     if (!chatter.user_id || !chatter.user_name) {
       return false;
@@ -54,8 +51,7 @@ export async function chatterTimeHandler(
   channel: string,
   chatters: TTwitchApiChatter[],
 ): Promise<void> {
-
-  chatters.forEach((chatter) => {
+  for (const chatter of chatters) {
     handleSingleChatter(chatter, channel);
-  });
+  }
 }
