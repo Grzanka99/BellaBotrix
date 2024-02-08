@@ -10,7 +10,7 @@ import {
 import FormTextInput from "~/components/ui/FormTextInput.vue";
 import FormButton from "~/components/ui/FormButton.vue";
 import { useTimersStore } from "~/store/timers.store";
-import { type Timers } from "database";
+import { type Timers } from "@prisma/client";
 import TimerEditForm from "~/components/timers/TimerEditForm.vue";
 import NewTimerForm from "~/components/timers/NewTimerForm.vue";
 
@@ -37,7 +37,8 @@ useHead({
   <TimerEditForm
     v-if="toEdit"
     :original-timer="toEdit"
-    @cancel="toEdit = undefined" />
+    @cancel="toEdit = undefined"
+  />
   <NewTimerForm v-if="newTimerForm" @cancel="newTimerForm = false" />
   <div id="timers-page">
     <div id="timers-page-controls">
@@ -45,11 +46,16 @@ useHead({
         <FormTextInput
           name="query"
           placeholder="Search by username..."
-          v-model="timers.queryFilter" />
-        <FormButton type="button" @click="timers.queryFilter = ''">clear</FormButton>
+          v-model="timers.queryFilter"
+        />
+        <FormButton type="button" @click="timers.queryFilter = ''"
+          >clear</FormButton
+        >
       </div>
       <div id="timers-page-controls__new-timer">
-        <FormButton @click="newTimerForm = true" type="button">Add new timer</FormButton>
+        <FormButton @click="newTimerForm = true" type="button"
+          >Add new timer</FormButton
+        >
       </div>
     </div>
     <Table>
@@ -63,7 +69,8 @@ useHead({
         <template v-if="timers.timers.length">
           <TableRow
             v-for="timer in timers.filtered"
-            :grid-template="gridTemplate">
+            :grid-template="gridTemplate"
+          >
             <TableCell>{{ timer.message }}</TableCell>
             <TableCell>{{ timer.timeout }}</TableCell>
             <TableCell centered>
@@ -76,7 +83,8 @@ useHead({
               <FormButton
                 type="button"
                 smaller
-                @click="timers.handleDelete(timer.id)">
+                @click="timers.handleDelete(timer.id)"
+              >
                 <Icon name="material-symbols:delete-forever" />
                 delete
               </FormButton>

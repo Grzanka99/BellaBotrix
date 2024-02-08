@@ -2,7 +2,7 @@ import { getOAuthToken } from "services/twitch-api/api-connector";
 import { prisma } from "services/db";
 import { logger } from "utils/logger";
 import { ChannelConnection } from "services/channel-connection";
-import { Channel } from "database";
+import { Channel } from "@prisma/client";
 import { gc } from "bun";
 import { TwitchIrc } from "services/twitch-irc";
 

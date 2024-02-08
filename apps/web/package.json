@@ -25,7 +25,6 @@
     "pinia": "^2.1.7",
     "sass": "^1.69.7",
     "zod": "^3.22.4",
-    "bellatrix": "workspace:*",
-    "database": "workspace:*"
+    "bellatrix": "workspace:*"
   }
 }

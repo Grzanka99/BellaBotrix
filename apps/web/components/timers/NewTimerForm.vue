@@ -1,18 +1,19 @@
 <script lang="ts" setup>
-import Modal from "../ui/Modal.vue";
-import { useTimersStore } from "~/store/timers.store";
-import { SCreateTimer, type TUpdateTimer } from "~/types/timers.type";
-import FormTextarea from "../ui/FormTextarea.vue";
-import FormNumberInput from "../ui/FormNumberInput.vue";
-import FormButton from "../ui/FormButton.vue";
+import type { Timers } from '@prisma/client';
+import Modal from '../ui/Modal.vue';
+import { useTimersStore } from '~/store/timers.store';
+import { SCreateTimer, SUpdateTimer, type TUpdateTimer } from '~/types/timers.type';
+import FormTextarea from '../ui/FormTextarea.vue';
+import FormNumberInput from '../ui/FormNumberInput.vue';
+import FormButton from '../ui/FormButton.vue';
 
 const emit = defineEmits<{
-  (e: "cancel"): void;
-}>();
+  (e: 'cancel'): void;
+}>()
 
 const timersStore = useTimersStore();
 
-const message = ref("");
+const message = ref('');
 const timeout = ref(1000);
 
 const { errors, validate, isInvalid } = useValidation<keyof TUpdateTimer>();
@@ -20,25 +21,25 @@ const { errors, validate, isInvalid } = useValidation<keyof TUpdateTimer>();
 const parsed = computed(() => {
   const payload = {
     message: message.value,
-    timeout: timeout.value,
-  };
+    timeout: timeout.value
+  }
 
-  return SCreateTimer.safeParse(payload);
-});
+  return SCreateTimer.safeParse(payload)
+})
 
 watch(parsed, (v) => {
   errors.value = [];
   if (!v.success) {
     errors.value = v.error.errors;
   }
-});
+})
 
 const onCancel = () => {
-  message.value = "";
+  message.value = '';
   timeout.value = 1000;
   errors.value = [];
-  emit("cancel");
-};
+  emit('cancel');
+}
 
 const handleSave = async () => {
   if (!parsed.value.success) {
@@ -48,10 +49,10 @@ const handleSave = async () => {
   await timersStore.handleCreate({
     message: message.value,
     timeout: timeout.value,
-  });
+  })
 
-  onCancel();
-};
+  onCancel()
+}
 </script>
 
 <template>

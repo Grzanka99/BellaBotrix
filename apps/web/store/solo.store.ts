@@ -1,4 +1,4 @@
-import type { Solo } from "database";
+import type { Solo } from "@prisma/client";
 import { useStorage } from "@vueuse/core";
 
 export const useSoloStore = defineStore("solo", () => {

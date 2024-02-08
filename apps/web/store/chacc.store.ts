@@ -1,4 +1,4 @@
-import type { ChannelAccess } from "database";
+import type { ChannelAccess } from "@prisma/client";
 import type { EChannelAccessLevel } from "bellatrix";
 
 export const useChaccStore = defineStore("chacc", () => {

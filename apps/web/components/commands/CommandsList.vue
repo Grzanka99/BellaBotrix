@@ -11,7 +11,7 @@ import FormButton from "~/components/ui/FormButton.vue";
 import CommandMessage from "./CommandMessage.vue";
 import EditCommandModal from "./EditCommandModal.vue";
 import FancyToggle from "../ui/FancyToggle.vue";
-import type { Commands } from "database";
+import type { Commands } from "@prisma/client";
 import { useCommandsStore } from "~/store/commands.store";
 
 defineProps<{
@@ -32,7 +32,8 @@ const onCancel = () => {
   <EditCommandModal
     v-if="toEdit"
     :original-command="toEdit"
-    @cancel="onCancel" />
+    @cancel="onCancel"
+  />
   <Table>
     <TableHead :grid-template="gridTemplate">
       <TableHeader></TableHeader>
@@ -46,8 +47,10 @@ const onCancel = () => {
           <TableCell centered>
             <FancyToggle
               :value="command.enabled"
-              @change="(enabled) => commandsStore.handleUpdate(command.id, { enabled })
-                " />
+              @change="
+                (enabled) => commandsStore.handleUpdate(command.id, { enabled })
+              "
+            />
           </TableCell>
           <TableCell>{{ command.name }}</TableCell>
           <TableCell>
@@ -64,7 +67,8 @@ const onCancel = () => {
             <FormButton
               @click.native="commandsStore.handleDelete(command.id)"
               type="button"
-              smaller>
+              smaller
+            >
               <Icon name="material-symbols:delete-forever" />
               delete
             </FormButton>
