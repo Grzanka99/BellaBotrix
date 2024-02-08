@@ -9,4 +9,3 @@ if (prisma) {
     await prismaQueue.enqueue(() => prisma.commands.deleteMany());
   }
 }
-

@@ -6,8 +6,7 @@
     "build": "nuxt build",
     "dev": "nuxt dev",
     "generate": "nuxt generate",
-    "preview": "nuxt preview",
-    "postinstall": "nuxt prepare && bunx prisma generate"
+    "preview": "nuxt preview"
   },
   "devDependencies": {
     "@total-typescript/ts-reset": "^0.5.1",
@@ -17,17 +16,17 @@
     "nuxt": "^3.9.0",
     "nuxt-icon": "^0.6.8",
     "vue": "^3.4.5",
+    "prisma": "^5.2.0",
     "vue-router": "^4.2.5"
   },
   "dependencies": {
     "@pinia/nuxt": "^0.5.1",
-    "lodash.mergewith": "^4.6.2",
-    "@prisma/client": "5.7.1",
+    "@prisma/client": "^5.9.1",
     "argon2": "^0.31.2",
+    "bellatrix": "workspace:*",
+    "lodash.mergewith": "^4.6.2",
     "pinia": "^2.1.7",
-    "prisma": "^5.7.1",
     "sass": "^1.69.7",
-    "zod": "^3.22.4",
-    "bellatrix": "workspace:*"
+    "zod": "^3.22.4"
   }
 }

@@ -3,29 +3,22 @@
   "module": "index.ts",
   "type": "module",
   "scripts": {
-    "start:bot": "bun --bun run ./src/index.ts",
-    "dev:bot": "bun --bun --watch ./src/index.ts",
+    "start": "bun --bun run ./src/index.ts",
     "dev": "bun --watch ./src/index.ts",
     "build": "bun build ./src/index.ts --target=bun --outfile=./bin/bellatrix --compile",
-    "compile:bot": "bun build ./src/index.ts --target=bun --outfile=./bin/bellatrix --compile",
-    "db:migrate": "prisma migrate dev --name",
-    "db:studio": "prisma studio",
-    "postinstall": "bunx prisma generate"
+    "compile:bot": "bun build ./src/index.ts --target=bun --outfile=./bin/bellatrix --compile"
   },
   "devDependencies": {
     "@biomejs/biome": "1.1.2",
     "@total-typescript/ts-reset": "^0.5.1",
-    "bun-types": "latest",
-    "prisma": "^5.2.0"
+    "prisma": "^5.2.0",
+    "bun-types": "latest"
   },
   "peerDependencies": {
     "typescript": "^5.0.0"
   },
   "dependencies": {
-    "@elysiajs/html": "^0.7.0",
-    "@elysiajs/static": "^0.7.1",
-    "@prisma/client": "5.7.1",
-    "elysia": "^0.7.12",
+    "@prisma/client": "^5.9.0",
     "zod": "^3.22.4"
   }
 }

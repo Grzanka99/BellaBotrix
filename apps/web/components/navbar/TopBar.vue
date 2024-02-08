@@ -14,6 +14,18 @@ const channelId = useStorage<string | undefined>("selectedChannelId", undefined)
 const { data, refresh } = await useFetch("/api/chacc");
 const auth = useAuth();
 
+// NOTE: Quick one just to allow quick restart till better approach
+const ALLOWED = ["Trejekk", "cezary"];
+const isAllowed = computed(() =>
+  ALLOWED.includes(auth.session.value?.username || ""),
+);
+
+const callRestart = async () => {
+  if (isAllowed) {
+    await $fetch("/api/restart-bot", { method: "POST" });
+  }
+};
+
 onBeforeMount(() => {
   if (!channel.value) {
     channel.value = auth.session.value?.id;
@@ -50,6 +62,7 @@ watch(channel, () => {
 
 <template>
   <header id="topbar">
+    <FormButton v-if="isAllowed" type="button" @click="callRestart">RESTART</FormButton>
     <FormButton @click="toggleDark()" type="button" width="50px">
       <Icon v-if="isDark" name="material-symbols:dark-mode" />
       <Icon v-else name="material-symbols:light-mode"></Icon>

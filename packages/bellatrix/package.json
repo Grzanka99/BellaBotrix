@@ -1,9 +1,11 @@
 {
   "name": "bellatrix",
-  "version": "0.0.1",
+  "version": "0.0.0",
   "private": "true",
+  "main": "./src/index.ts",
+  "types": "./index.d.ts",
   "exports": {
-    ".": "./index.d.ts"
+    ".": "./index.ts"
   },
   "dependencies": {
     "typescript": "latest",

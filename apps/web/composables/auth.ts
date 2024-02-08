@@ -1,13 +1,14 @@
-import type { AsyncDataExecuteOptions } from "nuxt/dist/app/composables/asyncData";
+import type { AsyncDataExecuteOptions } from "#app/composables/asyncData";
 import type { TAuthSession, TDtoCreateUser } from "~/types/auth.type";
 
-export const useAuth = () =>
-  useNuxtApp().$auth as {
+export const useAuth = () => {
+  return useNuxtApp().$auth as {
     loggedIn: ComputedRef<boolean>;
     session: Ref<TAuthSession | null>;
     redirectTo: Ref<string | null>;
     updateSession: (opts?: AsyncDataExecuteOptions | undefined) => Promise<TAuthSession | null>;
   };
+};
 
 export const authLogin = async (username: string, password: string) => {
   await $fetch("/api/auth/login", {
