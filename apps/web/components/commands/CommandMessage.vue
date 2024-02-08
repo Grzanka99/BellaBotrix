@@ -1,7 +1,13 @@
 <script setup lang="ts">
+import { useSevenTVIntegrationStore } from '~/store/7tv-integration.store';
+import MessageWithEmotes from './MessageWithEmotes.vue';
+
 const props = defineProps<{
   message: Record<string, string>
 }>()
+
+// NOTE: As for now it's only integration, it will remain with this name
+const seventTvInteg = useSevenTVIntegrationStore();
 
 const keys = computed(() => Object.keys(props.message))
 </script>
@@ -10,10 +16,12 @@ const keys = computed(() => Object.keys(props.message))
   <ul class="command-message" v-if="keys.length > 1">
     <li v-for="key in keys">
       <code>{{ key }}</code>
-      <span>{{ message[key] }}</span>
+      <MessageWithEmotes
+        :message="seventTvInteg.interpolate(message[key])" />
     </li>
   </ul>
-  <div v-else class="command-message--single">{{ message.base }}</div>
+  <MessageWithEmotes v-else class="command-message--single"
+    :message="seventTvInteg.interpolate(message.base)" />
 </template>
 
 <style lang="scss" scoped>
@@ -35,10 +43,6 @@ const keys = computed(() => Object.keys(props.message))
       font-family: 'Source Code Pro', monospace;
     }
 
-    >span {
-      font-size: 1.4rem;
-    }
-
     &:hover {
       background: var(--background-light);
       cursor: pointer;
@@ -46,7 +50,7 @@ const keys = computed(() => Object.keys(props.message))
   }
 
   &--single {
-    padding: 0 var(--padding-half) ;
+    padding: 0 var(--padding-half);
   }
 }
 </style>

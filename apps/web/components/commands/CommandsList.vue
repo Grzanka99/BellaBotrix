@@ -32,8 +32,7 @@ const onCancel = () => {
   <EditCommandModal
     v-if="toEdit"
     :original-command="toEdit"
-    @cancel="onCancel"
-  />
+    @cancel="onCancel" />
   <Table>
     <TableHead :grid-template="gridTemplate">
       <TableHeader></TableHeader>
@@ -47,10 +46,8 @@ const onCancel = () => {
           <TableCell centered>
             <FancyToggle
               :value="command.enabled"
-              @change="
-                (enabled) => commandsStore.handleUpdate(command.id, { enabled })
-              "
-            />
+              @change="(enabled) => commandsStore.handleUpdate(command.id, { enabled })
+                " />
           </TableCell>
           <TableCell>{{ command.name }}</TableCell>
           <TableCell>
@@ -67,8 +64,7 @@ const onCancel = () => {
             <FormButton
               @click.native="commandsStore.handleDelete(command.id)"
               type="button"
-              smaller
-            >
+              smaller>
               <Icon name="material-symbols:delete-forever" />
               delete
             </FormButton>

@@ -19,6 +19,7 @@ export default defineEventHandler(async (event) => {
     select: {
       name: true,
       id: true,
+      channel_id: true,
     },
   });
 
