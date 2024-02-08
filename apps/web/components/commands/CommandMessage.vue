@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { useSevenTvintegrationStore } from '~/store/7tv-integration.store';
+import { useSevenTVIntegrationStore } from '~/store/7tv-integration.store';
 import MessageWithEmotes from './MessageWithEmotes.vue';
 
 const props = defineProps<{
@@ -7,7 +7,7 @@ const props = defineProps<{
 }>()
 
 // NOTE: As for now it's only integration, it will remain with this name
-const seventTvInteg = useSevenTvintegrationStore();
+const seventTvInteg = useSevenTVIntegrationStore();
 
 const keys = computed(() => Object.keys(props.message))
 </script>

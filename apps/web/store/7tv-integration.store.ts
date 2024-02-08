@@ -1,7 +1,7 @@
 import { useStorage } from "@vueuse/core";
 import type { SevenTVSingleEmote } from "~/types/emote-integration.type";
 
-export const useSevenTvintegrationStore = defineStore("7tv-integration", () => {
+export const useSevenTVIntegrationStore = defineStore("7tv-integration", () => {
   const channelId = useStorage<string | undefined>("selectedChannelId", undefined);
 
   const emotes = ref<SevenTVSingleEmote[]>([]);
