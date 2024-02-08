@@ -9,6 +9,7 @@ const channelName = useStorage<string | undefined>(
   "selectedChannelName",
   undefined,
 );
+const channelId = useStorage<string | undefined>("selectedChannelId", undefined);
 
 const { data, refresh } = await useFetch("/api/chacc");
 const auth = useAuth();
@@ -35,8 +36,9 @@ watchEffect(() => {
     return;
   }
 
-  channelName.value = data.value?.find((el) => el.id === Number(channel.value))
-    ?.name;
+  const currOne = data.value?.find((el) => el.id === Number(channel.value));
+  channelName.value = currOne?.name;
+  channelId.value = currOne?.channel_id;
 });
 const isDark = useDark();
 const toggleDark = useToggle(isDark);
