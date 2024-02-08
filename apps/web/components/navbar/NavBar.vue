@@ -46,6 +46,23 @@ const handleAuthRefirect = () => {
   window.location = "/api/auth-redirect";
 }
 
+const auth = useAuth();
+// NOTE: Quick one just to allow quick restart till better approach
+const ALLOWED = ["Trejekk", "cezary"];
+const isAllowed = computed(() =>
+  ALLOWED.includes(auth.session.value?.username || ""),
+);
+
+const isBlocked = ref(false);
+const callRestart = async () => {
+  if (isAllowed) {
+    isBlocked.value = true;
+    await $fetch("/api/restart-bot", { method: "POST" });
+    isBlocked.value = false;
+  }
+};
+
+
 </script>
 <template>
   <nav id="navbar">
@@ -56,7 +73,16 @@ const handleAuthRefirect = () => {
         :display-name="route.displayName"
         :icon="route.icon" />
     </div>
-    <div class="routes">
+    <div class="routes control-buttons">
+      <FormButton
+        v-if="isAllowed"
+        type="button"
+        @click="callRestart"
+        :disabled="isBlocked"
+        :not-allowed="isBlocked">
+        <Icon name="material-symbols:refresh" />
+        restart
+      </FormButton>
       <FormButton type="button" @click="handleAuthRefirect">
         <Icon name="material-symbols:security" />
         authorize
@@ -81,5 +107,16 @@ const handleAuthRefirect = () => {
   display: flex;
   flex-direction: column;
   gap: var(--padding-quarter);
+}
+
+.control-buttons {
+  >button {
+    >svg {
+      position: absolute;
+      left: var(--padding-double);
+      font-size: 1.6rem;
+    }
+  }
+
 }
 </style>

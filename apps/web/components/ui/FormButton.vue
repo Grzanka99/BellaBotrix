@@ -2,6 +2,7 @@
 defineProps<{
   type: "submit" | "button";
   disabled?: boolean;
+  notAllowed?: boolean;
   width?: `${string}px`;
   smaller?: boolean;
 }>();
@@ -10,11 +11,13 @@ defineProps<{
 <template>
   <button
     class="form-button"
-    :class="{ 'form-button--smaller': smaller }"
+    :class="{
+      'form-button--smaller': smaller,
+      'form-button--not-allowed': notAllowed,
+    }"
     :type="type"
     :disabled="disabled"
-    :style="{ width }"
-  >
+    :style="{ width }">
     <slot />
   </button>
 </template>
@@ -41,6 +44,10 @@ defineProps<{
 
   &--smaller {
     padding: var(--padding-quarter);
+  }
+
+  &--not-allowed {
+    background: var(--warn);
   }
 
   &:hover:not(:disabled) {

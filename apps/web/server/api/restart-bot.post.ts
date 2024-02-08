@@ -30,7 +30,11 @@ export default defineEventHandler(async (event) => {
     };
   }
 
-  return {
-    message: "ok",
-  };
+  return await new Promise((res) => {
+    setTimeout(() => {
+      res({
+        message: "ok",
+      });
+    }, 5000);
+  });
 });
