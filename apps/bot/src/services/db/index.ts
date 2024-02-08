@@ -1,4 +1,4 @@
-import { PrismaClient } from "database";
+import { PrismaClient } from "@prisma/client";
 import { AsyncQueue } from "utils/async-queue";
 
 export const prisma = new PrismaClient();

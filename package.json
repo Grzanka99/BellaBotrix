@@ -7,7 +7,8 @@
     "dev": "turbo dev",
     "dev:web": "turbo dev --scope=web",
     "dev:bot": "turbo dev --scope=bot",
-    "build": "turbo build && ./build.sh"
+    "build": "turbo build && ./build.sh",
+    "postinstall": "bunx prisma generate"
   },
   "workspaces": [
     "apps/*",

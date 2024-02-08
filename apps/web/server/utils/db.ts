@@ -1,4 +1,4 @@
-import { PrismaClient } from "database";
+import { PrismaClient } from "@prisma/client";
 import { TDtoUser, TUser } from "~/types/auth.type";
 
 export const prisma = new PrismaClient();
