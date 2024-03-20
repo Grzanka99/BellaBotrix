@@ -39,9 +39,9 @@ export class TwitchIrc {
   }
 
   private handlePingMessage(msg: string): void {
-    if (msg.startsWith("PING :")) {
-      logger.info(`Received ping: ${msg.substring("PING: ".length)}`);
-      const pong = `PONG: ${msg.substring("PING: ".length)}`;
+    if (msg.startsWith("PING")) {
+      logger.info(`Received ping: ${msg.substring("PING".length)}`);
+      const pong = `PONG${msg.substring("PING".length)}`;
       logger.info(`Sending pong: ${pong}`);
       this.ws.send(pong);
     }
