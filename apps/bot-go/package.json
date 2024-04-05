@@ -1,0 +1,12 @@
+{
+  "name": "bot-go",
+  "module": "main.go",
+  "scripts": {
+    "start": "go run .",
+    "build": "go build .",
+    "dev": "nodemon --exec go run main.go --signal SIGTERM --watch \"*.go\""
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.0"
+  }
+}

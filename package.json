@@ -7,6 +7,7 @@
     "dev": "turbo dev",
     "dev:web": "turbo dev --scope=web",
     "dev:bot": "turbo dev --scope=bot",
+    "dev:bot-go": "turbo dev --scope=bot-go",
     "build": "turbo build && ./build.sh",
     "postinstall": "bunx prisma generate"
   },
