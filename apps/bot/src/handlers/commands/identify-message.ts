@@ -19,10 +19,13 @@ export async function identifyIsBotCommand(
   const allCommands = await prisma.commands.findMany({ where: { channelName: channel } });
 
   const command = allCommands.find((cmd) => {
-    const byName = triggerWord === cmd.name;
+    const byName = triggerWord.trim() === cmd.name.trim();
 
     if (!byName) {
-      const byAlias = cmd.alias.split(",").includes(triggerWord);
+      const byAlias = cmd.alias
+        .split(",")
+        .map((el) => el.trim())
+        .includes(triggerWord);
 
       return !!byAlias;
     }
