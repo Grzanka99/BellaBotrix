@@ -1,8 +1,7 @@
 <script lang="ts" setup>
-import type { Timers } from '@prisma/client';
 import Modal from '../ui/Modal.vue';
 import { useTimersStore } from '~/store/timers.store';
-import { SCreateTimer, SUpdateTimer, type TUpdateTimer } from '~/types/timers.type';
+import { SCreateTimer, type TUpdateTimer } from '~/types/timers.type';
 import FormTextarea from '../ui/FormTextarea.vue';
 import FormNumberInput from '../ui/FormNumberInput.vue';
 import FormButton from '../ui/FormButton.vue';

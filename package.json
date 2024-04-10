@@ -1,5 +1,6 @@
 {
   "devDependencies": {
+    "@types/lodash.merge": "^4.6.9",
     "turbo": "latest"
   },
   "packageManager": "bun@1.0.21",
@@ -13,5 +14,8 @@
   "workspaces": [
     "apps/*",
     "packages/*"
-  ]
+  ],
+  "dependencies": {
+    "lodash.merge": "^4.6.2"
+  }
 }

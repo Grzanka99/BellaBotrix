@@ -13,6 +13,7 @@ onMounted(settings.startRefresh);
 onUnmounted(settings.stopRefresh);
 
 const commands = computed(() => settings.settings?.commands);
+const triggerWords = computed(() => settings.settings?.triggerWords);
 const joinMessage = computed(() => settings.settings?.joinMessage);
 const points = computed(() => settings.settings?.points);
 const automod = computed(() => settings.settings?.automod);
@@ -42,6 +43,17 @@ useHead({
           @update:model-value="(value) =>
             settings.handleUpdateDebounce({
               commands: { prefix: { value } },
+            })
+            " />
+      </SingleSetting>
+    </SettingsGroup>
+    <SettingsGroup group-name="Trigger Words" v-if="triggerWords?.enabled">
+      <SingleSetting name="enabled" :option="triggerWords.enabled">
+        <FancyToggle
+          :value="triggerWords.enabled.value"
+          @change="(value) =>
+            settings.handleUpdate({
+              triggerWords: { enabled: { value } },
             })
             " />
       </SingleSetting>

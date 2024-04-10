@@ -18,6 +18,7 @@
     "typescript": "^5.0.0"
   },
   "dependencies": {
+    "bellatrix": "workspace:*",
     "@prisma/client": "^5.9.0",
     "zod": "^3.22.4"
   }

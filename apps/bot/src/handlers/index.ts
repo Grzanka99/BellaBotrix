@@ -1,10 +1,11 @@
-import { TChatMessage, THandler } from "handlers/types";
+import type { TChatMessage, THandler } from "handlers/types";
 import { identifyIsBotCommand } from "./commands/identify-message";
 import { createCommandHandler } from "./commands";
 import { createActivityHandler } from "./activity-handler";
-import { TwitchApi } from "services/twitch-api";
-import { TTwitchMessageInfo } from "services/types";
-import { TSettings } from "types/schema/settings.schema";
+import type { TwitchApi } from "services/twitch-api";
+import type { TTwitchMessageInfo } from "services/types";
+import type { TSettings } from "bellatrix";
+import { createTriggerWordsHandler } from "./trigger-words";
 
 type TProps = {
   channel: string;
@@ -12,6 +13,7 @@ type TProps = {
   message: string;
   settings: TSettings | undefined;
   api?: TwitchApi;
+  channelId: number | undefined;
 };
 
 export async function getChatHandler({
@@ -20,6 +22,7 @@ export async function getChatHandler({
   message,
   settings,
   api,
+  channelId,
 }: TProps): Promise<THandler[]> {
   const handlers: THandler[] = [{ useHandler: createActivityHandler() }];
 
@@ -44,5 +47,8 @@ export async function getChatHandler({
     }
   }
 
+  if (channelId && api && settings?.triggerWords.enabled.value) {
+    handlers.push({ useHandler: createTriggerWordsHandler(channelId) });
+  }
   return handlers;
 }

@@ -1,15 +1,15 @@
-import { TSettings } from "types/schema/settings.schema";
+import type { TSettings } from "bellatrix";
 
 export const DEFAULT_SETTINGS: TSettings = {
   commands: {
     enabled: {
-    value: true,
-    description: "Enable or disable commands",
+      value: true,
+      description: "Enable or disable commands",
     },
     prefix: {
-      value: '!',
-      description: "Prefix that will be put before command"
-    }
+      value: "!",
+      description: "Prefix that will be put before command",
+    },
   },
   joinMessage: {
     forAllUsers: {
@@ -63,6 +63,13 @@ export const DEFAULT_SETTINGS: TSettings = {
     pointsPerMessage: {
       value: 1,
       description: "How many points user should get after sending message",
+    },
+  },
+  triggerWords: {
+    enabled: {
+      value: true,
+      description:
+        'Enable functionality, so bot responds with message to trigger words, similar to commands but more like "chatty"',
     },
   },
   automod: {

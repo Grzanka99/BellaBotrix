@@ -1,4 +1,4 @@
-import { SSettings, TSettings } from "bellatrix";
+import { SSettings, type TSettings } from "bellatrix";
 
 export default defineEventHandler(async (event): Promise<TSettings> => {
   await requireAuthSession(event);

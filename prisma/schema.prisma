@@ -70,3 +70,11 @@ model Timers {
   timeout   Int
   message   String
 }
+
+model TriggerWords {
+  id        Int     @id @default(autoincrement())
+  channelId Int
+  triggers  String
+  response  String
+  enabled   Boolean
+}

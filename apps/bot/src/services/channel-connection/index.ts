@@ -2,6 +2,7 @@ import { gc } from "bun";
 import { getChatHandler } from "handlers";
 import { chatterTimeHandler } from "handlers/activity-handler/chatters-time";
 import { setDefaultCommandsForChannel } from "services/commands";
+import { prisma } from "services/db";
 import { getSettings } from "services/settings";
 import { ChannelTimer } from "services/timers";
 import { TwitchApi } from "services/twitch-api";
@@ -21,6 +22,7 @@ export class ChannelConnection {
   private _api: TwitchApi;
   private _irc: TwitchIrc;
   private channelName: string;
+  private channelId: number | undefined = undefined;
   private ownerId: number;
   private isSetup = false;
   private _settings: TSettings | undefined = undefined;
@@ -45,6 +47,16 @@ export class ChannelConnection {
     this._api = new TwitchApi(args.channelName, args.authToken);
     this.channelName = args.channelName;
     this.ownerId = args.ownerId;
+
+    prisma.channel
+      .findUnique({
+        where: { name: args.channelName.replace("#", "") },
+      })
+      .then((res) => {
+        if (res) {
+          this.channelId = res?.id;
+        }
+      });
   }
 
   private async automsgChecker(): Promise<void> {
@@ -104,6 +116,7 @@ export class ChannelConnection {
             message: ctx.message,
             settings: this.settings,
             api: this.api,
+            channelId: this.channelId,
           });
 
           for (const h of handler) {

@@ -30,6 +30,9 @@ export const SSettings = z.object({
     chancesOffset: SSettingOptionSchema(z.number()),
     pointsPerMessage: SSettingOptionSchema(z.number()),
   }),
+  triggerWords: z.object({
+    enabled: SSettingOptionSchema(z.boolean()),
+  }),
   automod: z.object({
     emotesLimit: z.object({
       enabled: SSettingOptionSchema(z.boolean()),

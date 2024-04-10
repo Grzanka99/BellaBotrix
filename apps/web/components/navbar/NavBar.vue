@@ -15,6 +15,11 @@ const routes = computed<TRoute[]>(() => [
     icon: "material-symbols:android-messages",
   },
   {
+    to: "/panel/trigger-words",
+    displayName: "trigger words",
+    icon: "material-symbols:match-word-rounded"
+  },
+  {
     to: "/panel/solo",
     displayName: "solo",
     icon: "material-symbols:local-fire-department-rounded",
