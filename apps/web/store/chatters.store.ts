@@ -1,6 +1,23 @@
 import type { User } from "@prisma/client";
 import { useStorage } from "@vueuse/core";
 import type { TUpdateChatter } from "~/types/chatters.type";
+import type { TSelectOption } from "~/types/ui.type";
+
+enum ESortOptions {
+  POINTSDESC = 0,
+  POINTASC = 1,
+  SENTDESC = 2,
+  SENTASC = 3,
+  NONE = 4,
+}
+
+const sortOptions: TSelectOption[] = [
+  { value: ESortOptions.NONE, displayName: "do not sort (default)" },
+  { value: ESortOptions.POINTSDESC, displayName: "sort by points desc." },
+  { value: ESortOptions.POINTASC, displayName: "sort by points asc." },
+  { value: ESortOptions.SENTDESC, displayName: "sort by sent desc." },
+  { value: ESortOptions.SENTASC, displayName: "sort by sent asc." },
+];
 
 export const useChattersStore = defineStore("chatters", () => {
   const channel = useStorage("selectedChannel", undefined);
@@ -35,6 +52,25 @@ export const useChattersStore = defineStore("chatters", () => {
     );
   });
 
+  const sortedOption = ref<ESortOptions>(ESortOptions.NONE);
+
+  const sorted = computed(() => {
+    switch (sortedOption.value) {
+      case ESortOptions.NONE:
+        return filtered.value.sort((a, b) => b.id - a.id);
+      case ESortOptions.SENTASC:
+        return filtered.value.sort((a, b) => a.sentMessages - b.sentMessages);
+      case ESortOptions.SENTDESC:
+        return filtered.value.sort((a, b) => b.sentMessages - a.sentMessages);
+      case ESortOptions.POINTASC:
+        return filtered.value.sort((a, b) => a.points - b.points);
+      case ESortOptions.POINTSDESC:
+        return filtered.value.sort((a, b) => b.points - a.points);
+      default:
+        return filtered.value.sort((a, b) => b.id - a.id);
+    }
+  });
+
   const handleUpdate = async (payload: TUpdateChatter) => {
     const res = await $fetch(`/api/${channel.value}/users`, {
       method: "PUT",
@@ -58,5 +94,8 @@ export const useChattersStore = defineStore("chatters", () => {
     startRefresh,
     stopRefresh,
     handleUpdate,
+    sortOptions,
+    sortedOption,
+    sorted,
   };
 });

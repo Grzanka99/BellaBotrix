@@ -10,18 +10,19 @@ import {
 import FormTextInput from "~/components/ui/FormTextInput.vue";
 import FormButton from "~/components/ui/FormButton.vue";
 import FancyToggle from "~/components/ui/FancyToggle.vue";
+import CustomSelect from "~/components/ui/CustomSelect.vue";
 import { useChattersStore } from "~/store/chatters.store";
 
-const chatters = useChattersStore();
+const s = useChattersStore();
 onMounted(() => {
-  chatters.startRefresh();
+  s.startRefresh();
 });
 onUnmounted(() => {
-  chatters.stopRefresh();
+  s.stopRefresh();
 });
 
 const totalPoints = computed(() => {
-  return chatters.chatters.reduce((prev, cur) => {
+  return s.chatters.reduce((prev, cur) => {
     if (cur.isBot) {
       return prev;
     }
@@ -44,14 +45,12 @@ useHead({
         <FormTextInput
           name="query"
           placeholder="Search by username..."
-          v-model="chatters.queryFilter"
-        />
-        <FormButton type="button" @click="chatters.queryFilter = ''"
-          >clear</FormButton
-        >
+          v-model="s.queryFilter" />
+        <FormButton type="button" @click="s.queryFilter = ''">clear</FormButton>
+        <CustomSelect :options="s.sortOptions" v-model="s.sortedOption" icon="material-symbols:sort" />
       </div>
       <div id="users-page-controls__info">
-        <h5>Total users: {{ chatters.chatters.length }}</h5>
+        <h5>Total users: {{ s.chatters.length }}</h5>
         <h5>Total points: {{ totalPoints }}</h5>
       </div>
     </div>
@@ -63,22 +62,20 @@ useHead({
         <TableHeader>points</TableHeader>
       </TableHead>
       <TableBody>
-        <template v-if="chatters.chatters.length">
+        <template v-if="s.chatters.length">
           <TableRow
-            v-for="user in chatters.filtered.toReversed()"
+            v-for="user in s.sorted"
             :grid-template="gridTemplate"
-            :class="{ isBot: user.isBot }"
-          >
+            :class="{ isBot: user.isBot }">
             <TableCell centered>
               <FancyToggle
                 :value="user.isBot"
                 @change="
-                  chatters.handleUpdate({
+                  s.handleUpdate({
                     id: user.id,
                     isBot: !user.isBot,
                   })
-                "
-              />
+                  " />
             </TableCell>
             <TableCell>
               <span :title="user.userid">
@@ -109,8 +106,18 @@ useHead({
 
   &__search {
     display: flex;
-    width: 400px;
+    // width: 400px;
     gap: var(--padding);
+
+
+    .form-button {
+      width: 140px;
+    }
+
+    .custom-select {
+      width: fit-content;
+      flex-shrink: 0;
+    }
   }
 
   &__info {
