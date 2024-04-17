@@ -2,10 +2,10 @@ import { EWonLost, TWithCommandHandler } from "handlers/types";
 import { prisma, prismaQueue } from "services/db";
 import { TTwitchMessageInfo } from "services/types";
 import { TOption } from "types";
+import { TSettings } from "types/schema/settings.schema";
 import { interpolate } from "utils/interpolate-string";
 import { logger } from "utils/logger";
 import { getUsername } from "./utils/get-username";
-import { TSettings } from "types/schema/settings.schema";
 
 export function getResult(totalPoints: number, offset: number): [EWonLost, number] {
   const chances = 50 - (totalPoints % 50) + offset;

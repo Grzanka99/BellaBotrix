@@ -1,11 +1,11 @@
-import { TWithCommandHandler, TUseHandler } from "handlers/types";
-import { addPoints, getTop, getUserPoints, givePoints, removePoints } from "./points.command";
+import { TUseHandler, TWithCommandHandler } from "handlers/types";
+import { TwitchApi } from "services/twitch-api";
 import { interpolate } from "utils/interpolate-string";
 import { gamble } from "./gamble.command";
-import { TwitchApi } from "services/twitch-api";
+import { addPoints, getTop, getUserPoints, givePoints, removePoints } from "./points.command";
 import { getUserWinrate, soloNope, soloYes, startSolo } from "./solo.command";
-import { getCanRun } from "./utils/can-run";
 import { spit } from "./spit.command";
+import { getCanRun } from "./utils/can-run";
 
 export function createCommandHandler(command: TWithCommandHandler, api: TwitchApi): TUseHandler {
   return async ({ send, channel, tags, settings }): Promise<void> => {

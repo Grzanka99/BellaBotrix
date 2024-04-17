@@ -1,10 +1,10 @@
-import { getOAuthToken } from "services/twitch-api/api-connector";
-import { prisma } from "services/db";
-import { logger } from "utils/logger";
-import { ChannelConnection } from "services/channel-connection";
 import { Channel } from "@prisma/client";
 import { gc } from "bun";
+import { ChannelConnection } from "services/channel-connection";
+import { prisma } from "services/db";
+import { getOAuthToken } from "services/twitch-api/api-connector";
 import { TwitchIrc } from "services/twitch-irc";
+import { logger } from "utils/logger";
 
 export async function startBot(): Promise<void> {
   console.time("bootstrap");

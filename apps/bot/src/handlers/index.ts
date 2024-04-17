@@ -1,10 +1,10 @@
+import type { TSettings } from "bellatrix";
 import type { TChatMessage, THandler } from "handlers/types";
-import { identifyIsBotCommand } from "./commands/identify-message";
-import { createCommandHandler } from "./commands";
-import { createActivityHandler } from "./activity-handler";
 import type { TwitchApi } from "services/twitch-api";
 import type { TTwitchMessageInfo } from "services/types";
-import type { TSettings } from "bellatrix";
+import { createActivityHandler } from "./activity-handler";
+import { createCommandHandler } from "./commands";
+import { identifyIsBotCommand } from "./commands/identify-message";
 import { createTriggerWordsHandler } from "./trigger-words";
 
 type TProps = {

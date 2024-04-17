@@ -5,7 +5,7 @@ export function getCanRun(
   channel: string,
   tags: TTwitchMessageInfo,
 ): boolean {
-  if (!tags.userId|| !tags.username) {
+  if (!tags.userId || !tags.username) {
     return false;
   }
 

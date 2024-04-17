@@ -64,7 +64,7 @@ export class AsyncPipe<T extends Array<unknown> = [], R = void> {
 
     return new Promise((res, rej) => {
       this.resolver = res;
-      this.rejecter = rej
+      this.rejecter = rej;
     });
   }
 }

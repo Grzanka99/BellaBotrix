@@ -1,6 +1,6 @@
 import { prisma, prismaQueue } from "services/db";
-import { BASE_COMMANDS } from "./constants/base-commands";
 import { minimalCommandToMinimalDbCommand } from "./commands.transform";
+import { BASE_COMMANDS } from "./constants/base-commands";
 
 export function getUniqueName(cmd: string, channel: string) {
   const ch = channel.startsWith("#") ? channel : `#${channel}`;

@@ -1,8 +1,8 @@
 import { TOption } from "bellatrix";
-import { parseCommandComponent } from "./command-component.parse";
-import { parseTags } from "./tags.parser";
-import { parseSourceComponent } from "./source-components.parser";
 import { TTwitchIrcContext } from "services/types";
+import { parseCommandComponent } from "./command-component.parse";
+import { parseSourceComponent } from "./source-components.parser";
+import { parseTags } from "./tags.parser";
 
 export function parseMessage(rawMessage: string): TOption<TTwitchIrcContext> {
   let idx = 0;

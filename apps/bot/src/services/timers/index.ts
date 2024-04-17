@@ -1,7 +1,7 @@
+import { gc } from "bun";
 import { prisma } from "services/db";
 import { logger } from "utils/logger";
 import { SingleTimer, TTimerSender } from "./single-timer";
-import { gc } from "bun";
 
 export class ChannelTimer {
   private id: number | undefined;

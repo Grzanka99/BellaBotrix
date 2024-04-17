@@ -1,6 +1,7 @@
 import { prisma } from "services/db";
 import { TTwitchApiChatter, TTwitchApiStream } from "services/types";
 import { TOption } from "types";
+import { logger } from "utils/logger";
 import {
   getChatters,
   getModerators,
@@ -8,7 +9,6 @@ import {
   getStreams,
   getTwitchApiUser,
 } from "./api-connector";
-import { logger } from "utils/logger";
 
 export class TwitchApi {
   private channelToken: string | undefined = undefined;

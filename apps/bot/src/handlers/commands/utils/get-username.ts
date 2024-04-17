@@ -1,7 +1,4 @@
-export function getUsername(
-  original: string,
-  sender: string,
-): [string, string] {
+export function getUsername(original: string, sender: string): [string, string] {
   let resUsername: string = sender;
   let formattedUsername: string = sender;
 

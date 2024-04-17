@@ -1,6 +1,6 @@
+import { getCanRun } from "./can-run";
 // @ts-nocheck
 import { describe, expect, test } from "bun:test";
-import { getCanRun } from "./can-run";
 
 describe("command privilages", () => {
   test("should identify wannacry_tm as moderator", () => {

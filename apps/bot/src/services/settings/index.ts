@@ -1,9 +1,9 @@
 import type { WebuiUser } from "@prisma/client";
+import { SSettings, type TSettings } from "bellatrix";
 import merge from "lodash.merge";
 import { prisma } from "services/db";
-import { DEFAULT_SETTINGS } from "./constants/settings";
-import { SSettings, type TSettings } from "bellatrix";
 import { logger } from "utils/logger";
+import { DEFAULT_SETTINGS } from "./constants/settings";
 
 const getDefaults = () => {
   const res = SSettings.safeParse(DEFAULT_SETTINGS);

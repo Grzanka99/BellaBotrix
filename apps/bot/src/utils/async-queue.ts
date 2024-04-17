@@ -8,10 +8,7 @@ export class AsyncQueue {
   private resolver: (v: boolean) => void = (_) => {};
   private rejecter: (v: boolean) => void = (_) => {};
 
-  public async enqueue<T>(
-    callback: () => Promise<T>,
-    autostart = true,
-  ): Promise<T> {
+  public async enqueue<T>(callback: () => Promise<T>, autostart = true): Promise<T> {
     return new Promise((res, rej) => {
       this.queue.push([callback, res, rej]);
       if (!this.isRunning && autostart) {

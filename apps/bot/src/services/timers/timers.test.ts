@@ -1,6 +1,6 @@
+import { SingleTimer } from "./single-timer";
 // @ts-nocheck
 import { describe, expect, mock, test } from "bun:test";
-import { SingleTimer } from "./single-timer";
 
 const sender = mock((_: string) => {
   return;

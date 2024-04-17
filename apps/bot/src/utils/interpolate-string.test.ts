@@ -1,5 +1,5 @@
-import { describe, expect, test } from "bun:test";
 import { interpolate } from "./interpolate-string";
+import { describe, expect, test } from "bun:test";
 
 describe("interpolate string", () => {
   test("should replace $name with TestName", () => {
@@ -13,9 +13,9 @@ describe("interpolate string", () => {
   test("should replace both placeholders", () => {
     const res = interpolate("some $user has some $points", {
       user: "@WannaCry_TM",
-      points: 33
-    })
+      points: 33,
+    });
 
-    expect(res).toBe("some @WannaCry_TM has some 33")
-  })
+    expect(res).toBe("some @WannaCry_TM has some 33");
+  });
 });

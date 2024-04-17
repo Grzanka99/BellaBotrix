@@ -1,11 +1,11 @@
 import { TWithCommandHandler } from "handlers/types";
 import { prisma, prismaQueue } from "services/db";
 import { TwitchApi } from "services/twitch-api";
+import { TTwitchMessageInfo } from "services/types";
 import { TOption } from "types";
 import { interpolate } from "utils/interpolate-string";
 import { logger } from "utils/logger";
 import { getUsername } from "./utils/get-username";
-import { TTwitchMessageInfo } from "services/types";
 
 export async function getTop(
   { actionMessage }: TWithCommandHandler,

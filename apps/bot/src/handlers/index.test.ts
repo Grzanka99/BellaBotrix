@@ -1,6 +1,6 @@
 // @ts-nocheck
 import { getChatHandler } from "handlers";
-import { describe, test, expect } from "bun:test";
+import { describe, expect, test } from "bun:test";
 
 describe.skip("get chat handler", () => {
   test("should return only default handler", async () => {

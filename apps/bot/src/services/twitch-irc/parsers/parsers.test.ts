@@ -1,6 +1,6 @@
-import { describe, expect, it } from "bun:test";
-import { parseEmotes } from "./emotes.parser";
 import { parseBadges } from "./badges.parser";
+import { parseEmotes } from "./emotes.parser";
+import { describe, expect, it } from "bun:test";
 
 const MESSAGE = "Hey there @Trejekk, Kappa Kappa Kippa";
 const EMOTES = "25:20-24,25-30/30:32-36";
@@ -23,7 +23,7 @@ describe("parser", () => {
       subscriber: true,
       broadcaster: false,
       premium: false,
-      superperson: true
-    })
+      superperson: true,
+    });
   });
 });
