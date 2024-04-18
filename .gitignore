@@ -35,3 +35,4 @@ prisma/*-journal
 
 # Turbo
 .turbo
+.vercel

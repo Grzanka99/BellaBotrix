@@ -40,5 +40,9 @@ export default defineEventHandler(async (event) => {
     data: { channelId: channel.id },
   });
 
+  await prisma.channelAccess.create({
+    data: { userid: auth.data.id, channelId: channel.id },
+  });
+
   return await sendRedirect(event, "/panel");
 });
