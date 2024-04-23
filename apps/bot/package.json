@@ -19,6 +19,7 @@
   },
   "dependencies": {
     "bellatrix": "workspace:*",
+    "r6dle": "workspace:*",
     "@prisma/client": "^5.9.0",
     "zod": "^3.22.4"
   }

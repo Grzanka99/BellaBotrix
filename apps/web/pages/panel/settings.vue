@@ -16,6 +16,7 @@ const commands = computed(() => settings.settings?.commands);
 const triggerWords = computed(() => settings.settings?.triggerWords);
 const joinMessage = computed(() => settings.settings?.joinMessage);
 const points = computed(() => settings.settings?.points);
+const r6dle = computed(() => settings.settings?.r6dle);
 const automod = computed(() => settings.settings?.automod);
 
 useHead({
@@ -54,6 +55,17 @@ useHead({
           @change="(value) =>
             settings.handleUpdate({
               triggerWords: { enabled: { value } },
+            })
+            " />
+      </SingleSetting>
+    </SettingsGroup>
+    <SettingsGroup group-name="R6dle" v-if="r6dle?.enabled">
+      <SingleSetting name="enabled" :option="r6dle.enabled">
+        <FancyToggle
+          :value="r6dle.enabled.value"
+          @change="(value) =>
+            settings.handleUpdate({
+              r6dle: { enabled: { value } },
             })
             " />
       </SingleSetting>

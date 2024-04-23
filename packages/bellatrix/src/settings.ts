@@ -33,6 +33,9 @@ export const SSettings = z.object({
   triggerWords: z.object({
     enabled: SSettingOptionSchema(z.boolean()),
   }),
+  r6dle: z.object({
+    enabled: SSettingOptionSchema(z.boolean()),
+  }),
   automod: z.object({
     emotesLimit: z.object({
       enabled: SSettingOptionSchema(z.boolean()),

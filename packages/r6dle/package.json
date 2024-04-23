@@ -1,0 +1,14 @@
+{
+  "name": "r6dle",
+  "version": "1.0.0",
+  "private": "true",
+  "main": "./src/index.ts",
+  "types": "./index.d.ts",
+  "exports": {
+    ".": "./index.ts"
+  },
+  "dependencies": {
+    "typescript": "latest",
+    "zod": "^3.22.4"
+  }
+}

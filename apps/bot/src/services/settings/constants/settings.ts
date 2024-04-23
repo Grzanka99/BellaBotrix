@@ -72,6 +72,12 @@ export const DEFAULT_SETTINGS: TSettings = {
         'Enable functionality, so bot responds with message to trigger words, similar to commands but more like "chatty"',
     },
   },
+  r6dle: {
+    enabled: {
+      value: false,
+      description: "Eneble wordle-like quiz for Rainbow 6 Siege operators in your chat",
+    },
+  },
   automod: {
     emotesLimit: {
       enabled: {
