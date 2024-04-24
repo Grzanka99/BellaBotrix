@@ -1,23 +1,26 @@
-import type { TUseHandler } from "handlers/types";
 import { prisma } from "services/db";
+import type { TTwitchIrcContext } from "services/types";
 
-export function createTriggerWordsHandler(channelId: number): TUseHandler {
-  return async ({ send, channel, message }): Promise<void> => {
-    const triggers = await prisma.triggerWords.findMany({ where: { channelId } });
+type Args = TTwitchIrcContext & { send: (msg: string) => void; channelId: number };
 
-    for (const trigger of triggers) {
-      if (!trigger.enabled) {
-        continue;
-      }
+export async function triggerWordsHandler({ send, message, channelId }: Args): Promise<void> {
+  if (!message) {
+    return undefined;
+  }
+  const triggers = await prisma.triggerWords.findMany({ where: { channelId } });
 
-      const splited = trigger.triggers.split(",");
+  for (const trigger of triggers) {
+    if (!trigger.enabled) {
+      continue;
+    }
 
-      for (const one of splited) {
-        if (message.includes(one.trim())) {
-          send(trigger.response);
-          return;
-        }
+    const splited = trigger.triggers.split(",");
+
+    for (const one of splited) {
+      if (message.includes(one.trim())) {
+        send(trigger.response);
+        return;
       }
     }
-  };
+  }
 }

@@ -1,5 +1,5 @@
 import { prisma, prismaQueue } from "services/db";
-import { TTwitchApiChatter } from "services/types";
+import type { TTwitchApiChatter } from "services/types";
 import { logger } from "utils/logger";
 
 async function handleSingleChatter(chatter: TTwitchApiChatter, channel: string): Promise<boolean> {

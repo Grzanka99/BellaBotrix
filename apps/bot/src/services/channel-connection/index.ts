@@ -12,6 +12,8 @@ import { interpolate } from "utils/interpolate-string";
 import { logger } from "utils/logger";
 import { R6Dle } from "services/r6dle";
 import { CommandHandler } from "services/commands/handler";
+import { activityHandler } from "handlers/activity-handler";
+import { triggerWordsHandler } from "handlers/trigger-words";
 
 type TArgs = {
   ircClient: TwitchIrc;
@@ -115,6 +117,7 @@ export class ChannelConnection {
             break;
           }
 
+          // NOTE: All commands
           if (this.settings) {
             this.commandHandler.handle({
               ...ctx,
@@ -124,24 +127,18 @@ export class ChannelConnection {
             });
           }
 
-          // const handler = await getChatHandler({
-          //   channel: ctx.channel,
-          //   tags: ctx.tags,
-          //   message: ctx.message,
-          //   settings: this.settings,
-          //   api: this.api,
-          //   channelId: this.channelId,
-          // });
-          //
-          // for (const h of handler) {
-          //   await h.useHandler({
-          //     channel: ctx.channel,
-          //     tags: ctx.tags,
-          //     message: ctx.message,
-          //     send: this.send.bind(this),
-          //     settings: this.settings,
-          //   });
-          // }
+          // NOTE: Increasing points when user types on chat
+          activityHandler(ctx);
+
+          // NOTE: "hot words" that trigger some response from bot
+          if (this.channelId && this.api && this.settings?.triggerWords.enabled.value) {
+            triggerWordsHandler({
+              ...ctx,
+              channelId: this.channelId,
+              send: this.send.bind(this),
+            });
+          }
+
           break;
         }
         case "JOIN": {
@@ -197,6 +194,9 @@ export class ChannelConnection {
     this._irc = undefined;
     // @ts-ignore-next-line
     this._api = undefined;
+
+    // @ts-ignore-next-line
+    this.commandHandler = undefined;
 
     gc(true);
   }
