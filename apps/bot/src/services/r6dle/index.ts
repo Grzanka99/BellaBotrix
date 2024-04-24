@@ -75,7 +75,7 @@ export class R6Dle {
     const current = R6DleOperators[this.currentOperator];
     const isOperator = this.isOperator(name);
     if (!isOperator) {
-      return;
+      return `[wrong] ${name} is incorrect operator`;
     }
 
     const chosen = R6DleOperators[isOperator];
@@ -87,10 +87,4 @@ export class R6Dle {
 
     return this.diff(current, chosen);
   }
-}
-
-const r6dle = new R6Dle();
-
-for await (const line of console) {
-  console.log(r6dle.guess(line));
 }

@@ -19,6 +19,7 @@ model Commands {
   message     Json?
   alias       String  @default("")
   channelName String  @default("")
+  isCore      Boolean @default(false)
 }
 
 model User {

@@ -4,7 +4,6 @@ import { prisma } from "services/db";
 export function createTriggerWordsHandler(channelId: number): TUseHandler {
   return async ({ send, channel, message }): Promise<void> => {
     const triggers = await prisma.triggerWords.findMany({ where: { channelId } });
-    console.log(channel, triggers);
 
     for (const trigger of triggers) {
       if (!trigger.enabled) {

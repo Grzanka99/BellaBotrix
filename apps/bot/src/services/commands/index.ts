@@ -19,14 +19,19 @@ export async function setDefaultCommandsForChannel(channel: string) {
         where: {
           uniqueName: getUniqueName(command.name, channel),
         },
-        update: {},
+        update: {
+          isCore: command.isCore,
+        },
         create: {
           uniqueName: getUniqueName(command.name, channel),
           name: command.name,
+          // TODO: it is correct type, some ts error I think, but need to fix that
+          // @ts-expect-error
           message: command.message,
           alias: command.alias,
           enabled: true,
           channelName: channel,
+          isCore: command.isCore,
         },
       });
     });

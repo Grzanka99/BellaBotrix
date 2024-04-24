@@ -1,4 +1,6 @@
-import { TOption } from "bellatrix";
+import type { TOption, TSettings } from "bellatrix";
+import type { TwitchApi } from "services/twitch-api";
+import { TCommand } from "types/schema/commands.schema";
 
 export type TTwitchApiUser = {
   id: string;
@@ -134,4 +136,19 @@ export type TTwitchIrcContext = {
   self: boolean;
   tags: TOption<TTwitchMessageInfo>;
   source: TOption<TTwitchIrcSource>;
+};
+
+export type THandleCommadArgs = TTwitchIrcContext & {
+  api: TwitchApi;
+  settings: TSettings;
+  send: (msg: string) => void;
+};
+
+export type THandleParsedCommandArgs = THandleCommadArgs & {
+  parsedCommand: TCommand;
+};
+
+export type THandleCoreCommandArgs = THandleParsedCommandArgs & {
+  subCommand: false | string;
+  commandContent: string;
 };

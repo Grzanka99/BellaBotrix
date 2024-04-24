@@ -14,6 +14,7 @@ export const CommandSchema = z.object({
   enabled: z.boolean(),
   message: CommandMessageSchema,
   alias: z.array(z.string()).optional(),
+  isCore: z.boolean(),
 });
 
 export const MinimalCommandSchema = CommandSchema.omit({

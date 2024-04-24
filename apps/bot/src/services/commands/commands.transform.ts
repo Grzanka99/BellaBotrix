@@ -1,12 +1,12 @@
-import { TOption } from "types";
+import type { TOption } from "types";
 import {
   CommandFromDBSchema,
   CommandMessageSchema,
   CommandSchema,
-  TCommand,
-  TCommandFromDB,
-  TDbInterfaceCommand,
-  TMinimalCommand,
+  type TCommand,
+  type TCommandFromDB,
+  type TDbInterfaceCommand,
+  type TMinimalCommand,
 } from "types/schema/commands.schema";
 
 export function dbCommandToCommand(dbCommand: TCommandFromDB): TOption<TCommand> {
