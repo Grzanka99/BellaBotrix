@@ -2,17 +2,14 @@ import type { TOption } from "bellatrix";
 import type { THandleCoreCommandArgs, THandleParsedCommandArgs } from "services/types";
 
 export class CoreCommand {
-  private name: string;
   private sub: string[] | undefined;
   private handler: (ctx: THandleCoreCommandArgs) => Promise<TOption<string>>;
   private requierMod: boolean;
 
   constructor(
-    name: string,
     handler: (ctx: THandleCoreCommandArgs) => Promise<TOption<string>>,
     requierMod = false,
   ) {
-    this.name = name;
     this.handler = handler;
     this.requierMod = requierMod;
   }
@@ -47,33 +44,29 @@ export class CoreCommand {
       return undefined;
     }
 
-    if (!ctx.message.toLowerCase().slice(1).startsWith(this.name.toLowerCase())) {
-      return undefined;
-    }
-
     if (!this.sub) {
       return await this.handler({
         ...ctx,
         subCommand: false,
-        commandContent: ctx.message.substring(2 + this.name.length),
+        commandContent: ctx.message.substring(2 + ctx.triggerWord.length),
       });
     }
 
-    const noName = ctx.message.slice(2 + this.name.length);
+    const noName = ctx.message.slice(2 + ctx.triggerWord.length);
     const possibleSub = noName.substring(0, noName.indexOf(" "));
 
     if (this.sub.includes(possibleSub)) {
       return await this.handler({
         ...ctx,
         subCommand: possibleSub,
-        commandContent: ctx.message.substring(3 + this.name.length + possibleSub.length),
+        commandContent: ctx.message.substring(3 + ctx.triggerWord.length + possibleSub.length),
       });
     }
 
     return await this.handler({
       ...ctx,
       subCommand: false,
-      commandContent: ctx.message.substring(2 + this.name.length),
+      commandContent: ctx.message.substring(2 + ctx.triggerWord.length),
     });
   }
 }

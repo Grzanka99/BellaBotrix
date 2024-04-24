@@ -1,4 +1,5 @@
 import type { CoreCommand } from "./core-command";
+import { gambleCoreCommand } from "./handlers/gamble.command";
 import {
   addPointsCoreCommand,
   getTopCoreCommand,
@@ -6,6 +7,12 @@ import {
   givePointsCoreCommand,
   removePointsCoreCommand,
 } from "./handlers/points.command";
+import {
+  getUserWinrateCoreCommand,
+  soloNopeCoreCommand,
+  soloYesCoreCommand,
+  startSoloCoreCommand,
+} from "./handlers/solo.command";
 import { spitCoreCommand } from "./handlers/spit.command";
 
 export const CoreCommandsHandlers: Record<string, CoreCommand> = {
@@ -15,4 +22,9 @@ export const CoreCommandsHandlers: Record<string, CoreCommand> = {
   addpoints: addPointsCoreCommand,
   removepoints: removePointsCoreCommand,
   givepoints: givePointsCoreCommand,
+  solo: startSoloCoreCommand,
+  yes: soloYesCoreCommand,
+  nope: soloNopeCoreCommand,
+  winrate: getUserWinrateCoreCommand,
+  gamble: gambleCoreCommand,
 };

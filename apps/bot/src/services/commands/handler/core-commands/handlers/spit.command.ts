@@ -1,7 +1,7 @@
 import { interpolate } from "utils/interpolate-string";
 import { CoreCommand } from "../core-command";
 
-export const spitCoreCommand = new CoreCommand("htfu", async (ctx) => {
+export const spitCoreCommand = new CoreCommand(async (ctx) => {
   if (!ctx.message || !ctx.tags) {
     return undefined;
   }

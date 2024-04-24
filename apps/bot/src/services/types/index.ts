@@ -146,6 +146,8 @@ export type THandleCommadArgs = TTwitchIrcContext & {
 
 export type THandleParsedCommandArgs = THandleCommadArgs & {
   parsedCommand: TCommand;
+  triggerWord: string;
+  tags: TTwitchMessageInfo;
 };
 
 export type THandleCoreCommandArgs = THandleParsedCommandArgs & {

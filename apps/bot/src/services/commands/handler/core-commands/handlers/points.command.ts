@@ -4,7 +4,7 @@ import { interpolate } from "utils/interpolate-string";
 import { getUsername } from "handlers/commands/utils/get-username";
 import { logger } from "utils/logger";
 
-export const getTopCoreCommand = new CoreCommand("top", async (ctx) => {
+export const getTopCoreCommand = new CoreCommand(async (ctx) => {
   const top = await prismaQueue.enqueue(() =>
     prisma.user.findMany({
       take: 10,
@@ -31,7 +31,7 @@ export const getTopCoreCommand = new CoreCommand("top", async (ctx) => {
   });
 });
 
-export const getUserPointsCoreCommmand = new CoreCommand("points", async (ctx) => {
+export const getUserPointsCoreCommmand = new CoreCommand(async (ctx) => {
   if (!ctx.tags || !ctx.message) {
     return undefined;
   }
@@ -59,125 +59,117 @@ export const getUserPointsCoreCommmand = new CoreCommand("points", async (ctx) =
   });
 });
 
-export const addPointsCoreCommand = new CoreCommand(
-  "addpoints",
-  async (ctx) => {
-    if (!ctx.message || !ctx.tags || !ctx.channel) {
+export const addPointsCoreCommand = new CoreCommand(async (ctx) => {
+  if (!ctx.message || !ctx.tags || !ctx.channel) {
+    return undefined;
+  }
+
+  const [resUsername, formattedUsername] = getUsername(ctx.message, ctx.tags.username);
+  const targetUserId = await ctx.api.getUserId(formattedUsername);
+  if (!targetUserId) {
+    return undefined;
+  }
+
+  const startPosition = ctx.message.indexOf(resUsername) + resUsername.length;
+  const points = Number.parseInt(ctx.message.substring(startPosition));
+
+  if (Number.isNaN(points)) {
+    logger.error("points is NaN");
+    return undefined;
+  }
+
+  await prismaQueue.enqueue(async () => {
+    if (!ctx.channel) {
       return undefined;
     }
+    const user = await prisma.user.findFirst({
+      where: { userid: `${targetUserId}@${ctx.channel}` },
+    });
 
-    const [resUsername, formattedUsername] = getUsername(ctx.message, ctx.tags.username);
-    const targetUserId = await ctx.api.getUserId(formattedUsername);
-    if (!targetUserId) {
-      return undefined;
-    }
-
-    const startPosition = ctx.message.indexOf(resUsername) + resUsername.length;
-    const points = Number.parseInt(ctx.message.substring(startPosition));
-
-    if (Number.isNaN(points)) {
-      logger.error("points is NaN");
-      return undefined;
-    }
-
-    await prismaQueue.enqueue(async () => {
-      if (!ctx.channel) {
-        return undefined;
-      }
-      const user = await prisma.user.findFirst({
-        where: { userid: `${targetUserId}@${ctx.channel}` },
-      });
-
-      if (!user) {
-        prisma.user.create({
-          data: {
-            username: formattedUsername,
-            userid: `${targetUserId}@${ctx.channel}`,
-            points,
-            channel: ctx.channel,
-          },
-        });
-        return `${formattedUsername} doesn't exist on this channel, yet`;
-      }
-
-      await prisma.user.update({
-        where: {
-          userid: user.userid,
-        },
+    if (!user) {
+      prisma.user.create({
         data: {
-          points: user.points + points,
-        },
-      });
-    });
-
-    return interpolate(ctx.parsedCommand.message.base, {
-      username: `@${resUsername}`,
-      points,
-    });
-  },
-  true,
-);
-
-export const removePointsCoreCommand = new CoreCommand(
-  "removepoints",
-  async (ctx) => {
-    if (!ctx.message || !ctx.tags) {
-      return undefined;
-    }
-
-    const [resUsername, formattedUsername] = getUsername(ctx.message, ctx.tags.username);
-
-    const targetUserId = await ctx.api.getUserId(formattedUsername);
-    if (!targetUserId) {
-      return undefined;
-    }
-
-    const startPosition = ctx.message.indexOf(resUsername) + resUsername.length;
-    const points = Number.parseInt(ctx.message.substring(startPosition));
-
-    if (Number.isNaN(points)) {
-      logger.error("points is NaN");
-      return undefined;
-    }
-
-    const finalPoints = await prismaQueue.enqueue(async () => {
-      const user = await prisma.user.findUnique({
-        where: {
+          username: formattedUsername,
           userid: `${targetUserId}@${ctx.channel}`,
+          points,
+          channel: ctx.channel,
         },
       });
+      return `${formattedUsername} doesn't exist on this channel, yet`;
+    }
 
-      if (!user) {
-        return interpolate(ctx.parsedCommand.message.base || "", {
-          username: `@${resUsername}`,
-          points: 0,
-        });
-      }
+    await prisma.user.update({
+      where: {
+        userid: user.userid,
+      },
+      data: {
+        points: user.points + points,
+      },
+    });
+  });
 
-      let finalPoints = user.points - points;
-      finalPoints = finalPoints < 0 ? 0 : finalPoints;
+  return interpolate(ctx.parsedCommand.message.base, {
+    username: `@${resUsername}`,
+    points,
+  });
+}, true);
 
-      await prisma.user.update({
-        where: {
-          userid: user.userid,
-        },
-        data: {
-          points: finalPoints,
-        },
+export const removePointsCoreCommand = new CoreCommand(async (ctx) => {
+  if (!ctx.message || !ctx.tags) {
+    return undefined;
+  }
+
+  const [resUsername, formattedUsername] = getUsername(ctx.message, ctx.tags.username);
+
+  const targetUserId = await ctx.api.getUserId(formattedUsername);
+  if (!targetUserId) {
+    return undefined;
+  }
+
+  const startPosition = ctx.message.indexOf(resUsername) + resUsername.length;
+  const points = Number.parseInt(ctx.message.substring(startPosition));
+
+  if (Number.isNaN(points)) {
+    logger.error("points is NaN");
+    return undefined;
+  }
+
+  const finalPoints = await prismaQueue.enqueue(async () => {
+    const user = await prisma.user.findUnique({
+      where: {
+        userid: `${targetUserId}@${ctx.channel}`,
+      },
+    });
+
+    if (!user) {
+      return interpolate(ctx.parsedCommand.message.base || "", {
+        username: `@${resUsername}`,
+        points: 0,
       });
+    }
 
-      return finalPoints;
+    let finalPoints = user.points - points;
+    finalPoints = finalPoints < 0 ? 0 : finalPoints;
+
+    await prisma.user.update({
+      where: {
+        userid: user.userid,
+      },
+      data: {
+        points: finalPoints,
+      },
     });
 
-    return interpolate(ctx.parsedCommand.message.base || "", {
-      username: `@${resUsername}`,
-      points: finalPoints,
-    });
-  },
-  true,
-);
+    return finalPoints;
+  });
 
-export const givePointsCoreCommand = new CoreCommand("givepoints", async (ctx) => {
+  return interpolate(ctx.parsedCommand.message.base || "", {
+    username: `@${resUsername}`,
+    points: finalPoints,
+  });
+}, true);
+
+export const givePointsCoreCommand = new CoreCommand(async (ctx) => {
   if (!ctx.message || !ctx.tags) {
     return undefined;
   }

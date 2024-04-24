@@ -58,8 +58,13 @@ export class CommandHandler {
       return undefined;
     }
 
-    if (parsedCommand.isCore && CoreCommandsHandlers[parsedCommand.name]) {
-      const res = await CoreCommandsHandlers[parsedCommand.name].handle({ ...args, parsedCommand });
+    if (parsedCommand.isCore && CoreCommandsHandlers[parsedCommand.name] && args.tags) {
+      const res = await CoreCommandsHandlers[parsedCommand.name].handle({
+        ...args,
+        tags: args.tags,
+        parsedCommand,
+        triggerWord,
+      });
       if (res) {
         args.send(res);
       }
