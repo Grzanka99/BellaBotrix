@@ -104,7 +104,9 @@ export const BASE_COMMANDS: TMinimalCommandsList = [
       {
         name: "guess",
         message: {
-          base: "username guessing $operator",
+          base: "You are right $username, it's indeed $operator!",
+          badOperator: "Operator $badOperator doesn't exist",
+          wrong: "$diff",
         },
       },
       {

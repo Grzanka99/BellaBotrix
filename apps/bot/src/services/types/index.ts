@@ -1,7 +1,7 @@
 import type { TOption, TSettings } from "bellatrix";
 import { R6Dle } from "services/r6dle";
 import type { TwitchApi } from "services/twitch-api";
-import { TCommand } from "types/schema/commands.schema";
+import { TCommand, TSubCommand } from "types/schema/commands.schema";
 
 export type TTwitchApiUser = {
   id: string;
@@ -153,6 +153,6 @@ export type THandleParsedCommandArgs = THandleCommadArgs & {
 };
 
 export type THandleCoreCommandArgs = THandleParsedCommandArgs & {
-  subCommand: false | string;
+  subCommand: false | TSubCommand;
   commandContent: string;
 };

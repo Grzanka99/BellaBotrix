@@ -1,8 +1,10 @@
+import type { SubCommands } from "@prisma/client";
 import type { TOption } from "types";
 import {
   CommandFromDBSchema,
   CommandMessageSchema,
   CommandSchema,
+  type TSubCommand,
   type TCommand,
   type TCommandFromDB,
   type TDbInterfaceCommand,
@@ -33,6 +35,18 @@ export function dbCommandToCommand(dbCommand: TCommandFromDB): TOption<TCommand>
   }
 
   return res.data;
+}
+
+export function dbSubCommandToSubCommand(dbSubCommand: SubCommands): TSubCommand {
+  return {
+    name: dbSubCommand.name,
+    // @ts-expect-error
+    message: dbSubCommand.message,
+    alias: dbSubCommand.alias.split(",").map((el) => el.trim()),
+    id: dbSubCommand.id,
+    uniqueName: dbSubCommand.uniqueName,
+    channelName: dbSubCommand.channelName,
+  };
 }
 
 export function commandToDbCommand(command: TCommand): TOption<TCommandFromDB> {

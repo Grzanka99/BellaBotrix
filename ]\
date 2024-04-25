@@ -104,19 +104,13 @@ model R6DleOperators {
 }
 
 model R6DleGame {
-  id         Int                 @id @default(autoincrement())
-  operator   String
-  winner     String?
-  channel    String
-  history    R6DleGuessHistory[]
-  inProgress Boolean
+  id       Int    @id @default(autoincrement())
+  operator String
+  winner   String
+  channel  String
 }
 
 model R6DleGuessHistory {
-  id           Int       @id @default(autoincrement())
-  gameId       Int
-  game         R6DleGame @relation(fields: [gameId], references: [id])
-  guess        String
-  player       String
-  correctGuess Boolean
+  id     Int       @id @default(autoincrement())
+  gameId R6DleGame @relation(fields: ["gameId"], references: ["id"])
 }

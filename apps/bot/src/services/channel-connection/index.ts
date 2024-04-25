@@ -57,7 +57,7 @@ export class ChannelConnection {
     this.commandHandler = new CommandHandler(args.channelName);
 
     // TODO: Move it out of constructor maybe
-    this.r6dle = new R6Dle();
+    this.r6dle = new R6Dle(this.channelName);
 
     prisma.channel
       .findUnique({

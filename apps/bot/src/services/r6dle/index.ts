@@ -1,6 +1,7 @@
 import { capitalize, type TOption } from "bellatrix";
 import { R6DleOperators, type TR6DleOperator } from "r6dle";
-import { interpolate } from "utils/interpolate-string";
+import { prisma, prismaQueue } from "services/db";
+import { logger } from "utils/logger";
 
 enum EState {
   Partial = "partial",
@@ -34,13 +35,19 @@ function matchState(target: string | number, guess: string | number): EState {
 
 export class R6Dle {
   private operators = Object.keys(R6DleOperators).map((el) => el.toUpperCase());
-  private currentOperator = "SLEDGE";
+  private _currentOperator: string | undefined = undefined;
+  private _gameId: number | undefined = undefined;
+  private channel: string;
 
-  constructor() {
-    this.newOperator();
+  constructor(channel: string) {
+    this.channel = channel;
+    this.loadGame().then(([operator, gameid]) => {
+      this._currentOperator = operator;
+      this._gameId = gameid;
+    });
   }
 
-  public isOperator(name: string): false | string {
+  private isOperator(name: string): false | string {
     const res = this.operators.includes(name.toUpperCase());
     if (res) {
       return name.toUpperCase();
@@ -49,29 +56,77 @@ export class R6Dle {
     return false;
   }
 
-  public diff(target: TR6DleOperator, guess: TR6DleOperator): string {
+  private diff(target: TR6DleOperator, guess: TR6DleOperator): string {
     let res = "";
 
-    res += `[${matchState(target.sex, guess.sex)}] ${guess.sex} | `;
-    res += `[${matchArray(target.role, guess.role)}] ${guess.role.join(", ")} | `;
-    res += `[${matchState(target.side, guess.side)}] ${guess.side} | `;
-    res += `[${matchState(target.continent, guess.continent)}] ${guess.continent} | `;
-    res += `[${matchState(target.release_year, guess.release_year)}] ${guess.release_year + 2014}`;
+    res += `_${matchState(target.sex, guess.sex)}_ ${guess.sex} | `;
+    res += `_${matchArray(target.role, guess.role)}_ ${guess.role.join(", ")} | `;
+    res += `_${matchState(target.side, guess.side)}_ ${guess.side} | `;
+    res += `_${matchState(target.continent, guess.continent)}_ ${guess.continent} | `;
+    res += `_${matchState(target.release_year, guess.release_year)}_ ${guess.release_year + 2014}`;
     if (matchState(target.release_year, guess.release_year) === EState.Wrong) {
-      res += target.release_year > guess.release_year ? "[up]" : "[down]";
+      res += target.release_year > guess.release_year ? "_up_" : "_down_";
     }
     res += " | ";
-    res += `[${matchState(target.speed, guess.speed)}] ${guess.speed} speed`;
+    res += `_${matchState(target.speed, guess.speed)}_ ${guess.speed} speed`;
     return res;
   }
 
-  public newOperator(): void {
-    const rand = Math.floor(Math.random() * this.operators.length);
-    console.log(this.operators[rand], rand);
-    this.currentOperator = this.operators[rand];
+  private async loadGame(): Promise<[string, number]> {
+    logger.info(`Loading r6dle game for channel ${this.channel}`);
+    const res = await prismaQueue.enqueue(() =>
+      prisma.r6DleGame.findFirst({
+        where: { channel: this.channel, inProgress: true },
+      }),
+    );
+
+    if (!res) {
+      logger.info(`None r6dle game found for channel ${this.channel}`);
+      const newGame = await this.newGame();
+      return newGame;
+    }
+
+    logger.info(`Game r6dle of id ${res.id} for channel ${this.channel} loaded`);
+    return [res.operator, res.id];
   }
 
-  public guess(name: string): TOption<{ response: Record<string, string>; correct: boolean }> {
+  public async newGame(): Promise<[string, number]> {
+    logger.info(`Creating new r6dle game for channel ${this.channel}`);
+    const rand = Math.floor(Math.random() * this.operators.length);
+
+    const newGame = await prismaQueue.enqueue(() =>
+      prisma.r6DleGame.create({
+        data: {
+          operator: this.operators[rand],
+          channel: this.channel,
+          inProgress: true,
+        },
+      }),
+    );
+
+    logger.info(`New r6dle game with id: ${newGame.id} for channel ${this.channel} created`);
+
+    return [newGame.operator, newGame.id];
+  }
+
+  public async endGame(player: string): Promise<void> {
+    try {
+      await prismaQueue.enqueue(() =>
+        prisma.r6DleGame.update({
+          where: { id: this.gameId },
+          data: { inProgress: false, winner: player },
+        }),
+      );
+    } catch (_) {}
+  }
+
+  public async guess(
+    name: string,
+    player: string,
+  ): Promise<TOption<{ response: Record<string, string>; correct: boolean }>> {
+    if (!this.currentOperator || !this.gameId) {
+      return;
+    }
     const current = R6DleOperators[this.currentOperator];
     const isOperator = this.isOperator(name);
     if (!isOperator) {
@@ -81,13 +136,49 @@ export class R6Dle {
     const chosen = R6DleOperators[isOperator];
 
     if (JSON.stringify(chosen) === JSON.stringify(current)) {
-      this.newOperator();
+      await prismaQueue.enqueue(async () => {
+        if (!this.gameId) {
+          return undefined;
+        }
+        return await prisma.r6DleGuessHistory.create({
+          data: {
+            gameId: this.gameId,
+            player: player,
+            guess: isOperator,
+            correctGuess: true,
+          },
+        });
+      });
+      await this.endGame(player);
+
       return {
-        response: { name: capitalize(name) },
+        response: { operator: capitalize(name) },
         correct: true,
       };
     }
 
+    prismaQueue.enqueue(async () => {
+      if (!this.gameId) {
+        return;
+      }
+
+      return await prisma.r6DleGuessHistory.create({
+        data: {
+          gameId: this.gameId,
+          player: player,
+          guess: isOperator,
+          correctGuess: false,
+        },
+      });
+    });
     return { response: { diff: this.diff(current, chosen) }, correct: false };
+  }
+
+  public get currentOperator() {
+    return this._currentOperator;
+  }
+
+  public get gameId() {
+    return this._gameId;
   }
 }

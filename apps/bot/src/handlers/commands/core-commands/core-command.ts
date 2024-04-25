@@ -1,5 +1,6 @@
 import type { SubCommands } from "@prisma/client";
 import type { TOption } from "bellatrix";
+import { dbCommandToCommand, dbSubCommandToSubCommand } from "services/commands/commands.transform";
 import { prisma } from "services/db";
 import type { THandleCoreCommandArgs, THandleParsedCommandArgs } from "services/types";
 
@@ -105,7 +106,7 @@ export class CoreCommand {
     if (subCommand) {
       return await this.handler({
         ...ctx,
-        subCommand: subCommand.name,
+        subCommand: dbSubCommandToSubCommand(subCommand),
         commandContent: ctx.message.substring(3 + ctx.triggerWord.length + possibleSub.length),
       });
     }
