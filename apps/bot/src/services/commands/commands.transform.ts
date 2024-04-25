@@ -50,7 +50,7 @@ export function commandToDbCommand(command: TCommand): TOption<TCommandFromDB> {
 }
 
 export function minimalCommandToMinimalDbCommand(
-  command: TMinimalCommand,
+  command: Omit<TMinimalCommand, "isCore">,
 ): TOption<TDbInterfaceCommand> {
   return {
     ...command,

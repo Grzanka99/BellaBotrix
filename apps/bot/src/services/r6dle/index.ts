@@ -71,20 +71,23 @@ export class R6Dle {
     this.currentOperator = this.operators[rand];
   }
 
-  public guess(name: string): TOption<string> {
+  public guess(name: string): TOption<{ response: Record<string, string>; correct: boolean }> {
     const current = R6DleOperators[this.currentOperator];
     const isOperator = this.isOperator(name);
     if (!isOperator) {
-      return `[wrong] ${name} is incorrect operator`;
+      return { response: { badOperator: name }, correct: false };
     }
 
     const chosen = R6DleOperators[isOperator];
 
     if (JSON.stringify(chosen) === JSON.stringify(current)) {
       this.newOperator();
-      return interpolate("$username you are right! it's $name!", { name: capitalize(name) });
+      return {
+        response: { name: capitalize(name) },
+        correct: true,
+      };
     }
 
-    return this.diff(current, chosen);
+    return { response: { diff: this.diff(current, chosen) }, correct: false };
   }
 }

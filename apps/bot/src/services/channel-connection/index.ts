@@ -1,19 +1,18 @@
+import type { TSettings } from "bellatrix";
 import { gc } from "bun";
-import { getChatHandler } from "handlers";
+import { activityHandler } from "handlers/activity-handler";
 import { chatterTimeHandler } from "handlers/activity-handler/chatters-time";
+import { CommandHandler } from "handlers/commands";
+import { triggerWordsHandler } from "handlers/trigger-words";
 import { setDefaultCommandsForChannel } from "services/commands";
 import { prisma } from "services/db";
+import { R6Dle } from "services/r6dle";
 import { getSettings } from "services/settings";
 import { ChannelTimer } from "services/timers";
 import { TwitchApi } from "services/twitch-api";
 import type { TwitchIrc } from "services/twitch-irc";
-import type { TSettings } from "bellatrix";
 import { interpolate } from "utils/interpolate-string";
 import { logger } from "utils/logger";
-import { R6Dle } from "services/r6dle";
-import { CommandHandler } from "services/commands/handler";
-import { activityHandler } from "handlers/activity-handler";
-import { triggerWordsHandler } from "handlers/trigger-words";
 
 type TArgs = {
   ircClient: TwitchIrc;
@@ -39,6 +38,8 @@ export class ChannelConnection {
 
   private commandHandler: CommandHandler;
 
+  private r6dle: R6Dle;
+
   private get logger() {
     return {
       info: (msg: string) => logger.info(`[${this.channelName}] ${msg}`),
@@ -54,6 +55,9 @@ export class ChannelConnection {
     this.channelName = args.channelName;
     this.ownerId = args.ownerId;
     this.commandHandler = new CommandHandler(args.channelName);
+
+    // TODO: Move it out of constructor maybe
+    this.r6dle = new R6Dle();
 
     prisma.channel
       .findUnique({
@@ -124,6 +128,7 @@ export class ChannelConnection {
               api: this.api,
               settings: this.settings,
               send: this.send.bind(this),
+              r6dle: this.r6dle,
             });
           }
 

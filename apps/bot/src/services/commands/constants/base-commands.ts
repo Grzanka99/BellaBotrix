@@ -1,4 +1,4 @@
-import { TMinimalCommandsList } from "types/schema/commands.schema";
+import type { TMinimalCommandsList } from "types/schema/commands.schema";
 
 export const BASE_COMMANDS: TMinimalCommandsList = [
   {
@@ -93,5 +93,26 @@ export const BASE_COMMANDS: TMinimalCommandsList = [
       listItem: "$index. $username has $points",
     },
     isCore: true,
+  },
+  {
+    name: "r6dle",
+    message: {
+      base: "Either use !r6dle guess or !r6dle stats",
+    },
+    isCore: true,
+    subCommands: [
+      {
+        name: "guess",
+        message: {
+          base: "username guessing $operator",
+        },
+      },
+      {
+        name: "stats",
+        message: {
+          base: "$username won $won and has score of $score",
+        },
+      },
+    ],
   },
 ];

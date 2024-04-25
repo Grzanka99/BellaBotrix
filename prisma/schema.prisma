@@ -22,6 +22,16 @@ model Commands {
   isCore      Boolean @default(false)
 }
 
+model SubCommands {
+  id            Int    @id @default(autoincrement())
+  uniqueName    String @unique
+  name          String
+  parentCommand String
+  message       Json?
+  alias         String @default("")
+  channelName   String @default("")
+}
+
 model User {
   id           Int     @id @default(autoincrement())
   userid       String  @unique

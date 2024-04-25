@@ -1,9 +1,8 @@
 import { prisma } from "services/db";
-import { dbCommandToCommand } from "../commands.transform";
 import { interpolate } from "utils/interpolate-string";
-import { CoreCommand } from "./core-commands/core-command";
 import type { THandleCommadArgs } from "services/types";
 import { CoreCommandsHandlers } from "./core-commands";
+import { dbCommandToCommand } from "services/commands/commands.transform";
 
 export class CommandHandler {
   private channel: string;
