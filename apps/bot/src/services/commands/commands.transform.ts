@@ -41,7 +41,10 @@ export function dbSubCommandToSubCommand(dbSubCommand: SubCommands): TSubCommand
   return {
     name: dbSubCommand.name,
     // @ts-expect-error
-    message: dbSubCommand.message,
+    message:
+      typeof dbSubCommand.message === "string"
+        ? JSON.parse(dbSubCommand.message)
+        : dbSubCommand.message,
     alias: dbSubCommand.alias.split(",").map((el) => el.trim()),
     id: dbSubCommand.id,
     uniqueName: dbSubCommand.uniqueName,
