@@ -17,7 +17,7 @@ export async function handleGuessSubcommand(ctx: THandleCoreCommandArgs): Promis
   }
 
   if (res.correct) {
-    await ctx.r6dle.newGame();
+    await ctx.r6dle.startNewGame();
     return interpolate(base, { operator: res.response.operator, username: ctx.tags.username });
   }
 

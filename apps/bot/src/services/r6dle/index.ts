@@ -109,6 +109,12 @@ export class R6Dle {
     return [newGame.operator, newGame.id];
   }
 
+  public async startNewGame(): Promise<void> {
+    const [operator, gameid] = await this.newGame();
+    this._currentOperator = operator;
+    this._gameId = gameid;
+  }
+
   public async endGame(player: string): Promise<void> {
     try {
       await prismaQueue.enqueue(() =>
