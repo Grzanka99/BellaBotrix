@@ -1,9 +1,8 @@
-import { TWithCommandHandler } from "handlers/types";
-import { prisma, prismaQueue } from "services/db";
-import { TTwitchMessageInfo } from "services/types";
-import { TOption } from "types";
-import { interpolate } from "utils/interpolate-string";
+import type { TOption } from "bellatrix";
+import { CoreCommand } from "../core-command";
 import { logger } from "utils/logger";
+import { prisma, prismaQueue } from "services/db";
+import { interpolate } from "utils/interpolate-string";
 
 function getUsername(original: string): TOption<[string, string]> {
   const username = original.match(/\@\S+/);
@@ -19,25 +18,23 @@ function getUsername(original: string): TOption<[string, string]> {
   return undefined;
 }
 
-export async function startSolo(
-  { original, actionMessage }: TWithCommandHandler,
-  channel: string,
-  tags: TTwitchMessageInfo,
-): Promise<TOption<string>> {
-  if (!original || !actionMessage.base || !tags.username || !tags.userId) {
+export const startSoloCoreCommand = new CoreCommand(async (ctx) => {
+  if (!ctx.message || !ctx.tags) {
     return undefined;
   }
 
-  const username1 = tags.username;
+  const { base, inSolo, notEnoughtPoints } = ctx.parsedCommand.message;
 
-  const res = getUsername(original);
+  const username1 = ctx.tags.username;
+
+  const res = getUsername(ctx.message);
   if (!res) {
     return undefined;
   }
 
   const [unformattedU2, username2] = res;
-  const startPosition = original.indexOf(unformattedU2) + unformattedU2.length;
-  const points = Math.abs(parseInt(original.substring(startPosition)));
+  const startPosition = ctx.message.indexOf(unformattedU2) + unformattedU2.length;
+  const points = Math.abs(Number.parseInt(ctx.message.substring(startPosition)));
 
   if (Number.isNaN(points)) {
     logger.error("points is NaN");
@@ -53,7 +50,7 @@ export async function startSolo(
   });
 
   if (existingSolo) {
-    return interpolate(actionMessage.inSolo || "", {
+    return interpolate(inSolo || "", {
       username1,
       username2,
     });
@@ -62,13 +59,14 @@ export async function startSolo(
   const user1points = await prismaQueue.enqueue(() =>
     prisma.user.findUnique({
       where: {
-        userid: `${tags.userId}@${channel}`,
+        // @ts-expect-error
+        userid: `${ctx.tags.userId}@${ctx.channel}`,
       },
     }),
   );
 
   if (!user1points || user1points.points < points) {
-    return interpolate(actionMessage.notEnoughtPoints || "", {
+    return interpolate(notEnoughtPoints || "", {
       username1,
       username2,
     });
@@ -81,7 +79,8 @@ export async function startSolo(
           user1: username1,
           user2: username2,
           points,
-          channel,
+          // @ts-expect-error
+          channel: ctx.channel,
           inProgress: true,
         },
       }),
@@ -97,27 +96,23 @@ export async function startSolo(
       }, 120 * 1000);
     });
 
-  return interpolate(actionMessage.base, {
+  return interpolate(base, {
     username1,
     username2,
     points,
   });
-}
+});
 
-export async function soloNope(
-  { actionMessage }: TWithCommandHandler,
-  channel: string,
-  tags: TTwitchMessageInfo,
-): Promise<TOption<string>> {
-  if (!tags.userId || !tags.username || !actionMessage.base) {
+export const soloNopeCoreCommand = new CoreCommand(async (ctx) => {
+  if (!ctx.tags) {
     return undefined;
   }
 
   const foundSolo = await prismaQueue.enqueue(() =>
     prisma.solo.findFirst({
       where: {
-        OR: [{ user1: tags.username }, { user2: tags.username }],
-        channel,
+        OR: [{ user1: ctx.tags.username }, { user2: ctx.tags.username }],
+        channel: ctx.channel,
         inProgress: true,
         winner: null,
       },
@@ -140,25 +135,23 @@ export async function soloNope(
     }),
   );
 
-  return interpolate(actionMessage.base, {
-    username: `@${tags.username}`,
+  return interpolate(ctx.parsedCommand.message.base, {
+    username: `@${ctx.tags.username}`,
   });
-}
+});
 
-export async function soloYes(
-  { actionMessage }: TWithCommandHandler,
-  channel: string,
-  tags: TTwitchMessageInfo,
-): Promise<TOption<string>> {
-  if (!tags.userId || !tags.username || !actionMessage.base) {
+export const soloYesCoreCommand = new CoreCommand(async (ctx) => {
+  if (!ctx.tags) {
     return undefined;
   }
+
+  const { base, notEnoughtPoints } = ctx.parsedCommand.message;
 
   const foundSolo = await prismaQueue.enqueue(() =>
     prisma.solo.findFirst({
       where: {
-        user2: tags.username,
-        channel,
+        user2: ctx.tags.username,
+        channel: ctx.channel,
         inProgress: true,
         winner: null,
       },
@@ -172,7 +165,7 @@ export async function soloYes(
   const user2points = await prismaQueue.enqueue(() =>
     prisma.user.findUnique({
       where: {
-        userid: `${tags.userId}@${channel}`,
+        userid: `${ctx.tags.userId}@${ctx.channel}`,
       },
     }),
   );
@@ -182,7 +175,7 @@ export async function soloYes(
   }
 
   if (user2points.points < foundSolo.points) {
-    return interpolate(actionMessage.notEnoughtPoints || "", {
+    return interpolate(notEnoughtPoints || "", {
       username: tags.displayName,
     });
   }
@@ -208,7 +201,7 @@ export async function soloYes(
     });
 
     const looserFromDB = await prisma.user.findFirst({
-      where: { username: looser, channel: channel },
+      where: { username: looser, channel: ctx.channel },
     });
 
     if (!looserFromDB || !winnerFromDB) {
@@ -240,32 +233,33 @@ export async function soloYes(
     return res;
   }
 
-  return interpolate(actionMessage.base, {
+  return interpolate(base, {
     winner: `@${winner}`,
     looser: `@${looser}`,
     points: foundSolo.points,
   });
-}
+});
 
-export async function getUserWinrate(
-  { original, actionMessage }: TWithCommandHandler,
-  channel: string,
-  sender?: string,
-): Promise<TOption<string>> {
-  if (!original || !actionMessage.base || !sender) {
+export const getUserWinrateCoreCommand = new CoreCommand(async (ctx) => {
+  if (!ctx.message) {
     return undefined;
   }
 
-  const [resUsername, formattedUsername] = getUsername(original) || [sender, sender];
+  const [resUsername, formattedUsername] = getUsername(ctx.message) || [
+    ctx.tags.username,
+    ctx.tags.username,
+  ];
 
   const solosWithUser = await prismaQueue.enqueue(() =>
     prisma.solo.findMany({
       where: {
         OR: [{ user1: formattedUsername }, { user2: formattedUsername }],
-        AND: { inProgress: false, winner: { not: "undecided" }, channel },
+        AND: { inProgress: false, winner: { not: "undecided" }, channel: ctx.channel },
       },
     }),
   );
+
+  const { base, fiftypercent, winrateNegative } = ctx.parsedCommand.message;
 
   const total = solosWithUser.length;
   const wins = solosWithUser.filter((el) => el.winner === formattedUsername).length;
@@ -273,25 +267,29 @@ export async function getUserWinrate(
   const formattedWinrate = `${winrate.toFixed(2)}%`;
 
   if (winrate === 50) {
-    return interpolate(actionMessage.fiftypercent || "$winrate", {
-      total,
-      wins,
-      winrate: formattedWinrate,
-      username: `@${resUsername}`,
-    });
-  } else if (winrate > 50) {
-    return interpolate(actionMessage.base, {
-      total,
-      wins,
-      winrate: formattedWinrate,
-      username: `@${resUsername}`,
-    });
-  } else if (winrate < 50) {
-    return interpolate(actionMessage.winrateNegative || "$winrate", {
+    return interpolate(fiftypercent || "$winrate", {
       total,
       wins,
       winrate: formattedWinrate,
       username: `@${resUsername}`,
     });
   }
-}
+
+  if (winrate > 50) {
+    return interpolate(base, {
+      total,
+      wins,
+      winrate: formattedWinrate,
+      username: `@${resUsername}`,
+    });
+  }
+
+  if (winrate < 50) {
+    return interpolate(winrateNegative || "$winrate", {
+      total,
+      wins,
+      winrate: formattedWinrate,
+      username: `@${resUsername}`,
+    });
+  }
+});

@@ -1,13 +1,11 @@
-import { EWonLost, TWithCommandHandler } from "handlers/types";
+import { getUsername } from "handlers/commands/utils/get-username";
+import { EWonLost } from "handlers/types";
 import { prisma, prismaQueue } from "services/db";
-import { TTwitchMessageInfo } from "services/types";
-import { TOption } from "types";
-import { TSettings } from "types/schema/settings.schema";
-import { interpolate } from "utils/interpolate-string";
 import { logger } from "utils/logger";
-import { getUsername } from "./utils/get-username";
+import { CoreCommand } from "../core-command";
+import { interpolate } from "utils/interpolate-string";
 
-export function getResult(totalPoints: number, offset: number): [EWonLost, number] {
+function getResult(totalPoints: number, offset: number): [EWonLost, number] {
   const chances = 50 - (totalPoints % 50) + offset;
   const rand = Math.floor(Math.random() * 100) + 1;
 
@@ -28,36 +26,33 @@ export function getResult(totalPoints: number, offset: number): [EWonLost, numbe
   return [EWonLost.Lost, rand];
 }
 
-export async function gamble(
-  command: TWithCommandHandler,
-  channel: string,
-  tags: TTwitchMessageInfo,
-  settings: TSettings,
-): Promise<TOption<string>> {
-  if (!command.original || !command.actionMessage || !tags.userId || !tags.username) {
+export const gambleCoreCommand = new CoreCommand(async (ctx) => {
+  if (!ctx.message) {
     return undefined;
   }
 
-  const [resUsername, formattedUsername] = getUsername(command.original, tags.username);
+  const [resUsername, formattedUsername] = getUsername(ctx.message, ctx.tags.username);
 
-  const startPosition = command.original.indexOf("!gamble") + 8;
-  const points = command.original.substring(startPosition);
-  let numberPoints = parseInt(points);
+  const startPosition = ctx.message.indexOf("!gamble") + 8;
+  const points = ctx.message.substring(startPosition);
+  let numberPoints = Number.parseInt(points);
 
   if (points !== "all" && Number.isNaN(numberPoints)) {
     logger.error("points is NaN");
     return undefined;
   }
 
+  const { base, wtf, notEnoughtPoints, superWon, extremeWon, lose } = ctx.parsedCommand.message;
+
   if (points !== "all" && numberPoints < 0) {
-    return command.actionMessage.wtf;
+    return wtf;
   }
 
   const user = await prismaQueue.enqueue(() =>
     prisma.user.findUnique({
       where: {
-        userid: `${tags.userId}@${channel}`,
-        channel,
+        userid: `${ctx.tags.userId}@${ctx.channel}`,
+        channel: ctx.channel,
       },
     }),
   );
@@ -71,14 +66,14 @@ export async function gamble(
   }
 
   if (user.points < numberPoints) {
-    return interpolate(command.actionMessage.notEnoughtPoints || "", {
+    return interpolate(notEnoughtPoints || "", {
       username: resUsername,
     });
   }
 
   const [result, rolled] = getResult(
     user.points + numberPoints,
-    settings.points.chancesOffset.value,
+    ctx.settings.points.chancesOffset.value,
   );
 
   let msg = "";
@@ -86,21 +81,21 @@ export async function gamble(
   switch (result) {
     case EWonLost.Won: {
       resultPoints = numberPoints;
-      msg = command.actionMessage.base || "";
+      msg = base || "";
       break;
     }
     case EWonLost.SuperWon: {
       resultPoints = numberPoints * 2;
-      msg = command.actionMessage.superWon || "";
+      msg = superWon || "";
       break;
     }
     case EWonLost.ExtremeWon: {
       resultPoints = numberPoints * 5;
-      msg = command.actionMessage.extremeWon || "";
+      msg = extremeWon || "";
       break;
     }
     case EWonLost.Lost: {
-      msg = command.actionMessage.lose || "";
+      msg = lose || "";
       resultPoints = -numberPoints;
       break;
     }
@@ -126,4 +121,4 @@ export async function gamble(
     points: numberPoints,
     total: res.points,
   });
-}
+});

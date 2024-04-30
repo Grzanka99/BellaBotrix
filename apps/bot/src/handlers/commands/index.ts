@@ -1,125 +1,86 @@
-import { TUseHandler, TWithCommandHandler } from "handlers/types";
-import { TwitchApi } from "services/twitch-api";
+import { prisma } from "services/db";
 import { interpolate } from "utils/interpolate-string";
-import { gamble } from "./gamble.command";
-import { addPoints, getTop, getUserPoints, givePoints, removePoints } from "./points.command";
-import { getUserWinrate, soloNope, soloYes, startSolo } from "./solo.command";
-import { spit } from "./spit.command";
-import { getCanRun } from "./utils/can-run";
+import type { THandleCommadArgs } from "services/types";
+import { CoreCommandsHandlers } from "./core-commands";
+import { dbCommandToCommand } from "services/commands/commands.transform";
 
-export function createCommandHandler(command: TWithCommandHandler, api: TwitchApi): TUseHandler {
-  return async ({ send, channel, tags, settings }): Promise<void> => {
-    if (!settings) {
-      return;
+export class CommandHandler {
+  private channel: string;
+
+  constructor(channel: string) {
+    this.channel = channel;
+  }
+
+  public async handle(args: THandleCommadArgs): Promise<undefined> {
+    if (!args.api || !args.settings.commands.enabled.value || !args.message) {
+      return undefined;
     }
 
-    async function canRun(): Promise<boolean> {
-      const mods = await api.getChannelModerators();
-      const canRun = getCanRun(mods, channel, tags);
+    const prefix = args.settings.commands.prefix.value;
 
-      return canRun;
+    if (args.message[0] !== prefix) {
+      return undefined;
     }
 
-    switch (command.action) {
-      case "addpoints": {
-        if (!(await canRun()) || !api) {
-          return;
-        }
+    const triggerWord = args.message.includes(" ")
+      ? args.message.substring(1, args.message.indexOf(" "))
+      : args.message.replace(prefix, "");
 
-        const res = await addPoints(command, channel, tags, api);
-        if (res) {
-          send(res);
-        }
-        return;
-      }
-      case "removepoints": {
-        if (!(await canRun()) || !api) {
-          return;
-        }
-        const res = await removePoints(command, channel, tags, api);
-        if (res) {
-          send(res);
-        }
-        return;
-      }
-      case "givepoints": {
-        const res = await givePoints(command, channel, tags);
-        if (res) {
-          send(res);
-        }
+    const allCommands = await prisma.commands.findMany({
+      where: { channelName: this.channel, enabled: true },
+    });
 
-        return;
-      }
-      case "points": {
-        const res = await getUserPoints(command, channel, tags.username);
-        if (res) {
-          send(res);
-        }
-        return;
-      }
-      case "winrate": {
-        const res = await getUserWinrate(command, channel, tags.username);
-        if (res) {
-          send(res);
-        }
+    const command = allCommands.find((cmd) => {
+      const byName = triggerWord.trim().toLowerCase() === cmd.name.trim().toLowerCase();
 
-        return;
-      }
-      case "gamble": {
-        const res = await gamble(command, channel, tags, settings);
-        if (res) {
-          send(res);
-        }
-        return;
-      }
-      case "solo": {
-        const res = await startSolo(command, channel, tags);
-        if (res) {
-          send(res);
-        }
-        return;
-      }
-      case "nope": {
-        const res = await soloNope(command, channel, tags);
-        if (res) {
-          send(res);
-        }
-        return;
-      }
-      case "yes": {
-        const res = await soloYes(command, channel, tags);
-        if (res) {
-          send(res);
-        }
-        return;
-      }
-      case "htfu": {
-        const res = await spit(command, tags, api);
-        if (res) {
-          send(res);
-        }
-        return;
-      }
-      case "top": {
-        const res = await getTop(command, channel);
-        if (res) {
-          send(res);
-        }
-        return;
-      }
-      default: {
-        if (!command.actionMessage || !command.actionMessage.base) {
-          return;
-        }
+      if (!byName) {
+        const byAlias = cmd.alias
+          .split(",")
+          .map((el) => el.trim())
+          .includes(triggerWord.trim().toLowerCase());
 
-        const res = interpolate(command.actionMessage.base, {
-          username: tags.username || "",
-          channel,
-        });
-
-        send(res);
-        return;
+        return !!byAlias;
       }
+
+      return !!byName;
+    });
+
+    if (!command) {
+      return undefined;
     }
-  };
+
+    // NOTE: JsonValue is specifix to prisma (I guess) but it can be consider string in that case
+    // @ts-expect-error
+    const parsedCommand = dbCommandToCommand(command);
+
+    if (!parsedCommand) {
+      return undefined;
+    }
+
+    if (parsedCommand.isCore && CoreCommandsHandlers[parsedCommand.name] && args.tags) {
+      const res = await CoreCommandsHandlers[parsedCommand.name].handle({
+        ...args,
+        tags: args.tags,
+        parsedCommand,
+        triggerWord,
+      });
+      if (res) {
+        args.send(res);
+      }
+      return undefined;
+    }
+
+    if (!parsedCommand.message || !parsedCommand.message.base) {
+      return undefined;
+    }
+
+    const res = interpolate(parsedCommand.message.base, {
+      username: args.tags?.username || "",
+      this: this.channel,
+    });
+
+    args.send(res);
+
+    return undefined;
+  }
 }

@@ -6,6 +6,15 @@ export const CommandMessageSchema = z
   })
   .and(z.record(z.string(), z.string()));
 
+export const SubCommandSchema = z.object({
+  id: z.number(),
+  uniqueName: z.string(),
+  name: z.string(),
+  channelName: z.string(),
+  message: CommandMessageSchema,
+  alias: z.array(z.string()).optional(),
+});
+
 export const CommandSchema = z.object({
   id: z.number(),
   uniqueName: z.string(),
@@ -14,6 +23,8 @@ export const CommandSchema = z.object({
   enabled: z.boolean(),
   message: CommandMessageSchema,
   alias: z.array(z.string()).optional(),
+  isCore: z.boolean(),
+  subCommands: z.array(SubCommandSchema).optional(),
 });
 
 export const MinimalCommandSchema = CommandSchema.omit({
@@ -21,6 +32,16 @@ export const MinimalCommandSchema = CommandSchema.omit({
   uniqueName: true,
   channelName: true,
   enabled: true,
+}).extend({
+  subCommands: z
+    .array(
+      SubCommandSchema.omit({
+        id: true,
+        uniqueName: true,
+        channelName: true,
+      }),
+    )
+    .optional(),
 });
 
 export const CommandFromDBSchema = CommandSchema.extend({
@@ -40,3 +61,4 @@ export type TCommandsListFromDB = z.infer<typeof CommandsListFromDBSchema>;
 export type TMinimalCommand = z.infer<typeof MinimalCommandSchema>;
 export type TMinimalCommandsList = z.infer<typeof MinimalCommandsListSchema>;
 export type TDbInterfaceCommand = Partial<TCommandFromDB> & Pick<TCommandFromDB, "name">;
+export type TSubCommand = z.infer<typeof SubCommandSchema>;

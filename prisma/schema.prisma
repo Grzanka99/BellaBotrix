@@ -19,6 +19,17 @@ model Commands {
   message     Json?
   alias       String  @default("")
   channelName String  @default("")
+  isCore      Boolean @default(false)
+}
+
+model SubCommands {
+  id            Int    @id @default(autoincrement())
+  uniqueName    String @unique
+  name          String
+  parentCommand String
+  message       Json?
+  alias         String @default("")
+  channelName   String @default("")
 }
 
 model User {
@@ -78,4 +89,34 @@ model TriggerWords {
   triggers  String
   response  String
   enabled   Boolean
+}
+
+model R6DleOperators {
+  id      Int    @id @default(autoincrement())
+  name    String
+  role    String
+  side    String
+  country String
+  org     String
+  squad   String
+  release Int
+  speed   Int
+}
+
+model R6DleGame {
+  id         Int                 @id @default(autoincrement())
+  operator   String
+  winner     String?
+  channel    String
+  history    R6DleGuessHistory[]
+  inProgress Boolean
+}
+
+model R6DleGuessHistory {
+  id           Int       @id @default(autoincrement())
+  gameId       Int
+  game         R6DleGame @relation(fields: [gameId], references: [id])
+  guess        String
+  player       String
+  correctGuess Boolean
 }
