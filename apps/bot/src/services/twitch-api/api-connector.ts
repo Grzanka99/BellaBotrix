@@ -3,6 +3,7 @@ import {
   TTwitchApiResponse,
   TTwitchApiStream,
   TTwitchApiUser,
+  TTwitchFollowers,
   TTwitchOAuthRefresh,
   TTwitchValidateToken,
 } from "services/types";
@@ -39,6 +40,29 @@ export async function getChannelRefreshKey(code: string): Promise<TOption<TTwitc
   } catch {
     return undefined;
   }
+}
+
+export async function getChannelFollowers(
+  userid: string,
+  token: string,
+  startAt: string | undefined = undefined,
+): Promise<TOption<TTwitchApiResponse<TTwitchFollowers[]> & { total: number }>> {
+  const url = `https://api.twitch.tv/helix/channels/followers?broadcaster_id=${userid}&moderator_id=${userid}&first=100&after=${
+    startAt || ""
+  }`;
+
+  console.log(url);
+
+  const res = await fetch(url, {
+    cache: "no-cache",
+    headers: {
+      Authorization: `Bearer ${token}`,
+      "Client-Id": API_CLIENT_ID,
+    } as unknown,
+  });
+
+  const asjson = (await res.json()) as TTwitchApiResponse<TTwitchFollowers[]> & { total: number };
+  return asjson;
 }
 
 export async function validateToken(token: string): Promise<TOption<TTwitchValidateToken>> {

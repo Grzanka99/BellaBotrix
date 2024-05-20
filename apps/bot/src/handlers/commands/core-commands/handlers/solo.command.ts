@@ -59,7 +59,6 @@ export const startSoloCoreCommand = new CoreCommand(async (ctx) => {
   const user1points = await prismaQueue.enqueue(() =>
     prisma.user.findUnique({
       where: {
-        // @ts-expect-error
         userid: `${ctx.tags.userId}@${ctx.channel}`,
       },
     }),
@@ -176,7 +175,7 @@ export const soloYesCoreCommand = new CoreCommand(async (ctx) => {
 
   if (user2points.points < foundSolo.points) {
     return interpolate(notEnoughtPoints || "", {
-      username: tags.displayName,
+      username: ctx.tags.displayName,
     });
   }
 
@@ -197,7 +196,7 @@ export const soloYesCoreCommand = new CoreCommand(async (ctx) => {
     });
 
     const winnerFromDB = await prisma.user.findFirst({
-      where: { username: winner, channel: channel },
+      where: { username: winner, channel: ctx.channel },
     });
 
     const looserFromDB = await prisma.user.findFirst({

@@ -1,7 +1,7 @@
 import type { TOption, TSettings } from "bellatrix";
-import { R6Dle } from "services/r6dle";
+import type { R6Dle } from "services/r6dle";
 import type { TwitchApi } from "services/twitch-api";
-import { TCommand, TSubCommand } from "types/schema/commands.schema";
+import type { TCommand, TSubCommand } from "types/schema/commands.schema";
 
 export type TTwitchApiUser = {
   id: string;
@@ -39,6 +39,13 @@ export type TTwitchOAuthRefresh = {
   refresh_token: string;
   scope: string[];
   token_type: string;
+};
+
+export type TTwitchFollowers = {
+  user_id: string;
+  user_name: string;
+  user_loging: string;
+  followed_at: string;
 };
 
 export type TTwitchValidateToken = {

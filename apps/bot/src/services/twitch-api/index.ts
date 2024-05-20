@@ -1,8 +1,9 @@
 import { prisma } from "services/db";
-import { TTwitchApiChatter, TTwitchApiStream } from "services/types";
-import { TOption } from "types";
+import type { TTwitchApiChatter, TTwitchApiStream } from "services/types";
+import type { TOption } from "types";
 import { logger } from "utils/logger";
 import {
+  getChannelFollowers,
   getChatters,
   getModerators,
   getNewToken,
@@ -69,6 +70,39 @@ export class TwitchApi {
       where: { name: this.channelName },
       data: { token: newTokens.refresh_token },
     });
+  }
+
+  public async forceGetAllFollowers(): Promise<unknown> {
+    if (!this.userId || !this.channelToken || !(this.channelName.toLowerCase() === "trejekk")) {
+      return false;
+    }
+
+    const firstBatch = await getChannelFollowers(this.userId, this.channelToken);
+    if (!firstBatch) {
+      return [];
+    }
+
+    if (firstBatch?.total <= firstBatch?.data.length) {
+      return firstBatch.data;
+    }
+
+    let all = firstBatch.data;
+    let paggination = firstBatch.pagination.cursor;
+
+    for (;;) {
+      const newBatch = await getChannelFollowers(this.userId, this.channelToken, paggination);
+      if (!newBatch) {
+        break;
+      }
+
+      paggination = newBatch.pagination.cursor;
+      all = [...all, ...newBatch.data];
+      if (newBatch.total <= all.length) {
+        break;
+      }
+    }
+
+    return all;
   }
 
   public async getChannelModerators(): Promise<TTwitchApiChatter[]> {
