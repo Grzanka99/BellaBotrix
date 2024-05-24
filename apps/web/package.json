@@ -24,6 +24,7 @@
     "@prisma/client": "^5.9.1",
     "argon2": "^0.31.2",
     "bellatrix": "workspace:*",
+    "r6dle": "workspace:*",
     "lodash.mergewith": "^4.6.2",
     "pinia": "^2.1.7",
     "sass": "^1.69.7",

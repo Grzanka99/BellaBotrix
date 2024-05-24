@@ -13,8 +13,11 @@ export type TDtoUser = z.infer<typeof SDtoUser>;
 export const SDtoCreateUser = SDtoUser.extend({ regToken: z.string().min(1) });
 export type TDtoCreateUser = z.infer<typeof SDtoCreateUser>;
 
+type TPerms = "user" | "moderator" | "r6dleadmin" | "admin" | (string & {});
+
 export type TAuthSession = {
   id: number;
   username: string;
   channelId: number;
+  perms: TPerms[];
 };

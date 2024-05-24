@@ -34,6 +34,7 @@ export default defineEventHandler(async (event) => {
     id: user.id,
     username: user.username,
     channelId: user.channelId,
+    perms: user.perms.split(","),
   });
 
   return session;

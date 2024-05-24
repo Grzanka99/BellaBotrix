@@ -42,6 +42,14 @@ const routes = computed<TRoute[]>(() => [
   },
 ]);
 
+const globalSettings = [
+  {
+    to: "/panel/r6dle",
+    displayName: "r6dle",
+    icon: 'material-symbols:person',
+  }
+]
+
 const accountOnlyRoutes = [
   {
     to: "/panel/access",
@@ -61,6 +69,12 @@ const handleAuthRefirect = () => {
     <div class="routes">
       <NavigationLink
         v-for="route in routes"
+        :to="route.to"
+        :display-name="route.displayName"
+        :icon="route.icon" />
+      <SpacerWithTitle text="Global/Admin settings" />
+      <NavigationLink
+        v-for="route in globalSettings"
         :to="route.to"
         :display-name="route.displayName"
         :icon="route.icon" />

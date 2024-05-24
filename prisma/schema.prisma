@@ -67,6 +67,7 @@ model WebuiUser {
   token     String @default("")
   channelId Int    @default(-1)
   settings  Json
+  perms     String @default("user")
 }
 
 model ChannelAccess {
@@ -92,11 +93,13 @@ model TriggerWords {
 }
 
 model R6DleOperators {
-  id      Int    @id @default(autoincrement())
-  name    String
+  id      Int     @id @default(autoincrement())
+  enabled Boolean @default(false)
+  name    String  @unique()
   role    String
   side    String
   country String
+  region  String
   org     String
   squad   String
   release Int

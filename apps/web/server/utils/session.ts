@@ -1,5 +1,5 @@
 import type { H3Event, SessionConfig } from "h3";
-import { TAuthSession } from "~/types/auth.type";
+import type { TAuthSession } from "~/types/auth.type";
 
 const sessionConfig: SessionConfig = useRuntimeConfig().auth || {};
 

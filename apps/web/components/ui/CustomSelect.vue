@@ -68,6 +68,8 @@ const optionsVisible = ref(false);
     background: var(--background);
     border: 1px solid var(--stroke-light);
     width: 100%;
+    max-height: 200px;
+    overflow-y: auto;
     border-radius: var(--radius);
     padding: var(--padding-half);
     top: calc(100% + var(--padding-half));
@@ -77,7 +79,6 @@ const optionsVisible = ref(false);
     display: flex;
     flex-direction: column;
     gap: var(--padding-quarter);
-    overflow: hidden;
 
     >li {
       padding: var(--padding-half);
