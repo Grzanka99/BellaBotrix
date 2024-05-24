@@ -65,7 +65,7 @@ export class R6Dle {
     res += `_${matchState(target.continent, guess.continent)}_ ${guess.continent} | `;
     res += `_${matchState(target.release_year, guess.release_year)}_ ${guess.release_year + 2014}`;
     if (matchState(target.release_year, guess.release_year) === EState.Wrong) {
-      res += target.release_year > guess.release_year ? "_up_" : "_down_";
+      res += target.release_year > guess.release_year ? "_up_" : " _down_";
     }
     res += " | ";
     res += `_${matchState(target.speed, guess.speed)}_ ${guess.speed} speed`;
