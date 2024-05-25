@@ -1,5 +1,6 @@
 import { CoreCommand } from "../../core-command";
 import { handleGuessSubcommand } from "./r6dle-guess";
+import { handleStatsSubcommand } from "./r6dle-stats";
 
 export const r6dleCoreCommand = new CoreCommand(
   async (ctx) => {
@@ -16,7 +17,7 @@ export const r6dleCoreCommand = new CoreCommand(
         return await handleGuessSubcommand(ctx);
       }
       case "stats": {
-        return "stats subcommand";
+        return await handleStatsSubcommand(ctx);
       }
     }
   },

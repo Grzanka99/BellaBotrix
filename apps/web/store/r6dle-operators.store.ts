@@ -1,4 +1,8 @@
-import type { TCreateR6DleOperator, TR6dleOperatorV2, TUpdateR6dleOperator } from "r6dle";
+import type {
+  TCreateR6DleOperator,
+  TR6dleOperatorV2,
+  TUpdateR6dleOperator,
+} from "r6dle";
 
 export const useR6DleOperatorsStore = defineStore("r6dleOperators", () => {
   const userPerms = useAuth().session.value?.perms;
