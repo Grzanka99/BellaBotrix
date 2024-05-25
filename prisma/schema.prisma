@@ -95,6 +95,7 @@ model TriggerWords {
 model R6DleOperators {
   id      Int     @id @default(autoincrement())
   enabled Boolean @default(false)
+  gender  String  @default("Other")
   name    String  @unique()
   role    String
   side    String

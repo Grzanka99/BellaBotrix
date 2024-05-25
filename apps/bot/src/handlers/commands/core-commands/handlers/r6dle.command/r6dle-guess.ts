@@ -21,6 +21,10 @@ export async function handleGuessSubcommand(ctx: THandleCoreCommandArgs): Promis
     return interpolate(base, { operator: res.response.operator, username: ctx.tags.username });
   }
 
+  if (res.response.error) {
+    return "Something went really really wrong...";
+  }
+
   return interpolate(wrong || "$diff", {
     diff: res.response.diff,
   });

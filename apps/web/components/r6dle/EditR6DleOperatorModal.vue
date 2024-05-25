@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ER6DleRole, ER6DleOrg, ER6DleSquad, ER6DleRegion, type TUpdateR6dleOperator, type TR6dleOperatorV2, SUpdateR6DleOperator } from 'r6dle';
+import { ER6DleRole, ER6DleOrg, ER6DleSquad, ER6DleRegion, type TUpdateR6dleOperator, type TR6dleOperatorV2, SUpdateR6DleOperator, ER6dleGender } from 'r6dle';
 import Modal from '../ui/Modal.vue';
 import FormTextInput from '../ui/FormTextInput.vue';
 import CustomSelect from '../ui/CustomSelect.vue';
@@ -17,6 +17,7 @@ const props = defineProps<{
 
 const alreadyExists = ref(false);
 
+const gender = ref<ER6dleGender>(props.originalOperator.gender);
 const role = ref<ER6DleRole[]>(props.originalOperator.role);
 const side = ref<"Attack" | "Defence">(props.originalOperator.side);
 const country = ref(props.originalOperator.country);
@@ -27,6 +28,7 @@ const speed = ref(props.originalOperator.speed);
 const region = ref<ER6DleRegion>(props.originalOperator.region);
 
 const handleCancel = () => {
+  gender.value = ER6dleGender.Other;
   role.value = [];
   side.value = 'Attack';
   country.value = '';
@@ -42,6 +44,7 @@ const handleCancel = () => {
 const parsed = computed(() => {
   const payload = {
     id: props.originalOperator.id,
+    gender: gender.value,
     role: [...role.value],
     side: side.value,
     country: country.value,
@@ -88,6 +91,7 @@ const h = useR6DleOperatorsModal();
     <form
       @submit.prevent="handleAddOperator" class="r6dle-form">
       <CustomSelect v-model="side" :options="h.sideSelectOptions" />
+      <CustomSelect v-model="gender" :options="h.genderOptions" />
       <div class="row">
         <FormTextInput
           name="country"

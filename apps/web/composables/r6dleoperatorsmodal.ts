@@ -1,4 +1,4 @@
-import { ER6DleOrg, ER6DleRegion, ER6DleRole, ER6DleSquad } from "r6dle";
+import { ER6DleOrg, ER6DleRegion, ER6DleRole, ER6DleSquad, ER6dleGender } from "r6dle";
 import type { TSelectOption } from "~/types/ui.type";
 
 export function useR6DleOperatorsModal() {
@@ -73,6 +73,9 @@ export function useR6DleOperatorsModal() {
     { value: ER6DleOrg.SFG, displayName: ER6DleOrg.SFG },
     { value: ER6DleOrg.AFEAU, displayName: ER6DleOrg.AFEAU },
     { value: ER6DleOrg.COT, displayName: ER6DleOrg.COT },
+    { value: ER6DleOrg.CB35TH, displayName: ER6DleOrg.CB35TH },
+    { value: ER6DleOrg.DAE, displayName: ER6DleOrg.DAE },
+    { value: ER6DleOrg.ROS, displayName: ER6DleOrg.ROS },
   ];
 
   const squadSelectOptions: TSelectOption[] = [
@@ -137,6 +140,12 @@ export function useR6DleOperatorsModal() {
     { value: ER6DleRole.FrontLine, displayName: ER6DleRole.FrontLine },
   ];
 
+  const genderOptions: TSelectOption[] = [
+    { value: ER6dleGender.Male, displayName: ER6dleGender.Male },
+    { value: ER6dleGender.Female, displayName: ER6dleGender.Female },
+    { value: ER6dleGender.Other, displayName: ER6dleGender.Other },
+  ];
+
   return {
     sideSelectOptions,
     regionSelectOptions,
@@ -145,5 +154,6 @@ export function useR6DleOperatorsModal() {
     releaseSelectOptions,
     speedSelectOptions,
     roleOptions,
+    genderOptions,
   };
 }

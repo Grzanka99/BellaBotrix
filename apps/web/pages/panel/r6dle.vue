@@ -28,7 +28,7 @@ onUnmounted(() => {
 const toEdit = ref<TR6dleOperatorV2 | undefined>(undefined);
 const newOperatorModalOpen = ref(false)
 
-const gridTemplate = "120px 1fr 1fr 1fr 1fr 1fr 1fr 1fr 120px 120px 120px";
+const gridTemplate = "120px 1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr 120px 120px 120px";
 
 const handleCreate = (v: TCreateR6DleOperator) => {
   newOperatorModalOpen.value = false;
@@ -65,6 +65,7 @@ useHead({
       <TableHead :grid-template="gridTemplate">
         <TableHeader></TableHeader>
         <TableHeader>name</TableHeader>
+        <TableHeader>gender</TableHeader>
         <TableHeader>role</TableHeader>
         <TableHeader>side</TableHeader>
         <TableHeader>country</TableHeader>
@@ -83,6 +84,7 @@ useHead({
                 @change="(enabled) => s.handleUpdate({ id: operator.id, enabled })" />
             </TableCell>
             <TableCell>{{ operator.name }}</TableCell>
+            <TableCell>{{ operator.gender }}</TableCell>
             <TableCell>{{ operator.role }}</TableCell>
             <TableCell>{{ operator.side }}</TableCell>
             <TableCell>{{ operator.country }}</TableCell>

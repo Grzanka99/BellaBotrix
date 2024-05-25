@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { type TCreateR6DleOperator, SCreateR6DleOperator, ER6DleRole, ER6DleOrg, ER6DleSquad, ER6DleRegion } from 'r6dle';
+import { type TCreateR6DleOperator, SCreateR6DleOperator, ER6DleRole, ER6DleOrg, ER6DleSquad, ER6DleRegion, ER6dleGender } from 'r6dle';
 import Modal from '../ui/Modal.vue';
 import FormTextInput from '../ui/FormTextInput.vue';
 import CustomSelect from '../ui/CustomSelect.vue';
@@ -18,6 +18,7 @@ defineProps<{
 const alreadyExists = ref(false);
 
 const name = ref('');
+const gender = ref(ER6dleGender.Other);
 const role = ref<ER6DleRole[]>([]);
 const side = ref<"Attack" | "Defence">('Attack');
 const country = ref('');
@@ -29,7 +30,8 @@ const region = ref<ER6DleRegion>(ER6DleRegion.Europe);
 
 const handleCancel = () => {
   name.value = "";
-  role.value = [];
+  gender.value = ER6dleGender.Other,
+    role.value = [];
   side.value = 'Attack';
   country.value = '';
   org.value = ER6DleOrg.None;
@@ -44,6 +46,7 @@ const handleCancel = () => {
 const parsed = computed(() => {
   const payload = {
     name: name.value,
+    gender: gender.value,
     role: [...role.value],
     side: side.value,
     country: country.value,
@@ -88,14 +91,15 @@ const h = useR6DleOperatorsModal();
     <h4 v-if="alreadyExists">Operator of name: {{ name }} already exists</h4>
     <form
       @submit.prevent="handleAddOperator" class="r6dle-form">
+      <FormTextInput
+        name="name"
+        v-model="name"
+        placeholder="name"
+        label="operator name"
+        :error="validate('name')" />
       <div class="row">
-        <FormTextInput
-          name="name"
-          v-model="name"
-          placeholder="name"
-          label="operator name"
-          :error="validate('name')" />
         <CustomSelect v-model="side" :options="h.sideSelectOptions" />
+        <CustomSelect v-model="gender" :options="h.genderOptions" />
       </div>
       <div class="row">
         <FormTextInput

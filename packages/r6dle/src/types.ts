@@ -65,6 +65,9 @@ export enum ER6DleOrg {
   SFG = "SFG",
   AFEAU = "AFEAU",
   COT = "COT",
+  CB35TH = "35th Commando Batalion",
+  DAE = "DAE",
+  ROS = "ROS",
 }
 
 export enum ER6DleSquad {
@@ -77,9 +80,16 @@ export enum ER6DleSquad {
   None = "None",
 }
 
+export enum ER6dleGender {
+  Male = "Male",
+  Female = "Female",
+  Other = "Other",
+}
+
 export const SR6DleOperator = z.object({
   id: z.number(),
   enabled: z.boolean(),
+  gender: z.nativeEnum(ER6dleGender),
   name: z.string().refine((v) => v.length > 0),
   role: z.array(z.nativeEnum(ER6DleRole)).refine((v) => v.length > 0),
   side: z.union([z.literal("Attack"), z.literal("Defence")]),

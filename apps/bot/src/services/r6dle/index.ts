@@ -1,5 +1,5 @@
 import { capitalize, type TOption } from "bellatrix";
-import { R6DleOperators, type TR6DleOperator } from "r6dle";
+import type { TR6dleOperatorV2 } from "r6dle";
 import { prisma, prismaQueue } from "services/db";
 import { logger } from "utils/logger";
 
@@ -34,17 +34,38 @@ function matchState(target: string | number, guess: string | number): EState {
 }
 
 export class R6Dle {
-  private operators = Object.keys(R6DleOperators).map((el) => el.toUpperCase());
+  private fullOperators: TR6dleOperatorV2[] = [];
+  private operators: string[] = [];
   private _currentOperator: string | undefined = undefined;
   private _gameId: number | undefined = undefined;
   private channel: string;
 
   constructor(channel: string) {
     this.channel = channel;
-    this.loadGame().then(([operator, gameid]) => {
-      this._currentOperator = operator;
-      this._gameId = gameid;
-    });
+    this.fetchOperators()
+      .then(() => {
+        this.loadGame().then(([operator, gameid]) => {
+          this._currentOperator = operator;
+          this._gameId = gameid;
+        });
+      })
+      .then(() => {
+        logger.info("Setting interval to refresh R6Dle operators for 60 seconds");
+        setInterval(async () => {
+          await this.fetchOperators();
+        }, 60_000);
+      });
+  }
+
+  private async fetchOperators(): Promise<void> {
+    logger.info("Fetching R6Dle operators");
+    const res = await prisma.r6DleOperators.findMany();
+
+    const mapped = res.map((el) => ({ ...el, role: el.role.split(",") }) as TR6dleOperatorV2);
+
+    this.fullOperators = mapped;
+    this.operators = mapped.map((el) => el.name.toUpperCase());
+    logger.info(`Loaded ${this.operators.length} operators`);
   }
 
   private isOperator(name: string): false | string {
@@ -56,16 +77,18 @@ export class R6Dle {
     return false;
   }
 
-  private diff(target: TR6DleOperator, guess: TR6DleOperator): string {
+  private diff(target: TR6dleOperatorV2, guess: TR6dleOperatorV2): string {
     let res = "";
 
-    res += `_${matchState(target.sex, guess.sex)}_ ${guess.sex} | `;
+    res += `_${matchState(target.gender, guess.gender)}_ ${guess.gender} | `;
     res += `_${matchArray(target.role, guess.role)}_ ${guess.role.join(", ")} | `;
     res += `_${matchState(target.side, guess.side)}_ ${guess.side} | `;
-    res += `_${matchState(target.continent, guess.continent)}_ ${guess.continent} | `;
-    res += `_${matchState(target.release_year, guess.release_year)}_ ${guess.release_year + 2014}`;
-    if (matchState(target.release_year, guess.release_year) === EState.Wrong) {
-      res += target.release_year > guess.release_year ? "_up_" : " _down_";
+    res += `_${matchState(target.region, guess.region)}_ ${guess.country} | `;
+    res += `_${matchState(target.org, guess.org)}_ ${guess.org} | `;
+    res += `_${matchState(target.squad, guess.squad)}_ ${guess.squad} | `;
+    res += `_${matchState(target.release, guess.release)}_ ${guess.release}`;
+    if (matchState(target.release, guess.release) === EState.Wrong) {
+      res += target.release > guess.release ? " _up_" : " _down_";
     }
     res += " | ";
     res += `_${matchState(target.speed, guess.speed)}_ ${guess.speed} speed`;
@@ -133,13 +156,22 @@ export class R6Dle {
     if (!this.currentOperator || !this.gameId) {
       return;
     }
-    const current = R6DleOperators[this.currentOperator];
+
+    const current = this.fullOperators.find((el) => el.name.toUpperCase() === this.currentOperator);
+    if (!current) {
+      return { response: { error: "Something went wrong" }, correct: false };
+    }
+    console.log(this.currentOperator);
     const isOperator = this.isOperator(name);
     if (!isOperator) {
       return { response: { badOperator: name }, correct: false };
     }
 
-    const chosen = R6DleOperators[isOperator];
+    const chosen = this.fullOperators.find((el) => el.name.toUpperCase() === isOperator);
+
+    if (!chosen) {
+      return { response: { badOperator: isOperator }, correct: false };
+    }
 
     if (JSON.stringify(chosen) === JSON.stringify(current)) {
       await prismaQueue.enqueue(async () => {
