@@ -83,8 +83,21 @@ export class R6Dle {
     res += `_${matchState(target.gender, guess.gender)}_ ${guess.gender} | `;
     res += `_${matchArray(target.role, guess.role)}_ ${guess.role.join(", ")} | `;
     res += `_${matchState(target.side, guess.side)}_ ${guess.side} | `;
-    res += `_${matchState(target.region, guess.region)}_ ${guess.country} | `;
-    res += `_${matchState(target.org, guess.org)}_ ${guess.org} | `;
+
+    if (
+      matchState(target.region, guess.region) === EState.Ok &&
+      matchState(target.country, guess.country) === EState.Ok
+    ) {
+      res += `_${EState.Ok}_ ${guess.country} | `;
+    } else if (
+      matchState(target.region, guess.region) === EState.Ok &&
+      !(matchState(target.country, guess.country) === EState.Ok)
+    ) {
+      res += `_${EState.Partial}_ ${guess.country} | `;
+    } else {
+      res += `_${EState.Wrong}_ ${guess.country} | `;
+    }
+
     res += `_${matchState(target.squad, guess.squad)}_ ${guess.squad} | `;
     res += `_${matchState(target.release, guess.release)}_ ${guess.release}`;
     if (matchState(target.release, guess.release) === EState.Wrong) {
