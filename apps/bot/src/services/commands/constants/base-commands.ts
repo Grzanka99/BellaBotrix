@@ -95,6 +95,15 @@ export const BASE_COMMANDS: TMinimalCommandsList = [
     isCore: true,
   },
   {
+    name: "r6stats",
+    message: {
+      base: "Stats of user $ubisoftname in current season: kd: $kd, wr: $wr, matches: $matches, level: $level, rank: $rank",
+      dontExists: "User $ubisoftname dont exists or there was unexpected error",
+      noUsername: "You need to provide ubisoft username for this command to work",
+    },
+    isCore: true,
+  },
+  {
     name: "r6dle",
     message: {
       base: "Either use !r6dle guess or !r6dle stats",

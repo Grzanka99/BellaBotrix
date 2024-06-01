@@ -1,5 +1,6 @@
 import type { TOption, TSettings } from "bellatrix";
 import type { R6Dle } from "services/r6dle";
+import { R6Stats } from "services/r6stats";
 import type { TwitchApi } from "services/twitch-api";
 import type { TCommand, TSubCommand } from "types/schema/commands.schema";
 
@@ -150,6 +151,7 @@ export type THandleCommadArgs = TTwitchIrcContext & {
   api: TwitchApi;
   settings: TSettings;
   r6dle: R6Dle;
+  r6stats: R6Stats;
   send: (msg: string) => void;
 };
 

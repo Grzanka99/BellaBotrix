@@ -7,6 +7,7 @@ import { triggerWordsHandler } from "handlers/trigger-words";
 import { setDefaultCommandsForChannel } from "services/commands";
 import { prisma } from "services/db";
 import { R6Dle } from "services/r6dle";
+import { R6Stats } from "services/r6stats";
 import { getSettings } from "services/settings";
 import { ChannelTimer } from "services/timers";
 import { TwitchApi } from "services/twitch-api";
@@ -39,6 +40,7 @@ export class ChannelConnection {
   private commandHandler: CommandHandler;
 
   private r6dle: R6Dle;
+  private r6stats: R6Stats;
 
   private get logger() {
     return {
@@ -58,6 +60,7 @@ export class ChannelConnection {
 
     // TODO: Move it out of constructor maybe
     this.r6dle = new R6Dle(this.channelName);
+    this.r6stats = R6Stats.instance;
 
     prisma.channel
       .findUnique({
@@ -129,6 +132,7 @@ export class ChannelConnection {
               settings: this.settings,
               send: this.send.bind(this),
               r6dle: this.r6dle,
+              r6stats: this.r6stats,
             });
           }
 

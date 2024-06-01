@@ -8,6 +8,7 @@ import {
   removePointsCoreCommand,
 } from "./handlers/points.command";
 import { r6dleCoreCommand } from "./handlers/r6dle.command";
+import { r6StatsCoreComand } from "./handlers/r6stats.command";
 import {
   getUserWinrateCoreCommand,
   soloNopeCoreCommand,
@@ -29,4 +30,5 @@ export const CoreCommandsHandlers: Record<string, CoreCommand> = {
   winrate: getUserWinrateCoreCommand,
   gamble: gambleCoreCommand,
   r6dle: r6dleCoreCommand,
+  r6stats: r6StatsCoreComand,
 };
