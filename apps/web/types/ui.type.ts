@@ -5,6 +5,6 @@ export type TRoute = {
 };
 
 export type TSelectOption = {
-  value: string | number,
-  displayName: string,
-}
+  value: string | number;
+  displayName: string;
+};

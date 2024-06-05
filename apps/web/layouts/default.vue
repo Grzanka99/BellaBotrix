@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import NavBar from "~/components/navbar/NavBar.vue";
+import NavBar from "~/components/navbar/NavBar.server.vue";
 import TopBar from "~/components/navbar/TopBar.vue";
 import { useStorage } from "@vueuse/core";
 

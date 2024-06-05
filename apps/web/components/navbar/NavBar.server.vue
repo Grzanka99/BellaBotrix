@@ -42,13 +42,6 @@ const routes = computed<TRoute[]>(() => [
   },
 ]);
 
-const globalSettings = [
-  {
-    to: "/panel/r6dle",
-    displayName: "r6dle",
-    icon: 'material-symbols:person',
-  }
-]
 
 const accountOnlyRoutes = [
   {
@@ -57,6 +50,23 @@ const accountOnlyRoutes = [
     icon: "material-symbols:security",
   },
 ]
+
+
+const auth = useAuth();
+const isGlobalAdmin = computed(() => auth.session.value?.perms.includes('admin'));
+const canAccessGlobalSettings = computed(() => isGlobalAdmin.value || auth.session.value?.perms.includes('r6dleadmin'));
+
+// NOTE: Admin only
+const globalSettings = [
+  {
+    to: "/panel/r6dle",
+    displayName: "r6dle",
+    icon: 'material-symbols:person',
+    adminType: 'r6dleadmin',
+  }
+]
+
+
 
 const handleAuthRefirect = () => {
   // @ts-ignore
@@ -72,17 +82,19 @@ const handleAuthRefirect = () => {
         :to="route.to"
         :display-name="route.displayName"
         :icon="route.icon" />
-      <SpacerWithTitle text="Global/Admin settings" />
-      <NavigationLink
-        v-for="route in globalSettings"
-        :to="route.to"
-        :display-name="route.displayName"
-        :icon="route.icon" />
+      <template v-if="canAccessGlobalSettings">
+        <SpacerWithTitle text="Global/Admin settings" />
+        <template
+          v-for="route in globalSettings">
+          <NavigationLink
+            v-if="isGlobalAdmin || $auth.session.value?.perms.includes(route.adminType)"
+            :to="route.to"
+            :display-name="route.displayName"
+            :icon="route.icon" />
+        </template>
+      </template>
       <SpacerWithTitle text="User-only settings" />
-      <NavigationLink
-        v-for="route in accountOnlyRoutes"
-        :to="route.to"
-        :display-name="route.displayName"
+      <NavigationLink v-for="route in accountOnlyRoutes" :to="route.to" :display-name="route.displayName"
         :icon="route.icon" />
     </div>
     <div class="routes control-buttons">
