@@ -53,8 +53,8 @@ const accountOnlyRoutes = [
 
 
 const auth = useAuth();
-const isGlobalAdmin = computed(() => auth.session.value?.perms.includes('admin'));
-const canAccessGlobalSettings = computed(() => isGlobalAdmin.value || auth.session.value?.perms.includes('r6dleadmin'));
+const isGlobalAdmin = computed(() => auth.session.value?.perms?.includes('admin'));
+const canAccessGlobalSettings = computed(() => isGlobalAdmin.value || auth.session.value?.perms?.includes('r6dleadmin'));
 
 // NOTE: Admin only
 const globalSettings = [
@@ -87,7 +87,7 @@ const handleAuthRefirect = () => {
         <template
           v-for="route in globalSettings">
           <NavigationLink
-            v-if="isGlobalAdmin || $auth.session.value?.perms.includes(route.adminType)"
+            v-if="isGlobalAdmin || $auth.session.value?.perms?.includes(route.adminType)"
             :to="route.to"
             :display-name="route.displayName"
             :icon="route.icon" />
