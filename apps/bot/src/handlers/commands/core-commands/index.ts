@@ -1,5 +1,6 @@
 import type { CoreCommand } from "./core-command";
 import { gambleCoreCommand } from "./handlers/gamble.command";
+import { messagesCount } from "./handlers/messages.command";
 import {
   addPointsCoreCommand,
   getTopCoreCommand,
@@ -31,4 +32,5 @@ export const CoreCommandsHandlers: Record<string, CoreCommand> = {
   gamble: gambleCoreCommand,
   r6dle: r6dleCoreCommand,
   r6stats: r6StatsCoreComand,
+  messages: messagesCount,
 };
