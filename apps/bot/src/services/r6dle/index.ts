@@ -35,10 +35,13 @@ function matchState(target: string | number, guess: string | number): EState {
 
 export class R6Dle {
   private fullOperators: TR6dleOperatorV2[] = [];
-  private operators: string[] = [];
   private _currentOperator: string | undefined = undefined;
   private _gameId: number | undefined = undefined;
   private channel: string;
+
+  private static operators: string[] = [];
+  private static operatorsRefreshRunner = false;
+  private static instances = 0;
 
   constructor(channel: string) {
     this.channel = channel;
@@ -50,10 +53,16 @@ export class R6Dle {
         });
       })
       .then(() => {
-        logger.info("Setting interval to refresh R6Dle operators for 60 seconds");
+        logger.info("Setting interval to refresh R6Dle operators every 60 seconds");
+        if (R6Dle.operatorsRefreshRunner) {
+          return;
+        }
+
+        R6Dle.operatorsRefreshRunner = true;
+
         setInterval(async () => {
           await this.fetchOperators();
-        }, 60_000);
+        }, 10_000);
       });
   }
 
@@ -64,12 +73,12 @@ export class R6Dle {
     const mapped = res.map((el) => ({ ...el, role: el.role.split(",") }) as TR6dleOperatorV2);
 
     this.fullOperators = mapped;
-    this.operators = mapped.map((el) => el.name.toUpperCase());
-    logger.info(`Loaded ${this.operators.length} operators`);
+    R6Dle.operators = mapped.map((el) => el.name.toUpperCase());
+    logger.info(`Loaded ${R6Dle.operators.length} operators`);
   }
 
   private isOperator(name: string): false | string {
-    const res = this.operators.includes(name.toUpperCase());
+    const res = R6Dle.operators.includes(name.toUpperCase());
     if (res) {
       return name.toUpperCase();
     }
@@ -128,12 +137,12 @@ export class R6Dle {
 
   public async newGame(): Promise<[string, number]> {
     logger.info(`Creating new r6dle game for channel ${this.channel}`);
-    const rand = Math.floor(Math.random() * this.operators.length);
+    const rand = Math.floor(Math.random() * R6Dle.operators.length);
 
     const newGame = await prismaQueue.enqueue(() =>
       prisma.r6DleGame.create({
         data: {
-          operator: this.operators[rand],
+          operator: R6Dle.operators[rand],
           channel: this.channel,
           inProgress: true,
         },
@@ -174,7 +183,6 @@ export class R6Dle {
     if (!current) {
       return { response: { error: "Something went wrong" }, correct: false };
     }
-    console.log(this.currentOperator);
     const isOperator = this.isOperator(name);
     if (!isOperator) {
       return { response: { badOperator: name }, correct: false };
@@ -185,7 +193,7 @@ export class R6Dle {
     if (!chosen) {
       return { response: { badOperator: isOperator }, correct: false };
     }
-
+    R6Dle;
     if (JSON.stringify(chosen) === JSON.stringify(current)) {
       await prismaQueue.enqueue(async () => {
         if (!this.gameId) {
