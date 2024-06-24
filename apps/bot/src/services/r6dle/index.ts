@@ -62,7 +62,7 @@ export class R6Dle {
 
         setInterval(async () => {
           await this.fetchOperators();
-        }, 10_000);
+        }, 60_000);
       });
   }
 
