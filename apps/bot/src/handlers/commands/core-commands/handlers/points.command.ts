@@ -42,7 +42,7 @@ export const getUserPointsCoreCommmand = new CoreCommand(async (ctx) => {
 
   const user = await prismaQueue.enqueue(() =>
     prisma.user.findFirst({
-      where: { username: formattedUsername, channel: ctx.channel },
+      where: { userid: `${ctx.tags.userId}@${ctx.channel}` },
     }),
   );
 
