@@ -35,6 +35,8 @@ export const SSettings = z.object({
   }),
   r6dle: z.object({
     enabled: SSettingOptionSchema(z.boolean()),
+    maxPoints: SSettingOptionSchema(z.number().min(0)),
+    modifier: SSettingOptionSchema(z.number().min(0)),
   }),
   automod: z.object({
     emotesLimit: z.object({

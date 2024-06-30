@@ -74,8 +74,16 @@ export const DEFAULT_SETTINGS: TSettings = {
   },
   r6dle: {
     enabled: {
-      value: false,
+      value: true,
       description: "Eneble wordle-like quiz for Rainbow 6 Siege operators in your chat",
+    },
+    maxPoints: {
+      value: 1000,
+      description: "Maximum number of points that user can receive for won r6dle game",
+    },
+    modifier: {
+      value: 100,
+      description: "How many points are taken away from max points for each try",
     },
   },
   automod: {
