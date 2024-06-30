@@ -33,26 +33,24 @@ async function handlePoints(ctx: THandleCoreCommandArgs, gameId: number): Promis
 
   const points = maxpoints - modifier * (game.history.length - 1);
 
-  const currUser = await prismaQueue.enqueue(() =>
-    prisma.user.findFirst({
-      where: { userid: `${ctx.tags.userId}@${ctx.channel}` },
-    }),
-  );
+  prismaQueue.enqueue(async () => {
+    const currUser = await prismaQueue.enqueue(() =>
+      prisma.user.findFirst({
+        where: { userid: `${ctx.tags.userId}@${ctx.channel}` },
+      }),
+    );
 
-  // NOTE: If user ever sent any message === take part in game
-  // NOTE: he has to be registered in database already
-  if (!currUser) {
-    return 0;
-  }
+    if (!currUser) {
+      return;
+    }
 
-  prismaQueue.enqueue(() =>
-    prisma.user.update({
+    await prisma.user.update({
       where: { userid: `${ctx.tags.userId}@${ctx.channel}` },
       data: {
         points: currUser.points + points,
       },
-    }),
-  );
+    });
+  });
 
   return points;
 }
@@ -72,7 +70,8 @@ export async function handleGuessSubcommand(ctx: THandleCoreCommandArgs): Promis
 
   if (res.correct) {
     const thisGameId = ctx.r6dle.gameId;
-    await ctx.r6dle.startNewGame();
+    ctx.r6dle.startNewGame();
+
     if (!thisGameId) {
       return interpolate(base, {
         operator: res.response.operator,

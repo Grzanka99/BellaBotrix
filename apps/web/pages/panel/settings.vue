@@ -32,9 +32,9 @@ useHead({
         <FancyToggle
           :value="commands.enabled.value"
           @change="(value) =>
-            settings.handleUpdate({
-              commands: { enabled: { value } },
-            })
+              settings.handleUpdate({
+                commands: { enabled: { value } },
+              })
             " />
       </SingleSetting>
       <SingleSetting name="prefix" :option="commands.prefix">
@@ -42,9 +42,9 @@ useHead({
           name="commands-enabled"
           :model-value="commands.prefix.value"
           @update:model-value="(value) =>
-            settings.handleUpdateDebounce({
-              commands: { prefix: { value } },
-            })
+              settings.handleUpdateDebounce({
+                commands: { prefix: { value } },
+              })
             " />
       </SingleSetting>
     </SettingsGroup>
@@ -53,9 +53,9 @@ useHead({
         <FancyToggle
           :value="triggerWords.enabled.value"
           @change="(value) =>
-            settings.handleUpdate({
-              triggerWords: { enabled: { value } },
-            })
+              settings.handleUpdate({
+                triggerWords: { enabled: { value } },
+              })
             " />
       </SingleSetting>
     </SettingsGroup>
@@ -64,9 +64,29 @@ useHead({
         <FancyToggle
           :value="r6dle.enabled.value"
           @change="(value) =>
-            settings.handleUpdate({
-              r6dle: { enabled: { value } },
-            })
+              settings.handleUpdate({
+                r6dle: { enabled: { value } },
+              })
+            " />
+      </SingleSetting>
+      <SingleSetting name="r6dle max" :option="r6dle.maxPoints">
+        <FormNumberInput
+          name="r6dle maxpoints"
+          :model-value="r6dle.maxPoints.value"
+          @update:model-value="(value) =>
+              settings.handleUpdateDebounce({
+                r6dle: { maxPoints: { value } },
+              })
+            " />
+      </SingleSetting>
+      <SingleSetting name="r6dle modifier" :option="r6dle.modifier">
+        <FormNumberInput
+          name="r6dle modifier"
+          :model-value="r6dle.modifier.value"
+          @update:model-value="(value) =>
+              settings.handleUpdateDebounce({
+                r6dle: { modifier: { value } },
+              })
             " />
       </SingleSetting>
     </SettingsGroup>
@@ -77,9 +97,9 @@ useHead({
         <FancyToggle
           :value="joinMessage.forAllUsers.enabled.value"
           @change="(value) =>
-            settings.handleUpdate({
-              joinMessage: { forAllUsers: { enabled: { value } } },
-            })
+              settings.handleUpdate({
+                joinMessage: { forAllUsers: { enabled: { value } } },
+              })
             " />
       </SingleSetting>
       <SingleSetting
@@ -90,9 +110,9 @@ useHead({
           name="message-for-all-users"
           :model-value="joinMessage.forAllUsers.message.value"
           @update:model-value="(value) =>
-            settings.handleUpdateDebounce({
-              joinMessage: { forAllUsers: { message: { value } } },
-            })
+              settings.handleUpdateDebounce({
+                joinMessage: { forAllUsers: { message: { value } } },
+              })
             " />
       </SingleSetting>
       <SingleSetting
@@ -101,9 +121,9 @@ useHead({
         <FancyToggle
           :value="joinMessage.forSpecificUsers.enabled.value"
           @change="(value) =>
-            settings.handleUpdate({
-              joinMessage: { forSpecificUsers: { enabled: { value } } },
-            })
+              settings.handleUpdate({
+                joinMessage: { forSpecificUsers: { enabled: { value } } },
+              })
             " />
       </SingleSetting>
       <SingleSetting
@@ -114,9 +134,9 @@ useHead({
           name="message-for-specific-users"
           :model-value="joinMessage.forSpecificUsers.message.value"
           @update:model-value="(value) =>
-            settings.handleUpdateDebounce({
-              joinMessage: { forSpecificUsers: { message: { value } } },
-            })
+              settings.handleUpdateDebounce({
+                joinMessage: { forSpecificUsers: { message: { value } } },
+              })
             " />
       </SingleSetting>
       <SingleSetting
@@ -127,13 +147,13 @@ useHead({
           name="list-of-users"
           :model-value="joinMessage.forSpecificUsers.users.value.join(', ')"
           @update:model-value="(value) =>
-            settings.handleUpdateDebounce({
-              joinMessage: {
-                forSpecificUsers: {
-                  users: { value: value.split(',') },
+              settings.handleUpdateDebounce({
+                joinMessage: {
+                  forSpecificUsers: {
+                    users: { value: value.split(',') },
+                  },
                 },
-              },
-            })
+              })
             " />
       </SingleSetting>
     </SettingsGroup>
@@ -142,9 +162,9 @@ useHead({
         <FancyToggle
           :value="points.enabled.value"
           @change="(value) =>
-            settings.handleUpdate({
-              points: { enabled: { value } },
-            })
+              settings.handleUpdate({
+                points: { enabled: { value } },
+              })
             " />
       </SingleSetting>
       <SingleSetting
@@ -152,23 +172,22 @@ useHead({
         disabled
         :option="points.autoIncrement">
         <FormNumberInput
+          name="points.autoIncrement"
           :model-value="points.autoIncrement.value"
           @update:model-value="(value) =>
-            settings.handleUpdateDebounce({
-              points: { autoIncrement: { value } },
-            })
+              settings.handleUpdateDebounce({
+                points: { autoIncrement: { value } },
+              })
             " />
       </SingleSetting>
-      <SingleSetting
-        name="chances offset"
-        :option="points.chancesOffset">
+      <SingleSetting name="chances offset" :option="points.chancesOffset">
         <FormNumberInput
           name="chances-offset"
           :model-value="points.chancesOffset.value"
           @update:model-value="(value) =>
-            settings.handleUpdateDebounce({
-              points: { chancesOffset: { value } },
-            })
+              settings.handleUpdateDebounce({
+                points: { chancesOffset: { value } },
+              })
             " />
       </SingleSetting>
       <SingleSetting
@@ -178,9 +197,9 @@ useHead({
         <FormNumberInput
           :model-value="points.pointsPerMessage.value"
           @update:model-value="(value) =>
-            settings.handleUpdateDebounce({
-              points: { pointsPerMessage: { value } },
-            })
+              settings.handleUpdateDebounce({
+                points: { pointsPerMessage: { value } },
+              })
             " />
       </SingleSetting>
     </SettingsGroup>

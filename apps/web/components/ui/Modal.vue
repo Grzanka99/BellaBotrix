@@ -17,8 +17,7 @@ defineEmits(["close"]);
             name="material-symbols:close-rounded"
             class="modal__close-icon"
             @click.self="$emit('close')"
-            size="20px"
-          />
+            size="20px" />
           <div class="modal-header" v-if="header || description">
             <h3 v-if="header">{{ header }}</h3>
             <h5 v-if="description">{{ description }}</h5>
@@ -50,6 +49,9 @@ defineEmits(["close"]);
   width: fit-content;
   min-width: 100px;
   min-height: 100px;
+  max-height: 80vh;
+  overflow-y: auto;
+
   padding: var(--padding);
   height: fit-content;
   align-self: center;

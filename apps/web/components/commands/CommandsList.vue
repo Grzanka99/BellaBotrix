@@ -13,15 +13,16 @@ import EditCommandModal from "./EditCommandModal.vue";
 import FancyToggle from "../ui/FancyToggle.vue";
 import type { Commands } from "@prisma/client";
 import { useCommandsStore } from "~/store/commands.store";
+import type { TCommandWithSubCommands } from "~/types/commands.type";
 
 defineProps<{
-  commands: Commands[];
+  commands: TCommandWithSubCommands[];
 }>();
 
-const commandsStore = useCommandsStore();
+const s = useCommandsStore();
 
 const gridTemplate = "100px 2fr 4fr 2fr 120px 120px";
-const toEdit = ref<Commands | undefined>(undefined);
+const toEdit = ref<TCommandWithSubCommands | undefined>(undefined);
 
 const onCancel = () => {
   toEdit.value = undefined;
@@ -46,10 +47,14 @@ const onCancel = () => {
           <TableCell centered>
             <FancyToggle
               :value="command.enabled"
-              @change="(enabled) => commandsStore.handleUpdate(command.id, { enabled })
-                " />
+              @change="(enabled) => s.handleUpdate(command.id, { enabled })" />
           </TableCell>
-          <TableCell>{{ command.name }}</TableCell>
+          <TableCell>
+            {{ command.name }}
+            <template v-if="command.subCommands.length">
+              <b>({{ command.subCommands.length }} sub.)</b>
+            </template>
+          </TableCell>
           <TableCell>
             <CommandMessage :message="command.message" />
           </TableCell>
@@ -62,7 +67,7 @@ const onCancel = () => {
           </TableCell>
           <TableCell centered>
             <FormButton
-              @click.native="commandsStore.handleDelete(command.id)"
+              @click.native="s.handleDelete(command.id)"
               type="button"
               smaller>
               <Icon name="material-symbols:delete-forever" />

@@ -1,29 +1,56 @@
-import type { Commands } from "@prisma/client";
+import { type SubCommands, type Commands } from "@prisma/client";
 import { useStorage } from "@vueuse/core";
-import type { TCreateCommand, TUpdateCommand } from "~/types/commands.type";
+import type { TCreateCommand, TUpdateCommand, TUpdateSubCommand } from "~/types/commands.type";
 
 export const useCommandsStore = defineStore("commands", () => {
   const channel = useStorage("selectedChannel", undefined);
 
-  const commands = ref<Commands[]>([]);
+  const rawCommands = ref<Commands[]>([]);
+  const subCommands = ref<SubCommands[]>([]);
   const queryFileter = ref("");
 
   const { data, refresh } = useFetch(() => `/api/${channel.value}/commands`);
+  const { data: subData, refresh: subRefresh } = useFetch(
+    () => `/api/${channel.value}/commands/subcommands`,
+  );
 
   watch(data, () => {
-    commands.value = data.value || [];
+    rawCommands.value = data.value || [];
+  });
+
+  watch(subData, () => {
+    subCommands.value = subData.value || [];
   });
 
   const refreshTimer = ref<NodeJS.Timeout>();
+  const subRefreshTimer = ref<NodeJS.Timeout>();
 
   const startRefresh = () => {
     refreshTimer.value = setInterval(refresh, 10000);
+    subRefreshTimer.value = setInterval(subRefresh, 10000);
   };
 
   const stopRefresh = () => {
     clearInterval(refreshTimer.value);
+    clearInterval(subRefreshTimer.value);
+
     refreshTimer.value = undefined;
+    subRefreshTimer.value = undefined;
   };
+
+  const commands = computed(() => {
+    const withSubcmds = [];
+    for (const cmd of rawCommands.value) {
+      const sub = subCommands.value.filter((el) => el.parentCommand === cmd.uniqueName);
+
+      withSubcmds.push({
+        ...cmd,
+        subCommands: sub,
+      });
+    }
+
+    return withSubcmds;
+  });
 
   const filteredCommands = computed(() => {
     if (!queryFileter.value.length) {
@@ -47,7 +74,7 @@ export const useCommandsStore = defineStore("commands", () => {
       // TODO: Toast
     }
 
-    commands.value = commands.value.filter((el) => el.id !== res);
+    rawCommands.value = commands.value.filter((el) => el.id !== res);
   };
 
   const handleUpdate = async (id: number, payload: Omit<TUpdateCommand, "id">) => {
@@ -61,7 +88,23 @@ export const useCommandsStore = defineStore("commands", () => {
         continue;
       }
 
-      commands.value[i] = res;
+      rawCommands.value[i] = res;
+      return;
+    }
+  };
+
+  const handleSubcmdUpdate = async (id: number, payload: Omit<TUpdateSubCommand, "id">) => {
+    const res = await $fetch(`/api/${channel.value}/commands/subcommands`, {
+      method: "PUT",
+      body: { ...payload, id },
+    });
+
+    for (const i in subCommands.value) {
+      if (subCommands.value[i].id !== res.id) {
+        continue;
+      }
+
+      subCommands.value[i] = res;
       return;
     }
   };
@@ -73,7 +116,7 @@ export const useCommandsStore = defineStore("commands", () => {
         body: payload,
       });
 
-      commands.value.push(res);
+      rawCommands.value.push(res);
     } catch (_) {
       // TODO: Toast
     }
@@ -96,5 +139,6 @@ export const useCommandsStore = defineStore("commands", () => {
     handleUpdate,
     handleCreate,
     checkIfTaken,
+    handleSubcmdUpdate,
   };
 });

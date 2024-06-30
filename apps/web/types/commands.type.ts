@@ -1,3 +1,4 @@
+import type { Commands, SubCommands } from "@prisma/client";
 import { z } from "zod";
 
 export const SCreateCommand = z.object({
@@ -14,4 +15,15 @@ export const SUpdateCommand = z.object({
   alias: z.coerce.string().optional(),
 });
 
+export const SUpdateSubCommand = z.object({
+  id: z.coerce.number(),
+  message: z.record<z.ZodString>(z.string()).optional(),
+  alias: z.coerce.string().optional(),
+});
+
 export type TUpdateCommand = z.infer<typeof SUpdateCommand>;
+export type TUpdateSubCommand = z.infer<typeof SUpdateSubCommand>;
+
+export type TCommandWithSubCommands = Commands & {
+  subCommands: SubCommands[];
+};

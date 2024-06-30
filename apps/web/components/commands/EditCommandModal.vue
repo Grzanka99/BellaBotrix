@@ -1,43 +1,49 @@
 <script setup lang="ts">
-import type { Commands } from '@prisma/client';
-import FormTextarea from '../ui/FormTextarea.vue';
-import FormTextInput from '../ui/FormTextInput.vue';
-import FormButton from '../ui/FormButton.vue';
-import Modal from '../ui/Modal.vue';
-import { useCommandsStore } from '~/store/commands.store';
+import type { Commands } from "@prisma/client";
+import FormTextarea from "../ui/FormTextarea.vue";
+import FormTextInput from "../ui/FormTextInput.vue";
+import FormButton from "../ui/FormButton.vue";
+import Modal from "../ui/Modal.vue";
+import { useCommandsStore } from "~/store/commands.store";
+import type { TCommandWithSubCommands } from "~/types/commands.type";
+import EditSubcommand from "./EditSubcommand.vue";
 
 const props = defineProps<{
-  originalCommand: Commands;
-}>()
+  originalCommand: TCommandWithSubCommands;
+}>();
 
 const emit = defineEmits<{
-  (e: 'cancel'): void;
-}>()
+  (e: "cancel"): void;
+}>();
 
-const commandsStore = useCommandsStore();
+const s = useCommandsStore();
 
 const alias = ref(props.originalCommand.alias);
-const message = ref<Record<string, string>>({
-  ...(props.originalCommand.message as Record<string, string>)
-} || {});
+const message = ref<Record<string, string>>(
+  {
+    ...(props.originalCommand.message as Record<string, string>),
+  } || {},
+);
 
 const handleSave = async () => {
-  await commandsStore.handleUpdate(props.originalCommand.id, {
+  await s.handleUpdate(props.originalCommand.id, {
     alias: alias.value,
-    message: message.value
-  })
+    message: message.value,
+  });
 
-  emit('cancel');
-}
-
+  emit("cancel");
+};
 </script>
 
 <template>
-  <Modal :header="`Edit command: ${originalCommand.name}`" @close="$emit('cancel')" open>
+  <Modal
+    :header="`Edit command: ${originalCommand.name}`"
+    @close="$emit('cancel')"
+    open>
     <form @submit.prevent="handleSave" class="edit-command-form">
       <h3>Message</h3>
       <FormTextarea
-        v-for="_, key in message"
+        v-for="(_, key) in message"
         :label="key"
         :name="`message-${key}`"
         v-model="message[key]"
@@ -49,6 +55,12 @@ const handleSave = async () => {
         <FormButton type="submit">Save</FormButton>
       </div>
     </form>
+    <template v-if="originalCommand.subCommands.length">
+      <h2>Subcommands</h2>
+      <EditSubcommand
+        v-for="sub in originalCommand.subCommands"
+        :original-subcommand="sub" />
+    </template>
   </Modal>
 </template>
 
