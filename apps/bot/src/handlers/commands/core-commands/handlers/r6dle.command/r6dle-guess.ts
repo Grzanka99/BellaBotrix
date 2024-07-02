@@ -3,6 +3,7 @@ import { prisma, prismaQueue } from "services/db";
 import type { THandleCoreCommandArgs } from "services/types";
 import type { TSubCommand } from "types/schema/commands.schema";
 import { interpolate } from "utils/interpolate-string";
+import { logger } from "utils/logger";
 
 async function handlePoints(ctx: THandleCoreCommandArgs, gameId: number): Promise<number> {
   if (!ctx.channel) {
@@ -34,22 +35,24 @@ async function handlePoints(ctx: THandleCoreCommandArgs, gameId: number): Promis
   const points = maxpoints - modifier * (game.history.length - 1);
 
   prismaQueue.enqueue(async () => {
-    const currUser = await prismaQueue.enqueue(() =>
-      prisma.user.findFirst({
+    try {
+      const currUser = await prisma.user.findFirst({
         where: { userid: `${ctx.tags.userId}@${ctx.channel}` },
-      }),
-    );
+      });
 
-    if (!currUser) {
-      return;
+      if (!currUser) {
+        return;
+      }
+
+      await prisma.user.update({
+        where: { userid: `${ctx.tags.userId}@${ctx.channel}` },
+        data: {
+          points: currUser.points + points,
+        },
+      });
+    } catch (_) {
+      logger.error("Something went very very wrong in r6dle");
     }
-
-    await prisma.user.update({
-      where: { userid: `${ctx.tags.userId}@${ctx.channel}` },
-      data: {
-        points: currUser.points + points,
-      },
-    });
   });
 
   return points;
