@@ -39,10 +39,11 @@ export const getUserPointsCoreCommmand = new CoreCommand(async (ctx) => {
   const { base } = ctx.parsedCommand.message;
 
   const [resUsername, formattedUsername] = getUsername(ctx.message, ctx.tags.username);
+  const targetUserId = await ctx.api.getUserId(formattedUsername);
 
   const user = await prismaQueue.enqueue(() =>
     prisma.user.findFirst({
-      where: { userid: `${ctx.tags.userId}@${ctx.channel}` },
+      where: { userid: `${targetUserId}@${ctx.channel}` },
     }),
   );
 
