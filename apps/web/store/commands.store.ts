@@ -1,6 +1,8 @@
-import { type SubCommands, type Commands } from "@prisma/client";
+import type { SubCommands, Commands } from "@prisma/client";
 import { useStorage } from "@vueuse/core";
 import type { TCreateCommand, TUpdateCommand, TUpdateSubCommand } from "~/types/commands.type";
+import { usePopupsStore } from "./popups.store";
+import { EPopupType } from "~/types/popup.type";
 
 export const useCommandsStore = defineStore("commands", () => {
   const channel = useStorage("selectedChannel", undefined);
@@ -71,7 +73,12 @@ export const useCommandsStore = defineStore("commands", () => {
     });
 
     if (!res) {
-      // TODO: Toast
+      usePopupsStore().add({
+        headline: "Error occured while deleting command",
+        details: ["try again later"],
+        timeout: 5000,
+        type: EPopupType.Error,
+      });
     }
 
     rawCommands.value = commands.value.filter((el) => el.id !== res);
@@ -118,7 +125,12 @@ export const useCommandsStore = defineStore("commands", () => {
 
       rawCommands.value.push(res);
     } catch (_) {
-      // TODO: Toast
+      usePopupsStore().add({
+        headline: "Error occured while creating command",
+        details: ["try again later"],
+        timeout: 5000,
+        type: EPopupType.Error,
+      });
     }
   };
 

@@ -40,4 +40,3 @@ const onSubmit = () => {
     <FormButton type="submit" :disabled="isInvalid">Login</FormButton>
   </form>
 </template>
-

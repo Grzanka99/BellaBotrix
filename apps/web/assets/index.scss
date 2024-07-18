@@ -25,6 +25,7 @@ $error: #cc001f;
 $warn: #ffc100;
 $success: #196e4b;
 $info: rgba(#bbbbbb, 0.2);
+$info-solid: #bbbbbb;
 
 :root {
   --accent: #039be5;
@@ -34,6 +35,7 @@ $info: rgba(#bbbbbb, 0.2);
   --warn: #{$warn};
   --success: #{$success};
   --info: #{$info};
+  --info-solid: #{$info-solid};
 
   --background: white;
   --background-dark: #212121;
@@ -141,7 +143,7 @@ body {
   flex-wrap: wrap;
 }
 
-.flow > * + * {
+.flow>*+* {
   margin-top: var(--flow-space, 1rem);
 }
 

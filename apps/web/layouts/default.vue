@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import NavBar from "~/components/navbar/NavBar.server.vue";
 import TopBar from "~/components/navbar/TopBar.vue";
+import PopupOverlay from "~/components/popup-handler/PopupOverlay.vue";
 import { useStorage } from "@vueuse/core";
 
 const auth = useAuth();
@@ -23,6 +24,7 @@ useHead({
 </script>
 
 <template>
+  <PopupOverlay />
   <div id="panel">
     <NavBar />
     <ClientOnly>

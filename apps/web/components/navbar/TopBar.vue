@@ -50,16 +50,16 @@ watch(channel, () => {
 
 <template>
   <header id="topbar">
-    <FormButton @click="toggleDark()" type="button" width="50px">
-      <Icon v-if="isDark" name="material-symbols:dark-mode" />
-      <Icon v-else name="material-symbols:light-mode"></Icon>
-    </FormButton>
     <CustomSelect
       icon="material-symbols:video-library"
       :options="options"
       v-model="channel"
       class="channel-select"
       @click.native="refresh()" />
+    <FormButton @click="toggleDark()" type="button" width="50px">
+      <Icon v-if="isDark" name="material-symbols:dark-mode" />
+      <Icon v-else name="material-symbols:light-mode"></Icon>
+    </FormButton>
   </header>
 </template>
 
@@ -68,7 +68,7 @@ watch(channel, () => {
   display: flex;
   border-bottom: 1px solid var(--stroke);
   align-items: center;
-  justify-content: flex-end;
+  justify-content: flex-start;
   gap: var(--padding);
   padding: var(--padding);
 }

@@ -1,4 +1,9 @@
+<script setup lang="ts">
+import PopupOverlay from '~/components/popup-handler/PopupOverlay.vue';
+</script>
+
 <template>
+  <PopupOverlay />
   <div id="login-layout">
     <slot />
   </div>

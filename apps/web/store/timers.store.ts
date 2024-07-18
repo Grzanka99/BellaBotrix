@@ -1,6 +1,8 @@
 import type { Timers } from "@prisma/client";
 import { useStorage } from "@vueuse/core";
 import type { TCreateTimer, TUpdateTimer } from "~/types/timers.type";
+import { usePopupsStore } from "./popups.store";
+import { EPopupType } from "~/types/popup.type";
 
 export const useTimersStore = defineStore("timers", () => {
   const channel = useStorage("selectedChannel", undefined);
@@ -42,7 +44,12 @@ export const useTimersStore = defineStore("timers", () => {
     });
 
     if (!res) {
-      // TODO: Toast
+      usePopupsStore().add({
+        headline: "Error occured while deleteing timer",
+        details: ["try again later"],
+        type: EPopupType.Error,
+        timeout: 5000,
+      });
     }
 
     timers.value = timers.value.filter((el) => el.id !== res);
@@ -73,7 +80,12 @@ export const useTimersStore = defineStore("timers", () => {
 
       timers.value.push(res);
     } catch (_) {
-      // TODO: Toast
+      usePopupsStore().add({
+        headline: "Error occured while creating timer",
+        details: ["try again later"],
+        type: EPopupType.Error,
+        timeout: 5000,
+      });
     }
   };
 
