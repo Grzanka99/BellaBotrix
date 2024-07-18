@@ -32,6 +32,10 @@ const totalPoints = computed(() => {
   }, 0);
 });
 
+const totalNonBotUsers = computed(() => {
+  return s.chatters.filter(el => !el.isBot).length;
+})
+
 const gridTemplate = "100px 4fr 1fr 1fr";
 
 const meanMeaningfullPoints = computed(() => {
@@ -79,7 +83,7 @@ useHead({
         <CustomSelect :options="s.sortOptions" v-model="s.sortedOption" icon="material-symbols:sort" />
       </div>
       <div id="users-page-controls__info">
-        <h5>Total users: {{ s.chatters.length }}</h5>
+        <h5>Total users: {{ totalNonBotUsers }}</h5>
         <h5>Total points: {{ totalPoints }}</h5>
       </div>
     </div>
