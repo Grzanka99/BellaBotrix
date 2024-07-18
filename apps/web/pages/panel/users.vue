@@ -12,6 +12,7 @@ import FormButton from "~/components/ui/FormButton.vue";
 import FancyToggle from "~/components/ui/FancyToggle.vue";
 import CustomSelect from "~/components/ui/CustomSelect.vue";
 import { useChattersStore } from "~/store/chatters.store";
+import type { User } from "@prisma/client";
 
 const s = useChattersStore();
 onMounted(() => {
@@ -32,6 +33,34 @@ const totalPoints = computed(() => {
 });
 
 const gridTemplate = "100px 4fr 1fr 1fr";
+
+const meanMeaningfullPoints = computed(() => {
+  let sum = 0;
+  let total = 0;
+  for (const u of s.chatters) {
+    if (u.isBot) {
+      continue;
+    }
+
+    total += 1;
+    sum += u.points;
+  }
+
+  return sum / total;
+})
+
+const canItBeBot = (user: User) => {
+  if (user.points < meanMeaningfullPoints.value || user.sentMessages > 0) {
+    return false;
+  }
+
+  if (user.points > meanMeaningfullPoints.value && user.sentMessages === 0) {
+    return true;
+  }
+
+  return false;
+}
+
 
 useHead({
   title: "Users",
@@ -66,7 +95,7 @@ useHead({
           <TableRow
             v-for="user in s.sorted"
             :grid-template="gridTemplate"
-            :class="{ isBot: user.isBot }">
+            :class="{ isBot: user.isBot, canBeBot: !user.isBot && canItBeBot(user) }">
             <TableCell centered>
               <FancyToggle
                 :value="user.isBot"
@@ -126,5 +155,10 @@ useHead({
     align-items: center;
     padding: var(--padding-half);
   }
+}
+
+.canBeBot {
+  --color: rgba(255, 193, 0, 0.3);
+  background-image: linear-gradient(var(--color), var(--color));
 }
 </style>

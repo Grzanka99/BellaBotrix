@@ -19,7 +19,7 @@ defineProps<{
   transition: background 50ms cubic-bezier(.4, 0, .2, 1);
 
   &:hover {
-    background: var(--background-dim);
+    background-color: var(--background-dim);
   }
 }
 </style>
