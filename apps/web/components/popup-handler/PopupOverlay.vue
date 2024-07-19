@@ -1,37 +1,37 @@
 <script setup lang="ts">
-import { usePopupsStore } from '~/store/popups.store';
-import { EPopupStatus, EPopupType } from '~/types/popup.type';
+import { usePopupsStore } from "~/store/popups.store";
+import { EPopupStatus, EPopupType } from "~/types/popup.type";
 
 const s = usePopupsStore();
 
 // onMounted(() => {
-//   // setInterval(() => {
-//   //   s.add({
-//   //     headline: "Hello there info",
-//   //     details: ["general kenobi"],
-//   //     timeout: 5000,
-//   //     type: EPopupType.Info
-//   //   })
-//   // }, 1000);
+//   setInterval(() => {
+//     s.add({
+//       headline: "Hello there info",
+//       details: ["general kenobi"],
+//       timeout: 5000,
+//       type: EPopupType.Info,
+//     });
+//   }, 1000);
 //
 //   setInterval(() => {
 //     s.add({
 //       headline: "Hello there warning",
 //       details: ["general kenobi"],
 //       timeout: 10000,
-//       type: EPopupType.Warning
-//     })
+//       type: EPopupType.Warning,
+//     });
 //   }, 5000);
-//   //
-//   // setInterval(() => {
-//   //   s.add({
-//   //     headline: "Hello there error",
-//   //     details: ["general kenobi", "is a general named Kenobi"],
-//   //     timeout: 50000,
-//   //     type: EPopupType.Error
-//   //   })
-//   // }, 5000);
-// })
+//
+//   setInterval(() => {
+//     s.add({
+//       headline: "Hello there error",
+//       details: ["general kenobi", "is a general named Kenobi"],
+//       timeout: 50000,
+//       type: EPopupType.Error,
+//     });
+//   }, 5000);
+// });
 </script>
 
 <template>
@@ -40,17 +40,24 @@ const s = usePopupsStore();
       <li v-for="el in s.queue" :key="el.id" :data-type="el.type">
         <div class="popups-title-group">
           <h3 class="popups-headline">
-            <Icon v-if="el.type === EPopupType.Error" name="material-symbols:error-outline" />
-            <Icon v-else-if="el.type === EPopupType.Warning" name="material-symbols:warning-outline" />
+            <Icon
+              v-if="el.type === EPopupType.Error"
+              name="material-symbols:error-outline" />
+            <Icon
+              v-else-if="el.type === EPopupType.Warning"
+              name="material-symbols:warning-outline" />
             <Icon v-else name="material-symbols:chat-info-outline" />
             <span>{{ el.headline }}</span>
           </h3>
-          <button type="button" @click="s.handle(el.id)" class="popups-close-btn">
+          <button
+            type="button"
+            @click="s.handle(el.id)"
+            class="popups-close-btn">
             <Icon name="material-symbols:close" />
           </button>
         </div>
         <ul class="popups-details" v-if="el.details.length">
-          <li v-for="det in el.details"> {{ det }} </li>
+          <li v-for="det in el.details">{{ det }}</li>
         </ul>
       </li>
     </TransitionGroup>
@@ -76,7 +83,6 @@ const s = usePopupsStore();
   top: var(--padding-half);
   right: var(--padding-half);
 
-
   >li {
     position: relative;
     border-radius: var(--radius);
@@ -89,22 +95,22 @@ const s = usePopupsStore();
       margin-bottom: var(--padding-quarter);
     }
 
-    &[data-type=error] {
+    &[data-type="error"] {
       color: var(--text);
       background: var(--error);
     }
 
-    &[data-type=warning] {
+    &[data-type="warning"] {
       color: var(--background);
       background: var(--warn);
     }
 
-    &[data-type=info] {
+    &[data-type="info"] {
       color: var(--background);
       background: var(--info-solid);
     }
 
-    &[data-type=success] {
+    &[data-type="success"] {
       color: var(--background);
       background: var(--success);
     }

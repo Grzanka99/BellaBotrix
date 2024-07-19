@@ -7,7 +7,7 @@ type TPopupInner = TPopup & {
 
 function sorter(a: TPopup, b: TPopup) {
   if (a.type === EPopupType.Error && b.type !== EPopupType.Error) {
-    return 1;
+    return -1;
   }
 
   if (a.type === EPopupType.Error && b.type === EPopupType.Error) {
@@ -15,7 +15,7 @@ function sorter(a: TPopup, b: TPopup) {
   }
 
   if (a.type !== EPopupType.Error && b.type === EPopupType.Error) {
-    return -1;
+    return 1;
   }
 
   return 0;
@@ -28,16 +28,17 @@ export const usePopupsStore = defineStore("popups", () => {
   const add = (popup: TPopup) => {
     const localId = id.value + 1;
 
-    popups.value = [
+    const newValue = [
       ...popups.value,
       {
         ...popup,
         id: localId,
         status: EPopupStatus.Progress,
       },
-    ];
+    ].toSorted(sorter);
 
-    console.log(popup.timeout);
+    popups.value = newValue;
+
     id.value = localId;
     if (popup.timeout <= 0) {
       return;
