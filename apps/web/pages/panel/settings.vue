@@ -6,6 +6,7 @@ import FormNumberInput from "~/components/ui/FormNumberInput.vue";
 import FormTextarea from "~/components/ui/FormTextarea.vue";
 import SettingsGroup from "~/components/settings/SettingsGroup.vue";
 import SingleSetting from "~/components/settings/SingleSetting.vue";
+import CustomSelect from "~/components/ui/CustomSelect.vue";
 
 const settings = useSettingsStore();
 
@@ -210,16 +211,17 @@ useHead({
           :value="ollamaAI.enabled.value"
           @change="(value) => settings.handleUpdate({ ollamaAI: { enabled: { value } } })" />
       </SingleSetting>
-      <SingleSetting name="model" disabled :option="ollamaAI.model">
-        <FormTextInput
-          name="ollamaai-model"
-          :model-value="ollamaAI.model.value"
-          disabled
-          @update:model-value="(value) =>
-            settings.handleUpdateDebounce({
-              ollamaAI: { model: { value } },
-            })
-            " />
+      <SingleSetting name="model" :option="ollamaAI.model">
+        <CustomSelect
+          :options="[
+            { value: 'gemma2', displayName: 'gemma2, quite fast, quite good' },
+            { value: 'command-r', displayName: 'command-r, quite slow, very good' },
+            { value: 'phi3', displayName: 'phi3, very fast, very bad' }
+          ]"
+          @update:model-value="(value) => settings.handleUpdateDebounce({
+            ollamaAI: { model: { value } }
+          })"
+          :model-value="ollamaAI.model.value" />
       </SingleSetting>
       <SingleSetting name="reply language" :option="ollamaAI.language">
         <FormTextInput

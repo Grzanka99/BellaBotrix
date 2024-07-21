@@ -18,6 +18,7 @@
     "packages/*"
   ],
   "dependencies": {
-    "lodash.merge": "^4.6.2"
+    "lodash.merge": "^4.6.2",
+    "ollama": "^0.5.6"
   }
 }
