@@ -6,11 +6,6 @@ import { logger } from "utils/logger";
 const OLLAMA_API_URL = Bun.env.OLLAMA_API_URL;
 const ALLOWED_MODELS = Bun.env.ALLOWED_MODELS || ["phi3"];
 
-type TArgs = {
-  historySize: number;
-  language: string;
-};
-
 const DEFAULT_PART: Message[] = [
   {
     role: "system",
@@ -37,9 +32,8 @@ export class OllamaAI {
   private static queue: AsyncQueue;
 
   private history: Message[] = [];
-  private languagePrompt: Message;
 
-  constructor(private settings: TArgs) {
+  constructor() {
     if (!OllamaAI.ollama) {
       OllamaAI.ollama = new Ollama({ host: OLLAMA_API_URL });
     }
@@ -47,13 +41,44 @@ export class OllamaAI {
     if (!OllamaAI.queue) {
       OllamaAI.queue = new AsyncQueue();
     }
+  }
 
-    this.languagePrompt = { role: "system", content: `Always reply in ${settings.language}` };
+  private historySize = 0;
+  public setHistorySize(size: number) {
+    // NOTE: x2 to keep every reponse also
+    this.historySize = size * 2;
+  }
+
+  private languagePrompt: Message = {
+    role: "system",
+    content: "Always reply in English",
+  };
+  public setLanguage(lang: string) {
+    this.languagePrompt = {
+      role: "system",
+      content: `Always reply in ${lang}`,
+    };
+  }
+
+  private defaultPrompt: Message = {
+    role: "system",
+    content:
+      "Be a little toxic, you pretend to be Bellatrix Le'Strange from Harry Potter universum.",
+  };
+  public setDefaultPrompt(prompt: string) {
+    this.defaultPrompt = {
+      role: "system",
+      content: prompt,
+    };
+  }
+
+  private model = "phi3";
+  public setModel(model: string) {
+    this.model = this.getAllowdModel(model);
   }
 
   private addToHistory(message: Message) {
-    // NOTE: x2 to keep every reponse also
-    if (this.history.length >= this.settings.historySize * 2) {
+    if (this.history.length >= this.historySize) {
       this.history.shift();
     }
 
@@ -91,19 +116,7 @@ export class OllamaAI {
     return false;
   }
 
-  public async ask(
-    q: string,
-    username: string,
-    model: string,
-    defaultPrompt: string,
-  ): Promise<TOption<string>> {
-    const defaultSystemPrompt: Message = {
-      role: "system",
-      content: defaultPrompt.length
-        ? defaultPrompt
-        : "Be a little toxic, you pretend to be Bellatrix Le'Strange from Harry Potter universum.",
-    };
-
+  public async ask(q: string, username: string): Promise<TOption<string>> {
     const message: Message = {
       role: "user",
       content: `User ${username} wrote: ${q}`,
@@ -113,10 +126,10 @@ export class OllamaAI {
       const res = await OllamaAI.queue.enqueue(
         async () =>
           await OllamaAI.ollama?.chat({
-            model: this.getAllowdModel(model),
+            model: this.getAllowdModel(this.model),
             messages: [
               ...DEFAULT_PART,
-              defaultSystemPrompt,
+              this.defaultPrompt,
               this.languagePrompt,
               ...this.history,
               message,

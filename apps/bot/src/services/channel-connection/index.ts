@@ -113,18 +113,26 @@ export class ChannelConnection {
     // NOTE: Settings
     this.logger.info("Scheduling settings refresh for 10 seconds");
     await this.fetchSettings();
-    this.settingsInterval = setInterval(() => this.fetchSettings(), 10_000);
+    this.settingsInterval = setInterval(() => {
+      this.fetchSettings().then((value) => {
+        if (!this.ollamaAI) {
+          return;
+        }
 
-    // TODO: As it's just testing now, most settings will be hardcoded;
-    const ollamaSettings = {
-      language: this.settings?.ollamaAI.language.value || "English",
-      historySize: this.settings?.ollamaAI.keepHistory.value || 5,
-    };
+        this.ollamaAI.setLanguage(value.ollamaAI.language.value);
+        this.ollamaAI.setHistorySize(value.ollamaAI.keepHistory.value);
+        this.ollamaAI.setModel(value.ollamaAI.model.value);
+        this.ollamaAI.setDefaultPrompt(value.ollamaAI.entryPrompt.value);
+      });
+    }, 10_000);
 
-    this.logger.info(`Setting ollama with historySize of ${ollamaSettings.historySize}`);
-    this.logger.info(`Setting ollama with reply language of ${ollamaSettings.language}`);
+    this.ollamaAI = new OllamaAI();
 
-    this.ollamaAI = new OllamaAI(ollamaSettings);
+    this.ollamaAI.setHistorySize(this.settings?.ollamaAI.keepHistory.value || 5);
+    this.ollamaAI.setLanguage(this.settings?.ollamaAI.language.value || "English");
+    this.ollamaAI.setModel(this.settings?.ollamaAI.model.value || "phi3");
+    this.ollamaAI.setDefaultPrompt(this.settings?.ollamaAI.entryPrompt.value || "");
+
     this.ollamaAI.startHistoryCleaner(this.channelName);
 
     this.irc.addHandler(this.channelName, async (ctx) => {
@@ -166,12 +174,7 @@ export class ChannelConnection {
           if (this.settings?.ollamaAI.enabled.value && this.ollamaAI) {
             const shouldRun = this.ollamaAI.shouldRunOnThatMessage(ctx.message);
             if (shouldRun) {
-              const res = await this.ollamaAI.ask(
-                ctx.message,
-                ctx.tags.username,
-                this.settings.ollamaAI.model.value,
-                this.settings.ollamaAI.entryPrompt.value,
-              );
+              const res = await this.ollamaAI.ask(ctx.message, ctx.tags.username);
               if (res) {
                 this.send(`@${ctx.tags.username}, ${res}`);
               }
