@@ -8,7 +8,6 @@ const ALLOWED_MODELS = Bun.env.ALLOWED_MODELS || ["phi3"];
 
 type TArgs = {
   historySize: number;
-  defaultPrompt: string;
   language: string;
 };
 
@@ -38,7 +37,6 @@ export class OllamaAI {
   private static queue: AsyncQueue;
 
   private history: Message[] = [];
-  private defaultPrompt: Message;
   private languagePrompt: Message;
 
   constructor(private settings: TArgs) {
@@ -51,16 +49,6 @@ export class OllamaAI {
     }
 
     this.languagePrompt = { role: "system", content: `Always reply in ${settings.language}` };
-
-    if (settings.defaultPrompt.length) {
-      this.defaultPrompt = { role: "system", content: settings.defaultPrompt };
-    } else {
-      this.defaultPrompt = {
-        role: "system",
-        content:
-          "Be a little toxic, you pretend to be Bellatrix Le'Strange from Harry Potter universum.",
-      };
-    }
   }
 
   private addToHistory(message: Message) {
@@ -103,7 +91,19 @@ export class OllamaAI {
     return false;
   }
 
-  public async ask(q: string, username: string, model: string): Promise<TOption<string>> {
+  public async ask(
+    q: string,
+    username: string,
+    model: string,
+    defaultPrompt: string,
+  ): Promise<TOption<string>> {
+    const defaultSystemPrompt: Message = {
+      role: "system",
+      content: defaultPrompt.length
+        ? defaultPrompt
+        : "Be a little toxic, you pretend to be Bellatrix Le'Strange from Harry Potter universum.",
+    };
+
     const message: Message = {
       role: "user",
       content: `User ${username} wrote: ${q}`,
@@ -116,7 +116,7 @@ export class OllamaAI {
             model: this.getAllowdModel(model),
             messages: [
               ...DEFAULT_PART,
-              this.defaultPrompt,
+              defaultSystemPrompt,
               this.languagePrompt,
               ...this.history,
               message,

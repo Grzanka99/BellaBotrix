@@ -216,7 +216,8 @@ useHead({
           :options="[
             { value: 'gemma2', displayName: 'gemma2, quite fast, quite good' },
             { value: 'command-r', displayName: 'command-r, quite slow, very good' },
-            { value: 'phi3', displayName: 'phi3, very fast, very bad' }
+            { value: 'phi3', displayName: 'phi3, very fast, very bad' },
+            { value: 'mistral', displayName: 'mistral, rather fast, no idea' }
           ]"
           @update:model-value="(value) => settings.handleUpdateDebounce({
             ollamaAI: { model: { value } }
@@ -244,10 +245,9 @@ useHead({
             })
             " />
       </SingleSetting>
-      <SingleSetting name="entry prompt" disabled :option="ollamaAI.entryPrompt">
+      <SingleSetting name="entry prompt" :option="ollamaAI.entryPrompt">
         <FormTextarea
           name="ollamaai-entry-promp"
-          disabled
           :model-value="ollamaAI.entryPrompt.value"
           @update:model-value="(value) =>
             settings.handleUpdateDebounce({

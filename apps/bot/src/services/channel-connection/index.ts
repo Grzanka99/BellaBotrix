@@ -118,7 +118,6 @@ export class ChannelConnection {
     // TODO: As it's just testing now, most settings will be hardcoded;
     const ollamaSettings = {
       language: this.settings?.ollamaAI.language.value || "English",
-      defaultPrompt: "",
       historySize: this.settings?.ollamaAI.keepHistory.value || 5,
     };
 
@@ -171,6 +170,7 @@ export class ChannelConnection {
                 ctx.message,
                 ctx.tags.username,
                 this.settings.ollamaAI.model.value,
+                this.settings.ollamaAI.entryPrompt.value,
               );
               if (res) {
                 this.send(`@${ctx.tags.username}, ${res}`);
