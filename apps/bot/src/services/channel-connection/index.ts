@@ -110,6 +110,9 @@ export class ChannelConnection {
     // NOTE: Automsg
     this.automsgInterval = setInterval(() => this.automsgChecker(), 300_000);
 
+    // NOTE OllamaAI instance
+    this.ollamaAI = new OllamaAI();
+
     // NOTE: Settings
     this.logger.info("Scheduling settings refresh for 10 seconds");
     await this.fetchSettings();
@@ -126,8 +129,7 @@ export class ChannelConnection {
       });
     }, 10_000);
 
-    this.ollamaAI = new OllamaAI();
-
+    // NOTE: Setting up ollama AI
     this.ollamaAI.setHistorySize(this.settings?.ollamaAI.keepHistory.value || 5);
     this.ollamaAI.setLanguage(this.settings?.ollamaAI.language.value || "English");
     this.ollamaAI.setModel(this.settings?.ollamaAI.model.value || "phi3");
