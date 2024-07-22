@@ -224,7 +224,7 @@ useHead({
           })"
           :model-value="ollamaAI.model.value" />
       </SingleSetting>
-      <SingleSetting name="reply language" disabled :option="ollamaAI.language">
+      <SingleSetting name="reply language" :option="ollamaAI.language">
         <FormTextInput
           name="ollamaai-reply-lang"
           :model-value="ollamaAI.language.value"

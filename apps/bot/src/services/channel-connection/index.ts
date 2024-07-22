@@ -42,7 +42,7 @@ export class ChannelConnection {
 
   private r6dle: R6Dle;
   private r6stats: R6Stats;
-  private ollamaAI: OllamaAI | undefined = undefined;
+  private ollamaAI: OllamaAI;
 
   private get logger() {
     return {
@@ -63,6 +63,7 @@ export class ChannelConnection {
     // TODO: Move it out of constructor maybe
     this.r6dle = new R6Dle(this.channelName);
     this.r6stats = R6Stats.instance;
+    this.ollamaAI = new OllamaAI();
 
     prisma.channel
       .findUnique({
@@ -110,9 +111,6 @@ export class ChannelConnection {
     // NOTE: Automsg
     this.automsgInterval = setInterval(() => this.automsgChecker(), 300_000);
 
-    // NOTE OllamaAI instance
-    this.ollamaAI = new OllamaAI();
-
     // NOTE: Settings
     this.logger.info("Scheduling settings refresh for 10 seconds");
     await this.fetchSettings();
@@ -121,21 +119,12 @@ export class ChannelConnection {
         if (!this.ollamaAI) {
           return;
         }
-
-        this.ollamaAI.setLanguage(value.ollamaAI.language.value);
-        this.ollamaAI.setHistorySize(value.ollamaAI.keepHistory.value);
-        this.ollamaAI.setModel(value.ollamaAI.model.value);
-        this.ollamaAI.setDefaultPrompt(value.ollamaAI.entryPrompt.value);
       });
     }, 10_000);
 
-    // NOTE: Setting up ollama AI
-    this.ollamaAI.setHistorySize(this.settings?.ollamaAI.keepHistory.value || 5);
-    this.ollamaAI.setLanguage(this.settings?.ollamaAI.language.value || "English");
-    this.ollamaAI.setModel(this.settings?.ollamaAI.model.value || "phi3");
-    this.ollamaAI.setDefaultPrompt(this.settings?.ollamaAI.entryPrompt.value || "");
-
+    // NOTE: OllamaAI
     this.ollamaAI.startHistoryCleaner(this.channelName);
+    this.ollamaAI.setHistorySize(this.settings?.ollamaAI.keepHistory.value || 5);
 
     this.irc.addHandler(this.channelName, async (ctx) => {
       if (ctx.self) {
@@ -176,7 +165,13 @@ export class ChannelConnection {
           if (this.settings?.ollamaAI.enabled.value && this.ollamaAI) {
             const shouldRun = this.ollamaAI.shouldRunOnThatMessage(ctx.message);
             if (shouldRun) {
-              const res = await this.ollamaAI.ask(ctx.message, ctx.tags.username);
+              this.ollamaAI.setHistorySize(this.settings.ollamaAI.keepHistory.value);
+              const res = await this.ollamaAI.ask(ctx.message, ctx.tags.username, {
+                language: this.settings.ollamaAI.language.value,
+                model: this.settings.ollamaAI.model.value,
+                defaultPrompt: this.settings.ollamaAI.entryPrompt.value,
+              });
+
               if (res) {
                 this.send(`@${ctx.tags.username}, ${res}`);
               }

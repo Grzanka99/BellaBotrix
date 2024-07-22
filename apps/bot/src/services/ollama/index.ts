@@ -27,6 +27,12 @@ const DEFAULT_PART: Message[] = [
   },
 ];
 
+type TConfig = {
+  language: string;
+  model: string;
+  defaultPrompt: string;
+};
+
 export class OllamaAI {
   private static ollama: Ollama | undefined;
   private static queue: AsyncQueue;
@@ -47,34 +53,6 @@ export class OllamaAI {
   public setHistorySize(size: number) {
     // NOTE: x2 to keep every reponse also
     this.historySize = size * 2;
-  }
-
-  private languagePrompt: Message = {
-    role: "system",
-    content: "Always reply in English",
-  };
-  public setLanguage(lang: string) {
-    this.languagePrompt = {
-      role: "system",
-      content: `Always reply in ${lang}`,
-    };
-  }
-
-  private defaultPrompt: Message = {
-    role: "system",
-    content:
-      "Be a little toxic, you pretend to be Bellatrix Le'Strange from Harry Potter universum.",
-  };
-  public setDefaultPrompt(prompt: string) {
-    this.defaultPrompt = {
-      role: "system",
-      content: prompt,
-    };
-  }
-
-  private model = "phi3";
-  public setModel(model: string) {
-    this.model = this.getAllowdModel(model);
   }
 
   private addToHistory(message: Message) {
@@ -116,7 +94,28 @@ export class OllamaAI {
     return false;
   }
 
-  public async ask(q: string, username: string): Promise<TOption<string>> {
+  private newSystemMessage(content: string): Message {
+    return {
+      role: "system",
+      content,
+    };
+  }
+
+  private getMessagesFromConfig(config: TConfig): Message[] {
+    const defaultPrompt = config.defaultPrompt.length
+      ? this.newSystemMessage(config.defaultPrompt)
+      : this.newSystemMessage(
+          "Be a little toxic, you pretend to be Bellatrix Le'Strange from Harry Potter universum.",
+        );
+
+    const languagePrompt = config.language.length
+      ? this.newSystemMessage(`Always reply in ${config.language}`)
+      : this.newSystemMessage("Always reply in English");
+
+    return [defaultPrompt, languagePrompt];
+  }
+
+  public async ask(q: string, username: string, config: TConfig): Promise<TOption<string>> {
     const message: Message = {
       role: "user",
       content: `User ${username} wrote: ${q}`,
@@ -126,11 +125,10 @@ export class OllamaAI {
       const res = await OllamaAI.queue.enqueue(
         async () =>
           await OllamaAI.ollama?.chat({
-            model: this.getAllowdModel(this.model),
+            model: this.getAllowdModel(config.model),
             messages: [
               ...DEFAULT_PART,
-              this.defaultPrompt,
-              this.languagePrompt,
+              ...this.getMessagesFromConfig(config),
               ...this.history,
               message,
             ],
