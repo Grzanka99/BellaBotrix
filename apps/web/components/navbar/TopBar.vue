@@ -60,6 +60,9 @@ watch(channel, () => {
       <Icon v-if="isDark" name="material-symbols:dark-mode" />
       <Icon v-else name="material-symbols:light-mode"></Icon>
     </FormButton>
+    <div class="perms-list" v-if="auth.session.value?.perms.includes('admin')">
+      <span v-for="el in auth.session.value.perms">{{ el }}, </span>
+    </div>
   </header>
 </template>
 

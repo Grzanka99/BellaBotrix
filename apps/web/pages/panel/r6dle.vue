@@ -15,8 +15,14 @@ import NewR6DleOperatorModal from "~/components/r6dle/NewR6DleOperatorModal.vue"
 import FormTextInput from "~/components/ui/FormTextInput.vue";
 import EditR6DleOperatorModal from "~/components/r6dle/EditR6DleOperatorModal.vue";
 
-
 const s = useR6DleOperatorsStore();
+
+definePageMeta({
+  validate: () => {
+    const perms = useAuth().session.value?.perms || [];
+    return perms.includes('admin') || perms.includes('r6dleadmin');
+  }
+})
 
 onMounted(() => {
   s.startRefresh();

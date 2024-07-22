@@ -215,6 +215,7 @@ useHead({
         <CustomSelect
           :options="[
             { value: 'gemma2', displayName: 'gemma2, quite fast, quite good' },
+            { value: 'gemma2:27b', displayName: 'gemma2:27b, quite slow, very good (?)' },
             { value: 'command-r', displayName: 'command-r, quite slow, very good' },
             { value: 'phi3', displayName: 'phi3, very fast, very bad' },
             { value: 'mistral', displayName: 'mistral, rather fast, no idea' }

@@ -63,6 +63,12 @@ const globalSettings = [
     displayName: "r6dle",
     icon: 'material-symbols:person',
     adminType: 'r6dleadmin',
+  },
+  {
+    to: "/panel/permissions",
+    displayName: "permissions",
+    icon: 'material-symbols:user-attributes-outline',
+    adminType: 'admin',
   }
 ]
 

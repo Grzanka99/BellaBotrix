@@ -38,11 +38,8 @@ useHead({
         <FormTextInput
           name="query"
           placeholder="Search by username..."
-          v-model="solos.queryFilter"
-        />
-        <FormButton type="button" @click="solos.queryFilter = ''"
-          >clear</FormButton
-        >
+          v-model="solos.queryFilter" />
+        <FormButton type="button" @click="solos.queryFilter = ''">clear</FormButton>
       </div>
       <div id="solos-page-controls__info">
         <h5>Total solos: {{ solos.solos.length }}</h5>
@@ -61,13 +58,11 @@ useHead({
         <template v-if="solos.solos.length">
           <TableRow
             v-for="solo in solos.filtered.toReversed()"
-            :grid-template="gridTemplate"
-          >
+            :grid-template="gridTemplate">
             <TableCell centered>
               <FancyToggle
                 :value="!solo.inProgress"
-                :disabled="!solo.inProgress"
-              />
+                :disabled="!solo.inProgress" />
             </TableCell>
             <TableCell>{{ solo.user1 }}</TableCell>
             <TableCell>{{ solo.user2 }}</TableCell>
