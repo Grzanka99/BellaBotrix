@@ -1,5 +1,6 @@
 import { PrismaClient } from "@prisma/client";
-import type { TDtoUser, TUser } from "~/types/auth.type";
+import type { TAuthSession, TDtoUser, TUser } from "~/types/auth.type";
+import type { TPerms } from "~/types/permissions.type";
 
 export const prisma = new PrismaClient();
 
@@ -28,4 +29,21 @@ export async function createUser(user: TDtoUser) {
   });
 
   return newUser;
+}
+
+export async function getUserPerms(authData: TAuthSession): Promise<TPerms[]> {
+  if (!authData.id) {
+    return [];
+  }
+
+  const res = await prisma.webuiUser.findUnique({
+    where: { id: Number(authData.id) },
+    select: { perms: true },
+  });
+
+  if (!res) {
+    return [];
+  }
+
+  return res.perms.split(",") as TPerms[];
 }

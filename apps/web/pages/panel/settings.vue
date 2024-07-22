@@ -205,13 +205,14 @@ useHead({
             " />
       </SingleSetting>
     </SettingsGroup>
-    <SettingsGroup group-name="Ollama AI Reponses" v-if="ollamaAI">
+    <SettingsGroup group-name="Ollama AI Reponses" v-if="ollamaAI" :required-perms="['ai', 'ai+', 'admin']">
       <SingleSetting name="enabled" :option="ollamaAI.enabled">
         <FancyToggle
           :value="ollamaAI.enabled.value"
           @change="(value) => settings.handleUpdate({ ollamaAI: { enabled: { value } } })" />
       </SingleSetting>
-      <SingleSetting name="model" :option="ollamaAI.model">
+      <SingleSetting name="model" :option="ollamaAI.model" :required-perms="['ai+', 'admin']"
+        not-allowed-message="ai+ only">
         <CustomSelect
           :options="[
             { value: 'gemma2', displayName: 'gemma2, quite fast, quite good' },

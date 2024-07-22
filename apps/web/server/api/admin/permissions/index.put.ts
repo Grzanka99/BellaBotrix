@@ -1,9 +1,16 @@
-import { SUpdatePermissionsDto, type TPermissionEntry } from "~/types/permissions.type";
+import { getUserPerms } from "~/server/utils/db";
+import {
+  SUpdatePermissionsDto,
+  type TPerms,
+  type TPermissionEntry,
+} from "~/types/permissions.type";
 
 export default defineEventHandler(async (event) => {
   const auth = await requireAuthSession(event);
 
-  if (!auth.data.perms.includes("admin")) {
+  const perms = await getUserPerms(auth.data);
+
+  if (!perms.includes("admin")) {
     throw createError({
       message: "Unauthorized",
       statusCode: 401,
@@ -18,22 +25,22 @@ export default defineEventHandler(async (event) => {
     });
   }
 
-  const { id, perms } = parsed.data;
+  const { id, perms: newPerms } = parsed.data;
 
   if (auth.data.id === id) {
-    if (!perms.includes("admin") && auth.data.perms.includes("admin")) {
-      perms.push("admin");
+    if (!newPerms.includes("admin") && perms.includes("admin")) {
+      newPerms.push("admin");
     }
 
-    if (!perms.includes("user") && auth.data.perms.includes("user")) {
-      perms.push("user");
+    if (!newPerms.includes("user") && perms.includes("user")) {
+      newPerms.push("user");
     }
   }
 
   try {
     const updated = await prisma.webuiUser.update({
       where: { id },
-      data: { perms: perms.join(",") },
+      data: { perms: newPerms.join(",") },
       select: {
         id: true,
         perms: true,
@@ -49,7 +56,7 @@ export default defineEventHandler(async (event) => {
     return {
       id: updated.id,
       username: updated.username,
-      perms: updated.perms.split(","),
+      perms: updated.perms.split(",") as TPerms[],
       channel: channel?.name,
     } satisfies TPermissionEntry;
   } catch (_) {

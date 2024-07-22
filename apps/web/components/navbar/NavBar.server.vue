@@ -3,6 +3,7 @@ import type { TRoute } from "~/types/ui.type";
 import NavigationLink from "../ui/NavigationLink.vue";
 import FormButton from "../ui/FormButton.vue";
 import SpacerWithTitle from "../ui/SpacerWithTitle.vue";
+import { useStorage } from "@vueuse/core";
 
 const routes = computed<TRoute[]>(() => [
   {
@@ -56,6 +57,11 @@ const auth = useAuth();
 const isGlobalAdmin = computed(() => auth.session.value?.perms?.includes('admin'));
 const canAccessGlobalSettings = computed(() => isGlobalAdmin.value || auth.session.value?.perms?.includes('r6dleadmin'));
 
+const channelName = useStorage<string | undefined>(
+  "selectedChannelName",
+  undefined,
+);
+
 // NOTE: Admin only
 const globalSettings = [
   {
@@ -83,6 +89,7 @@ const handleAuthRefirect = () => {
 <template>
   <nav id="navbar">
     <div class="routes">
+      <SpacerWithTitle :text="`Channel: #${channelName}`" />
       <NavigationLink
         v-for="route in routes"
         :to="route.to"

@@ -1,18 +1,42 @@
 <script setup lang="ts">
 import type { TSettingOption } from "bellatrix";
+import type { TPerms } from "~/types/permissions.type";
 
-defineProps<{
+const props = defineProps<{
   name: string;
   option: TSettingOption<unknown>;
   disabled?: boolean;
+  requiredPerms?: TPerms[],
+  notAllowedMessage?: string,
 }>();
+
+const auth = useAuth();
+
+const canEdit = computed(() => {
+  if (!props.requiredPerms) {
+    return true;
+  }
+
+  const userRoles = auth.session.value?.perms || [];
+
+  for (const role of userRoles) {
+    if (props.requiredPerms.includes(role)) {
+      return true;
+    }
+  }
+
+  return false;
+})
 </script>
 
 <template>
-  <div class="single-setting" :class="{ 'single-setting--disabled': disabled }">
-    <span class="single-setting__name">{{ name }}</span>
+  <div class="single-setting" :class="{ 'single-setting--disabled': disabled || !canEdit }">
+    <span class="single-setting__name">
+      {{ name }}
+      <span v-if="!canEdit"><i>{{ notAllowedMessage }}</i></span>
+    </span>
     <div class="single-setting__controller">
-      <span v-if="disabled">{{ option.value }}</span>
+      <span v-if="disabled || !canEdit">{{ option.value }}</span>
       <slot v-else />
     </div>
     <div class="single-setting__desc">

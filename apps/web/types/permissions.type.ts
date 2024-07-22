@@ -9,7 +9,7 @@ const SPerms = z.union([
   z.literal("ai+"),
 ]);
 
-export type TPerms = z.infer<typeof SPerms> | (string & {});
+export type TPerms = z.infer<typeof SPerms>;
 
 export type TPermissionEntry = {
   id: number;
