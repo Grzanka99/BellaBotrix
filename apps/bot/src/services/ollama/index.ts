@@ -1,5 +1,6 @@
 import type { TOption } from "bellatrix";
 import { Ollama, type Message } from "ollama";
+import { prisma, prismaQueue } from "services/db";
 import { AsyncQueue } from "utils/async-queue";
 import { logger } from "utils/logger";
 
@@ -39,7 +40,7 @@ export class OllamaAI {
 
   private history: Message[] = [];
 
-  constructor() {
+  constructor(private channel: string) {
     if (!OllamaAI.ollama) {
       OllamaAI.ollama = new Ollama({ host: OLLAMA_API_URL });
     }
@@ -101,6 +102,28 @@ export class OllamaAI {
     };
   }
 
+  private async registerInDatabase(
+    config: TConfig,
+    userMessage: string,
+    response: string,
+    username: string,
+  ) {
+    await prismaQueue.enqueue(() =>
+      prisma.ollamaAIHistory.create({
+        data: {
+          channel: this.channel,
+          model: config.model,
+          language: config.language,
+          entryPrompt: config.defaultPrompt,
+          historySize: this.historySize,
+          userMessage,
+          response,
+          username,
+        },
+      }),
+    );
+  }
+
   private getMessagesFromConfig(config: TConfig): Message[] {
     const defaultPrompt = config.defaultPrompt.length
       ? this.newSystemMessage(config.defaultPrompt)
@@ -139,13 +162,16 @@ export class OllamaAI {
         return undefined;
       }
 
+      const trimmed = res.message.content.trim();
       this.addToHistory(message);
       this.addToHistory({
         role: "assistant",
-        content: res.message.content.trim(),
+        content: trimmed,
       });
 
-      return res.message.content.trim();
+      await this.registerInDatabase(config, q, trimmed, username);
+
+      return trimmed;
     } catch {
       return undefined;
     }

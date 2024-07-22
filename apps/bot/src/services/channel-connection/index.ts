@@ -63,7 +63,7 @@ export class ChannelConnection {
     // TODO: Move it out of constructor maybe
     this.r6dle = new R6Dle(this.channelName);
     this.r6stats = R6Stats.instance;
-    this.ollamaAI = new OllamaAI();
+    this.ollamaAI = new OllamaAI(this.channelName);
 
     prisma.channel
       .findUnique({
