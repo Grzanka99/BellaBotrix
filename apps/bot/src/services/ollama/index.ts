@@ -88,7 +88,7 @@ export class OllamaAI {
   }
 
   public shouldRunOnThatMessage(message: string): boolean {
-    if (message.includes("@BellaBotrix")) {
+    if (message.toLowerCase().includes("@BellaBotrix".toLowerCase())) {
       return true;
     }
 
@@ -172,7 +172,7 @@ export class OllamaAI {
       await this.registerInDatabase(config, q, trimmed, username);
 
       return trimmed;
-    } catch {
+    } catch (_) {
       return undefined;
     }
   }
