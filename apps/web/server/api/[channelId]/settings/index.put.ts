@@ -1,9 +1,43 @@
-import { SSettings, SSettingsUpdate, TSettings } from "bellatrix";
-import merge from "lodash.merge";
+import { SSettings, SSettingsUpdate, TSettings, type TSettingsUpdate } from "bellatrix";
 import mergeWith from "lodash.mergewith";
+import { getUserPerms } from "~/server/utils/db";
+import type { TAuthSession } from "~/types/auth.type";
+import type { TPerms } from "~/types/permissions.type";
+
+function checkRoles(userRoles: TPerms[], requiredRoles: TPerms[]): boolean {
+  for (const role of requiredRoles) {
+    if (userRoles.includes(role)) {
+      return true;
+    }
+  }
+  return false;
+}
+
+function alterSettingsForNonAIUser(data: TSettingsUpdate, perms: TPerms[]): TSettingsUpdate {
+  if (data.ollamaAI && !checkRoles(["ai", "ai+", "admin"], perms)) {
+    return {
+      ...data,
+      ollamaAI: undefined,
+    };
+  }
+
+  if (data.ollamaAI?.model && !checkRoles(["ai+", "admin"], perms)) {
+    return {
+      ...data,
+      ollamaAI: {
+        ...data.ollamaAI,
+        model: undefined,
+      },
+    };
+  }
+
+  return data;
+}
 
 export default defineEventHandler(async (event) => {
-  await requireAuthSession(event);
+  const auth = await requireAuthSession(event);
+
+  const perms = await getUserPerms(auth.data);
 
   const body = SSettingsUpdate.safeParse(await readBody(event));
 
@@ -12,6 +46,9 @@ export default defineEventHandler(async (event) => {
       statusCode: 401,
     });
   }
+
+  let { data } = body;
+  data = alterSettingsForNonAIUser(data, perms);
 
   const channel = await getChannelFromEvent(event);
 
@@ -42,7 +79,7 @@ export default defineEventHandler(async (event) => {
     });
   }
 
-  const merged = mergeWith(parsed.data, body.data, (oldv: string | number | [], newv: unknown) => {
+  const merged = mergeWith(parsed.data, data, (oldv: string | number | [], newv: unknown) => {
     if (Array.isArray(oldv) && Array.isArray(newv)) {
       return newv;
     }

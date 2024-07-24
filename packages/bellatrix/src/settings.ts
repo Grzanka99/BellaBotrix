@@ -38,6 +38,13 @@ export const SSettings = z.object({
     maxPoints: SSettingOptionSchema(z.number().min(0)),
     modifier: SSettingOptionSchema(z.number().min(0)),
   }),
+  ollamaAI: z.object({
+    enabled: SSettingOptionSchema(z.boolean()),
+    model: SSettingOptionSchema(z.string()),
+    language: SSettingOptionSchema(z.string()),
+    keepHistory: SSettingOptionSchema(z.number()),
+    entryPrompt: SSettingOptionSchema(z.string()),
+  }),
   automod: z.object({
     emotesLimit: z.object({
       enabled: SSettingOptionSchema(z.boolean()),

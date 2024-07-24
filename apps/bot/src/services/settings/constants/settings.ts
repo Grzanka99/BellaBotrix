@@ -86,6 +86,29 @@ export const DEFAULT_SETTINGS: TSettings = {
       description: "How many points are taken away from max points for each try",
     },
   },
+  ollamaAI: {
+    enabled: {
+      value: false,
+      description: "Enable or disable AI responses from BellaBotrix",
+    },
+    model: {
+      value: "gemma2",
+      description: "Model that AI is usign, for now locked to gemma2 as performance issues",
+    },
+    language: {
+      value: "Polish",
+      description: "Language that AI will (try to) reply with",
+    },
+    entryPrompt: {
+      value: "",
+      description:
+        "Entry prompt that will define a AI before running any response, leave empty to default one for this bot",
+    },
+    keepHistory: {
+      value: 5,
+      description: "How many messages should be kept in context. 0 wont keep history",
+    },
+  },
   automod: {
     emotesLimit: {
       enabled: {

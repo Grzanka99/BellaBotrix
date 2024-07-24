@@ -6,6 +6,7 @@ import { CommandHandler } from "handlers/commands";
 import { triggerWordsHandler } from "handlers/trigger-words";
 import { setDefaultCommandsForChannel } from "services/commands";
 import { prisma } from "services/db";
+import { OllamaAI } from "services/ollama";
 import { R6Dle } from "services/r6dle";
 import { R6Stats } from "services/r6stats";
 import { getSettings } from "services/settings";
@@ -41,6 +42,7 @@ export class ChannelConnection {
 
   private r6dle: R6Dle;
   private r6stats: R6Stats;
+  private ollamaAI: OllamaAI;
 
   private get logger() {
     return {
@@ -61,6 +63,7 @@ export class ChannelConnection {
     // TODO: Move it out of constructor maybe
     this.r6dle = new R6Dle(this.channelName);
     this.r6stats = R6Stats.instance;
+    this.ollamaAI = new OllamaAI(this.channelName);
 
     prisma.channel
       .findUnique({
@@ -110,8 +113,18 @@ export class ChannelConnection {
 
     // NOTE: Settings
     this.logger.info("Scheduling settings refresh for 10 seconds");
-    this.fetchSettings();
-    this.settingsInterval = setInterval(() => this.fetchSettings(), 10_000);
+    await this.fetchSettings();
+    this.settingsInterval = setInterval(() => {
+      this.fetchSettings().then((value) => {
+        if (!this.ollamaAI) {
+          return;
+        }
+      });
+    }, 10_000);
+
+    // NOTE: OllamaAI
+    this.ollamaAI.startHistoryCleaner(this.channelName);
+    this.ollamaAI.setHistorySize(this.settings?.ollamaAI.keepHistory.value || 5);
 
     this.irc.addHandler(this.channelName, async (ctx) => {
       if (ctx.self) {
@@ -146,6 +159,23 @@ export class ChannelConnection {
               channelId: this.channelId,
               send: this.send.bind(this),
             });
+          }
+
+          // NOTE: Ollama AI responses
+          if (this.settings?.ollamaAI.enabled.value && this.ollamaAI) {
+            const shouldRun = this.ollamaAI.shouldRunOnThatMessage(ctx.message);
+            if (shouldRun) {
+              this.ollamaAI.setHistorySize(this.settings.ollamaAI.keepHistory.value);
+              const res = await this.ollamaAI.ask(ctx.message, ctx.tags.username, {
+                language: this.settings.ollamaAI.language.value,
+                model: this.settings.ollamaAI.model.value,
+                defaultPrompt: this.settings.ollamaAI.entryPrompt.value,
+              });
+
+              if (res) {
+                this.send(`@${ctx.tags.username}, ${res}`);
+              }
+            }
           }
 
           break;

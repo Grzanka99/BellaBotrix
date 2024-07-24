@@ -124,3 +124,15 @@ model R6DleGuessHistory {
   player       String
   correctGuess Boolean
 }
+
+model OllamaAIHistory {
+  id          Int    @id @default(autoincrement())
+  model       String
+  historySize Int
+  entryPrompt String
+  username    String
+  userMessage String
+  response    String
+  channel     String
+  language    String
+}
