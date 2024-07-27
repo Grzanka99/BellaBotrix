@@ -7,6 +7,7 @@ import FormTextarea from "~/components/ui/FormTextarea.vue";
 import SettingsGroup from "~/components/settings/SettingsGroup.vue";
 import SingleSetting from "~/components/settings/SingleSetting.vue";
 import CustomSelect from "~/components/ui/CustomSelect.vue";
+import RequirePerms from "~/components/auth/RequirePerms.server.vue";
 
 const settings = useSettingsStore();
 
@@ -197,6 +198,7 @@ useHead({
         disabled
         :option="points.pointsPerMessage">
         <FormNumberInput
+          name="autoIncrement"
           :model-value="points.pointsPerMessage.value"
           @update:model-value="(value) =>
             settings.handleUpdateDebounce({
@@ -205,60 +207,69 @@ useHead({
             " />
       </SingleSetting>
     </SettingsGroup>
-    <SettingsGroup group-name="Ollama AI Reponses" v-if="ollamaAI" :required-perms="['ai', 'ai+', 'admin']">
-      <SingleSetting name="enabled" :option="ollamaAI.enabled">
-        <FancyToggle
-          :value="ollamaAI.enabled.value"
-          @change="(value) => settings.handleUpdate({ ollamaAI: { enabled: { value } } })" />
-      </SingleSetting>
-      <SingleSetting name="model" :option="ollamaAI.model" :required-perms="['ai+', 'admin']"
-        not-allowed-message="ai+ only">
-        <CustomSelect
-          :options="[
-            { value: 'gemma2', displayName: 'gemma2, quite fast, quite good' },
-            { value: 'gemma2:27b', displayName: 'gemma2:27b, quite slow, very good (?)' },
-            { value: 'command-r', displayName: 'command-r, quite slow, very good' },
-            { value: 'phi3', displayName: 'phi3, very fast, very bad' },
-            { value: 'mistral', displayName: 'mistral, rather fast, no idea' }
-          ]"
-          @update:model-value="(value) => settings.handleUpdateDebounce({
-            ollamaAI: { model: { value } }
-          })"
-          :model-value="ollamaAI.model.value" />
-      </SingleSetting>
-      <SingleSetting name="reply language" :option="ollamaAI.language">
-        <FormTextInput
-          name="ollamaai-reply-lang"
-          :model-value="ollamaAI.language.value"
-          @update:model-value="(value) =>
-            settings.handleUpdateDebounce({
-              ollamaAI: { language: { value } },
-            })
-            " />
-      </SingleSetting>
-      <SingleSetting name="keep history" disabled :option="ollamaAI.keepHistory">
-        <FormNumberInput
-          name="ollamaai-history"
-          disabled
-          :model-value="ollamaAI.keepHistory.value"
-          @update:model-value="(value) =>
-            settings.handleUpdateDebounce({
-              ollamaAI: { keepHistory: { value } },
-            })
-            " />
-      </SingleSetting>
-      <SingleSetting name="entry prompt" :option="ollamaAI.entryPrompt">
-        <FormTextarea
-          name="ollamaai-entry-promp"
-          :model-value="ollamaAI.entryPrompt.value"
-          @update:model-value="(value) =>
-            settings.handleUpdateDebounce({
-              ollamaAI: { entryPrompt: { value } },
-            })
-            " />
-      </SingleSetting>
-    </SettingsGroup>
-    <SettingsGroup group-name="Automod still work in progress">xD</SettingsGroup>
+    <RequirePerms :require="['ai', 'ai+']" type='block'>
+      <SettingsGroup group-name="Ollama AI Reponses" v-if="ollamaAI">
+        <SingleSetting name="enabled" :option="ollamaAI.enabled">
+          <FancyToggle
+            :value="ollamaAI.enabled.value"
+            @change="(value) => settings.handleUpdate({ ollamaAI: { enabled: { value } } })" />
+        </SingleSetting>
+        <RequirePerms :require="['ai+']" type='hide'>
+          <SingleSetting name="model" :option="ollamaAI.model">
+            <CustomSelect
+              :options="[
+                { value: 'gemma2', displayName: 'gemma2, quite fast, quite good' },
+                { value: 'gemma2:27b', displayName: 'gemma2:27b, quite slow, very good (?)' },
+                { value: 'command-r', displayName: 'command-r, quite slow, very good' },
+                { value: 'phi3', displayName: 'phi3, very fast, very bad' },
+                { value: 'mistral', displayName: 'mistral, rather fast, no idea' },
+                { value: 'mistral-nemo', displayName: 'mistral-nemo, no idea' },
+                { value: 'llama3.1', displayName: 'llama3.1, no idea' },
+              ]"
+              @update:model-value="(value) => settings.handleUpdateDebounce({
+                ollamaAI: { model: { value } }
+              })"
+              :model-value="ollamaAI.model.value" />
+          </SingleSetting>
+        </RequirePerms>
+        <SingleSetting name="reply language" :option="ollamaAI.language">
+          <FormTextInput
+            name="ollamaai-reply-lang"
+            :model-value="ollamaAI.language.value"
+            @update:model-value="(value) =>
+              settings.handleUpdateDebounce({
+                ollamaAI: { language: { value } },
+              })
+              " />
+        </SingleSetting>
+        <RequirePerms :require="['ai+']" type='hide'>
+          <SingleSetting name="keep history" :option="ollamaAI.keepHistory">
+            <FormNumberInput
+              name="ollamaai-history"
+              :model-value="ollamaAI.keepHistory.value"
+              @update:model-value="(value) =>
+                settings.handleUpdateDebounce({
+                  ollamaAI: { keepHistory: { value } },
+                })
+                " />
+          </SingleSetting>
+        </RequirePerms>
+        <SingleSetting name="entry prompt" :option="ollamaAI.entryPrompt">
+          <FormTextarea
+            name="ollamaai-entry-promp"
+            :model-value="ollamaAI.entryPrompt.value"
+            @update:model-value="(value) =>
+              settings.handleUpdateDebounce({
+                ollamaAI: { entryPrompt: { value } },
+              })
+              " />
+        </SingleSetting>
+      </SettingsGroup>
+    </RequirePerms>
+    <RequirePerms :require="['automod']" type='hide'>
+
+      <SettingsGroup group-name="Automod still work in progress">xD</SettingsGroup>
+    </RequirePerms>
   </div>
 </template>
 
