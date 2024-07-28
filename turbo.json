@@ -1,10 +1,19 @@
 {
   "$schema": "https://turbo.build/schema.json",
-  "globalDependencies": ["**/.env"],
+  "globalDependencies": [
+    "**/.env"
+  ],
   "pipeline": {
     "build": {
-      "dependsOn": ["^build", "^db:generate"],
-      "outputs": ["bin/bellatrix", ".output/**"]
+      "dependsOn": [
+        "^build",
+        "^db:generate"
+      ],
+      "outputs": [
+        "bin/bellatrix",
+        ".output/**",
+        "bin/sup"
+      ]
     },
     "db:generate": {
       "cache": false
@@ -13,7 +22,9 @@
       "cache": false
     },
     "dev": {
-      "dependsOn": ["^db:generate"],
+      "dependsOn": [
+        "^db:generate"
+      ],
       "cache": false,
       "persistent": true
     }

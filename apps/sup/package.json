@@ -1,12 +1,11 @@
 {
-  "name": "bot",
-  "module": "index.ts",
+  "name": "sup",
   "type": "module",
   "scripts": {
     "start": "bun --bun run ./src/index.ts",
     "dev": "bun --watch ./src/index.ts",
-    "build": "bun build ./src/index.ts --target=bun --outfile=./bin/bellatrix --compile",
-    "compile:bot": "bun build ./src/index.ts --target=bun --outfile=./bin/bellatrix --compile"
+    "build": "bun build ./src/index.ts --target=bun --outfile=./bin/sup --compile",
+    "compile:settings": "bun build ./src/index.ts --target=bun --outfile=./bin/sup --compile"
   },
   "devDependencies": {
     "@biomejs/biome": "1.1.2",
@@ -18,10 +17,9 @@
     "typescript": "^5.0.0"
   },
   "dependencies": {
-    "bellatrix": "workspace:*",
-    "r6dle": "workspace:*",
     "sqlite-storage": "workspace:*",
     "@prisma/client": "^5.9.0",
+    "elysia": "latest",
     "zod": "^3.22.4"
   }
 }

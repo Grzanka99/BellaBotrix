@@ -1,4 +1,4 @@
-import type { TSettings } from "bellatrix";
+import { SSettings, type TSettings } from "bellatrix";
 import { gc } from "bun";
 import { activityHandler } from "handlers/activity-handler";
 import { chatterTimeHandler } from "handlers/activity-handler/chatters-time";
@@ -13,8 +13,11 @@ import { getSettings } from "services/settings";
 import { ChannelTimer } from "services/timers";
 import { TwitchApi } from "services/twitch-api";
 import type { TwitchIrc } from "services/twitch-irc";
+import { SqliteStorage } from "sqlite-storage";
 import { interpolate } from "utils/interpolate-string";
 import { logger } from "utils/logger";
+
+const SHARED_DB_FILE = Bun.env.SHARED_DB_FILE || "shared.db";
 
 type TArgs = {
   ircClient: TwitchIrc;
@@ -30,7 +33,6 @@ export class ChannelConnection {
   private channelId: number | undefined = undefined;
   private ownerId: number;
   private isSetup = false;
-  private _settings: TSettings | undefined = undefined;
 
   private chattersInterval: Timer | undefined;
   private automsgInterval: Timer | undefined;
@@ -43,6 +45,9 @@ export class ChannelConnection {
   private r6dle: R6Dle;
   private r6stats: R6Stats;
   private ollamaAI: OllamaAI;
+
+  private settingsKey: string;
+  private storage: SqliteStorage;
 
   private get logger() {
     return {
@@ -64,6 +69,9 @@ export class ChannelConnection {
     this.r6dle = new R6Dle(this.channelName);
     this.r6stats = R6Stats.instance;
     this.ollamaAI = new OllamaAI(this.channelName);
+
+    this.settingsKey = `${args.channelName}-settings`;
+    this.storage = new SqliteStorage(SHARED_DB_FILE);
 
     prisma.channel
       .findUnique({
@@ -89,9 +97,26 @@ export class ChannelConnection {
   }
 
   private async fetchSettings() {
-    this._settings = await getSettings(this.ownerId);
+    this.settings = await getSettings(this.ownerId);
+    this.settings;
+  }
 
-    return this._settings;
+  private set settings(v: TSettings) {
+    this.storage.set(this.settingsKey, v);
+  }
+
+  public get settings(): TSettings | undefined {
+    const settings = this.storage.get(this.settingsKey);
+    if (!settings) {
+      return undefined;
+    }
+    const parsed = SSettings.safeParse(settings.value);
+
+    if (!parsed.success) {
+      return undefined;
+    }
+
+    return parsed.data;
   }
 
   public async setup(): Promise<void> {
@@ -112,15 +137,8 @@ export class ChannelConnection {
     this.automsgInterval = setInterval(() => this.automsgChecker(), 300_000);
 
     // NOTE: Settings
-    this.logger.info("Scheduling settings refresh for 10 seconds");
+    this.logger.info("Syncing settings with database");
     await this.fetchSettings();
-    this.settingsInterval = setInterval(() => {
-      this.fetchSettings().then((value) => {
-        if (!this.ollamaAI) {
-          return;
-        }
-      });
-    }, 10_000);
 
     // NOTE: OllamaAI
     this.ollamaAI.startHistoryCleaner(this.channelName);
@@ -137,6 +155,9 @@ export class ChannelConnection {
             break;
           }
 
+          // NOTE: Increasing points when user types on chat
+          activityHandler(ctx);
+
           // NOTE: All commands
           if (this.settings) {
             this.commandHandler.handle({
@@ -149,9 +170,6 @@ export class ChannelConnection {
               ollamaAi: this.ollamaAI,
             });
           }
-
-          // NOTE: Increasing points when user types on chat
-          activityHandler(ctx);
 
           // NOTE: "hot words" that trigger some response from bot
           if (this.channelId && this.api && this.settings?.triggerWords.enabled.value) {
@@ -251,9 +269,5 @@ export class ChannelConnection {
 
   public get irc(): TwitchIrc {
     return this._irc;
-  }
-
-  public get settings() {
-    return this._settings;
   }
 }

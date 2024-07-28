@@ -1,6 +1,7 @@
 import { SSettings, SSettingsUpdate, TSettings, type TSettingsUpdate } from "bellatrix";
 import mergeWith from "lodash.mergewith";
 import { getUserPerms, checkPerms } from "~/server/utils/perms";
+import { indicateSettingsSync } from "~/server/utils/sync";
 import type { TPerms } from "~/types/permissions.type";
 
 function alterSettingsForNonAIUser(data: TSettingsUpdate, perms: TPerms[]): TSettingsUpdate {
@@ -84,6 +85,8 @@ export default defineEventHandler(async (event) => {
       where: { id: settings.id },
       data: { settings: mergedParsed.data },
     });
+
+    indicateSettingsSync(channel.id);
 
     return mergedParsed.data;
   } catch (_) {
