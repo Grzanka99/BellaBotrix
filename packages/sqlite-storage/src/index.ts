@@ -57,6 +57,7 @@ export class SqliteStorage {
     const data = JSON.stringify({ data: value });
 
     let res: { changes: number } | undefined = undefined;
+
     if (this.has(key)) {
       const query = this.db.query(UPDATE_QUERY);
       res = query.run(data, key);
@@ -65,7 +66,7 @@ export class SqliteStorage {
       res = query.run(key, data);
     }
 
-    if (res.changes < 1) {
+    if (res?.changes < 1) {
       return false;
     }
 
