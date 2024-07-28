@@ -8,27 +8,6 @@ import { logger } from "utils/logger";
 const OLLAMA_API_URL = Bun.env.OLLAMA_API_URL;
 const ALLOWED_MODELS = Bun.env.ALLOWED_MODELS || ["phi3"];
 
-const DEFAULT_PART: Message[] = [
-  {
-    role: "system",
-    content:
-      "You are twitch chat user. Keep your replies short, reply cannot exceed 500 characters.",
-  },
-  {
-    role: "system",
-    content: "You are watching this stream alongside other users that may mention you on chat",
-  },
-  {
-    role: "system",
-    content:
-      "Your name is BellaBotrix so everytime you see @BellaBotrix in message it reffers to you. Do not include your name in response",
-  },
-  {
-    role: "system",
-    content: "NEVER include @BellaBotrix or BellaBotrix in reply",
-  },
-];
-
 type TConfig = {
   language: string;
   model: string;
@@ -159,7 +138,6 @@ export class OllamaAI {
     const defaulPrompts = await getDefaultPrompts(config);
 
     const messages = [...defaulPrompts, ...this.history, message];
-    console.log(messages);
 
     try {
       const res = await OllamaAI.queue.enqueue(
