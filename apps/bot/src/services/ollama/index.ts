@@ -1,12 +1,12 @@
+import type { OllamaAIModels } from "@prisma/client";
 import type { TOption } from "bellatrix";
 import { Ollama, type Message } from "ollama";
-import { prisma, prismaQueue } from "services/db";
+import { prisma, prismaQueue, storage } from "services/db";
 import { AsyncQueue } from "utils/async-queue";
 import { interpolate } from "utils/interpolate-string";
 import { logger } from "utils/logger";
 
 const OLLAMA_API_URL = Bun.env.OLLAMA_API_URL;
-const ALLOWED_MODELS = Bun.env.ALLOWED_MODELS || ["phi3"];
 
 type TConfig = {
   language: string;
@@ -48,6 +48,9 @@ export class OllamaAI {
 
   private history: Message[] = [];
 
+  private static skeymodels = "ollamamodels";
+  private static synced = false;
+
   constructor(private channel: string) {
     if (!OllamaAI.ollama) {
       OllamaAI.ollama = new Ollama({ host: OLLAMA_API_URL });
@@ -56,6 +59,27 @@ export class OllamaAI {
     if (!OllamaAI.queue) {
       OllamaAI.queue = new AsyncQueue();
     }
+
+    if (!OllamaAI.synced) {
+      this.syncModels();
+    }
+  }
+
+  private async syncModels() {
+    const res = await prisma.ollamaAIModels.findMany();
+
+    storage.set(OllamaAI.skeymodels, res);
+    OllamaAI.synced = true;
+  }
+
+  private get models(): string[] {
+    const res = storage.get<OllamaAIModels[]>(OllamaAI.skeymodels);
+
+    if (!res) {
+      return [];
+    }
+
+    return res.value.filter((el) => el.enabled).map((el) => el.name);
   }
 
   private historySize = 0;
@@ -87,12 +111,12 @@ export class OllamaAI {
   }
 
   private getAllowdModel(model: string): string {
-    if (ALLOWED_MODELS.includes(model)) {
+    if (this.models.includes(model)) {
       return model;
     }
 
-    logger.info(`Falling back to model ${ALLOWED_MODELS[0]}`);
-    return ALLOWED_MODELS[0];
+    logger.info(`Falling back to model ${this.models[0]}`);
+    return this.models[0];
   }
 
   public shouldRunOnThatMessage(message: string): boolean {

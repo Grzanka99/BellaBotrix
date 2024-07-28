@@ -1,18 +1,16 @@
 <script lang="ts" setup>
-import type { OllamaAISetupPrompts } from '@prisma/client';
-import Modal from '../ui/Modal.vue';
-import FormTextarea from '../ui/FormTextarea.vue';
-import FormButton from '../ui/FormButton.vue';
-import FormTextInput from '../ui/FormTextInput.vue';
-import { useAISystemPromptsStore } from '~/store/ai-system-prompts.store';
+import type { OllamaAISetupPrompts } from "@prisma/client";
+import { useAISystemPromptsStore } from "~/store/ai-system-prompts.store";
+import FormButton from "../ui/FormButton.vue";
+import FormTextInput from "../ui/FormTextInput.vue";
+import FormTextarea from "../ui/FormTextarea.vue";
+import Modal from "../ui/Modal.vue";
 
 const props = defineProps<{
-  originalPrompt: OllamaAISetupPrompts
-}>()
+  originalPrompt: OllamaAISetupPrompts;
+}>();
 
-const emit = defineEmits<{
-  (e: 'cancel'): void;
-}>()
+const emit = defineEmits<(e: "cancel") => void>();
 
 const s = useAISystemPromptsStore();
 
@@ -24,11 +22,10 @@ const handleSave = async () => {
     id: props.originalPrompt.id,
     name: name.value,
     text: text.value,
-  })
+  });
 
-  emit('cancel')
-}
-
+  emit("cancel");
+};
 </script>
 
 <template>

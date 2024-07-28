@@ -9,3 +9,12 @@ export async function indicateSettingsSync(channel: number): Promise<void> {
     body: `{"key": "${SYNC_KEY}"}`,
   });
 }
+
+export async function indicateAIModelsSync(): Promise<void> {
+  const url = `${SYNC_URL}/aimodels/sync`;
+
+  await fetch(url, {
+    method: "POST",
+    body: `{"key": "${SYNC_KEY}"}`,
+  });
+}

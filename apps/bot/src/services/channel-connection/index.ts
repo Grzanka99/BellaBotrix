@@ -5,7 +5,7 @@ import { chatterTimeHandler } from "handlers/activity-handler/chatters-time";
 import { CommandHandler } from "handlers/commands";
 import { triggerWordsHandler } from "handlers/trigger-words";
 import { setDefaultCommandsForChannel } from "services/commands";
-import { prisma } from "services/db";
+import { prisma, storage } from "services/db";
 import { OllamaAI } from "services/ollama";
 import { R6Dle } from "services/r6dle";
 import { R6Stats } from "services/r6stats";
@@ -13,11 +13,8 @@ import { getSettings } from "services/settings";
 import { ChannelTimer } from "services/timers";
 import { TwitchApi } from "services/twitch-api";
 import type { TwitchIrc } from "services/twitch-irc";
-import { SqliteStorage } from "sqlite-storage";
 import { interpolate } from "utils/interpolate-string";
 import { logger } from "utils/logger";
-
-const SHARED_DB_FILE = Bun.env.SHARED_DB_FILE || "shared.db";
 
 type TArgs = {
   ircClient: TwitchIrc;
@@ -36,7 +33,6 @@ export class ChannelConnection {
 
   private chattersInterval: Timer | undefined;
   private automsgInterval: Timer | undefined;
-  private settingsInterval: Timer | undefined;
 
   private automsgTimer: ChannelTimer | undefined;
 
@@ -47,7 +43,6 @@ export class ChannelConnection {
   private ollamaAI: OllamaAI;
 
   private settingsKey: string;
-  private storage: SqliteStorage;
 
   private get logger() {
     return {
@@ -71,7 +66,6 @@ export class ChannelConnection {
     this.ollamaAI = new OllamaAI(this.channelName);
 
     this.settingsKey = `${args.channelName}-settings`;
-    this.storage = new SqliteStorage(SHARED_DB_FILE);
 
     prisma.channel
       .findUnique({
@@ -102,11 +96,11 @@ export class ChannelConnection {
   }
 
   private set settings(v: TSettings) {
-    this.storage.set(this.settingsKey, v);
+    storage.set(this.settingsKey, v);
   }
 
   public get settings(): TSettings | undefined {
-    const settings = this.storage.get(this.settingsKey);
+    const settings = storage.get(this.settingsKey);
     if (!settings) {
       return undefined;
     }

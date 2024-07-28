@@ -75,8 +75,14 @@ const adminSettings = [
     adminType: "admin",
   },
   {
-    to: "/panel/admin/ai-settings",
-    displayName: "AI Settings",
+    to: "/panel/admin/ai/system-prompts",
+    displayName: "AI S. Prompts",
+    icon: "material-symbols:network-intelligence",
+    adminType: "admin",
+  },
+  {
+    to: "/panel/admin/ai/models",
+    displayName: "AI Models",
     icon: "material-symbols:network-intelligence",
     adminType: "admin",
   },

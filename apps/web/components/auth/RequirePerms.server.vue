@@ -1,15 +1,15 @@
 <script lang="ts" setup>
-import type { TPerms } from '~/types/permissions.type';
+import type { TPerms } from "~/types/permissions.type";
 
 const props = defineProps<{
-  require: TPerms[]
-  type: 'hide' | 'blur' | 'block'
-}>()
+  require: TPerms[];
+  type: "hide" | "blur" | "block";
+}>();
 
 const auth = useAuth();
 
 const canOpen = computed<boolean>(() => {
-  if (auth.session.value?.perms.includes('admin')) {
+  if (auth.session.value?.perms.includes("admin")) {
     return true;
   }
 

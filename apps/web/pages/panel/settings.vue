@@ -8,11 +8,21 @@ import SettingsGroup from "~/components/settings/SettingsGroup.vue";
 import SingleSetting from "~/components/settings/SingleSetting.vue";
 import CustomSelect from "~/components/ui/CustomSelect.vue";
 import RequirePerms from "~/components/auth/RequirePerms.server.vue";
+import { useAIModelsStore } from "~/store/ai-models.store";
+import type { TSelectOption } from "~/types/ui.type";
 
 const settings = useSettingsStore();
+const modelsStore = useAIModelsStore();
 
-onMounted(settings.startRefresh);
-onUnmounted(settings.stopRefresh);
+onMounted(() => {
+  settings.startRefresh();
+  modelsStore.startRefresh();
+});
+
+onUnmounted(() => {
+  settings.stopRefresh();
+  modelsStore.startRefresh();
+});
 
 const commands = computed(() => settings.settings?.commands);
 const triggerWords = computed(() => settings.settings?.triggerWords);
@@ -21,6 +31,24 @@ const points = computed(() => settings.settings?.points);
 const r6dle = computed(() => settings.settings?.r6dle);
 const ollamaAI = computed(() => settings.settings?.ollamaAI);
 const automod = computed(() => settings.settings?.automod);
+
+const aiModelsOptions = computed<TSelectOption<string>[]>(() => {
+  const res = modelsStore.enabled.map((el) => ({
+    value: el.name,
+    displayName: `${el.name}, ${el.description}`,
+  }));
+
+  if (!res.length) {
+    return [
+      {
+        value: ollamaAI.value?.model.value || "none",
+        displayName: ollamaAI.value?.model.value || "none",
+      },
+    ];
+  }
+
+  return res;
+});
 
 useHead({
   title: "Settings",
@@ -217,16 +245,7 @@ useHead({
         <RequirePerms :require="['ai+']" type='hide'>
           <SingleSetting name="model" :option="ollamaAI.model">
             <CustomSelect
-              :options="[
-                { value: 'gemma2', displayName: 'gemma2, quite fast, quite good' },
-                { value: 'gemma2:27b', displayName: 'gemma2:27b, quite slow, very good (?)' },
-                { value: 'command-r', displayName: 'command-r, quite slow, very good' },
-                { value: 'phi3', displayName: 'phi3, very fast, very bad' },
-                { value: 'mistral', displayName: 'mistral, rather fast, no idea' },
-                { value: 'mistral-nemo', displayName: 'mistral-nemo, no idea' },
-                { value: 'llama3.1', displayName: 'llama3.1, no idea' },
-                { value: 'glm4', displayName: 'glm4, fast, maybe better at polish' },
-              ]"
+              :options="aiModelsOptions"
               @update:model-value="(value) => settings.handleUpdateDebounce({
                 ollamaAI: { model: { value } }
               })"
@@ -279,5 +298,9 @@ useHead({
   display: flex;
   flex-direction: column;
   gap: var(--padding);
+
+  .custom-select {
+    width: 100%;
+  }
 }
 </style>

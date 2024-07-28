@@ -29,12 +29,12 @@ onMounted(() => {
   s.startRefresh();
 })
 
-onUpdated(() => {
+onUnmounted(() => {
   s.stopRefresh();
 })
 
 useHead({
-  title: 'AI Settings',
+  title: 'AI System Prompts',
 })
 </script>
 

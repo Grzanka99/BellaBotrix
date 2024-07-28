@@ -144,3 +144,10 @@ model OllamaAISetupPrompts {
   enabled Boolean
   order   Int
 }
+
+model OllamaAIModels {
+  id          Int     @id @default(autoincrement())
+  name        String
+  description String
+  enabled     Boolean
+}
