@@ -225,6 +225,7 @@ useHead({
                 { value: 'mistral', displayName: 'mistral, rather fast, no idea' },
                 { value: 'mistral-nemo', displayName: 'mistral-nemo, no idea' },
                 { value: 'llama3.1', displayName: 'llama3.1, no idea' },
+                { value: 'glm4', displayName: 'glm4, fast, maybe better at polish' },
               ]"
               @update:model-value="(value) => settings.handleUpdateDebounce({
                 ollamaAI: { model: { value } }
