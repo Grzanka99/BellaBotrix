@@ -142,5 +142,5 @@ model OllamaAISetupPrompts {
   name    String?
   text    String
   enabled Boolean
-  order   Int     @unique
+  order   Int
 }

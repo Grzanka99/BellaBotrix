@@ -2,6 +2,7 @@ import type { TOption } from "bellatrix";
 import { Ollama, type Message } from "ollama";
 import { prisma, prismaQueue } from "services/db";
 import { AsyncQueue } from "utils/async-queue";
+import { interpolate } from "utils/interpolate-string";
 import { logger } from "utils/logger";
 
 const OLLAMA_API_URL = Bun.env.OLLAMA_API_URL;
@@ -33,6 +34,34 @@ type TConfig = {
   model: string;
   defaultPrompt: string;
 };
+
+function newSystemMessage(content: string): Message {
+  return {
+    role: "system",
+    content,
+  };
+}
+
+async function getDefaultPrompts(config: TConfig): Promise<Message[]> {
+  const res = (await prisma.ollamaAISetupPrompts.findMany({ orderBy: { order: "asc" } })).filter(
+    (el) => el.enabled,
+  );
+
+  const mapped: Message[] = res.map((el) => {
+    switch (el.name) {
+      case "language": {
+        return newSystemMessage(interpolate(el.text, { language: config.language || "English" }));
+      }
+      case "entryPrompt": {
+        return newSystemMessage(config.defaultPrompt || el.text);
+      }
+    }
+
+    return newSystemMessage(el.text);
+  });
+
+  return mapped;
+}
 
 export class OllamaAI {
   private static ollama: Ollama | undefined;
@@ -95,13 +124,6 @@ export class OllamaAI {
     return false;
   }
 
-  private newSystemMessage(content: string): Message {
-    return {
-      role: "system",
-      content,
-    };
-  }
-
   private async registerInDatabase(
     config: TConfig,
     userMessage: string,
@@ -124,18 +146,8 @@ export class OllamaAI {
     );
   }
 
-  private getMessagesFromConfig(config: TConfig): Message[] {
-    const defaultPrompt = config.defaultPrompt.length
-      ? this.newSystemMessage(config.defaultPrompt)
-      : this.newSystemMessage(
-          "Be a little toxic, you pretend to be Bellatrix Le'Strange from Harry Potter universum.",
-        );
-
-    const languagePrompt = config.language.length
-      ? this.newSystemMessage(`Always reply in ${config.language}`)
-      : this.newSystemMessage("Always reply in English");
-
-    return [defaultPrompt, languagePrompt];
+  public forceHistoryClear(): void {
+    this.history = [];
   }
 
   public async ask(q: string, username: string, config: TConfig): Promise<TOption<string>> {
@@ -144,17 +156,17 @@ export class OllamaAI {
       content: `User ${username} wrote: ${q}`,
     };
 
+    const defaulPrompts = await getDefaultPrompts(config);
+
+    const messages = [...defaulPrompts, ...this.history, message];
+    console.log(messages);
+
     try {
       const res = await OllamaAI.queue.enqueue(
         async () =>
           await OllamaAI.ollama?.chat({
             model: this.getAllowdModel(config.model),
-            messages: [
-              ...DEFAULT_PART,
-              ...this.getMessagesFromConfig(config),
-              ...this.history,
-              message,
-            ],
+            messages,
           }),
       );
 

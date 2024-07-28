@@ -146,6 +146,7 @@ export class ChannelConnection {
               send: this.send.bind(this),
               r6dle: this.r6dle,
               r6stats: this.r6stats,
+              ollamaAi: this.ollamaAI,
             });
           }
 

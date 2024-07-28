@@ -1,4 +1,5 @@
 import type { CoreCommand } from "./core-command";
+import { aiClearHistoryCommand } from "./handlers/aiclearhistory.command";
 import { gambleCoreCommand } from "./handlers/gamble.command";
 import { messagesCount } from "./handlers/messages.command";
 import {
@@ -33,4 +34,5 @@ export const CoreCommandsHandlers: Record<string, CoreCommand> = {
   r6dle: r6dleCoreCommand,
   r6stats: r6StatsCoreComand,
   messages: messagesCount,
+  aiclearhistory: aiClearHistoryCommand,
 };

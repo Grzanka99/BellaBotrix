@@ -11,7 +11,6 @@ import FormButton from "~/components/ui/FormButton.vue";
 import CommandMessage from "./CommandMessage.vue";
 import EditCommandModal from "./EditCommandModal.vue";
 import FancyToggle from "../ui/FancyToggle.vue";
-import type { Commands } from "@prisma/client";
 import { useCommandsStore } from "~/store/commands.store";
 import type { TCommandWithSubCommands } from "~/types/commands.type";
 
@@ -66,10 +65,7 @@ const onCancel = () => {
             </FormButton>
           </TableCell>
           <TableCell centered>
-            <FormButton
-              @click.native="s.handleDelete(command.id)"
-              type="button"
-              smaller>
+            <FormButton @click.native="s.handleDelete(command.id)" type="button" smaller>
               <Icon name="material-symbols:delete-forever" />
               delete
             </FormButton>
