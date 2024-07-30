@@ -134,6 +134,11 @@ export class ChannelConnection {
     this.logger.info("Syncing settings with database");
     await this.fetchSettings();
 
+    if (!this.settings) {
+      logger.error("Cannot sync user settings");
+      throw "Cannot sync user settings";
+    }
+
     // NOTE: OllamaAI
     this.ollamaAI.startHistoryCleaner(this.channelName);
     this.ollamaAI.setHistorySize(this.settings?.ollamaAI.keepHistory.value || 5);
@@ -143,9 +148,14 @@ export class ChannelConnection {
         return;
       }
 
+      if (!this.settings) {
+        logger.error("Cannot sync user settings");
+        throw "Cannot sync user settings";
+      }
+
       switch (ctx.type) {
         case "PRIVMSG": {
-          if (!ctx.channel || !ctx.tags || !ctx.message) {
+          if (!ctx.channel || !ctx.tags || !ctx.message || !this.channelId || !this.api) {
             break;
           }
 
@@ -153,20 +163,20 @@ export class ChannelConnection {
           activityHandler(ctx);
 
           // NOTE: All commands
-          if (this.settings) {
-            this.commandHandler.handle({
-              ...ctx,
-              api: this.api,
-              settings: this.settings,
-              send: this.send.bind(this),
-              r6dle: this.r6dle,
-              r6stats: this.r6stats,
-              ollamaAi: this.ollamaAI,
-            });
-          }
+          this.commandHandler.handle({
+            ...ctx,
+            api: this.api,
+            settings: this.settings,
+            send: this.send.bind(this),
+            r6dle: this.r6dle,
+            r6stats: this.r6stats,
+            ollamaAi: this.ollamaAI,
+          });
+
+          const { triggerWords, ollamaAI } = this.settings;
 
           // NOTE: "hot words" that trigger some response from bot
-          if (this.channelId && this.api && this.settings?.triggerWords.enabled.value) {
+          if (triggerWords.enabled.value) {
             triggerWordsHandler({
               ...ctx,
               channelId: this.channelId,
@@ -175,14 +185,14 @@ export class ChannelConnection {
           }
 
           // NOTE: Ollama AI responses
-          if (this.settings?.ollamaAI.enabled.value && this.ollamaAI) {
+          if (ollamaAI.enabled.value && this.ollamaAI) {
             const shouldRun = this.ollamaAI.shouldRunOnThatMessage(ctx.message);
             if (shouldRun) {
-              this.ollamaAI.setHistorySize(this.settings.ollamaAI.keepHistory.value);
+              this.ollamaAI.setHistorySize(ollamaAI.keepHistory.value);
               const res = await this.ollamaAI.ask(ctx.message, ctx.tags.username, {
-                language: this.settings.ollamaAI.language.value,
-                model: this.settings.ollamaAI.model.value,
-                defaultPrompt: this.settings.ollamaAI.entryPrompt.value,
+                language: ollamaAI.language.value,
+                model: ollamaAI.model.value,
+                defaultPrompt: ollamaAI.entryPrompt.value,
               });
 
               if (res) {
@@ -194,26 +204,25 @@ export class ChannelConnection {
           break;
         }
         case "JOIN": {
-          if (this.settings?.joinMessage.forAllUsers.enabled.value) {
+          const { forAllUsers, forSpecificUsers } = this.settings.joinMessage;
+          if (forAllUsers.enabled.value) {
             this.send(
-              interpolate(this.settings.joinMessage.forAllUsers.message.value, {
+              interpolate(forAllUsers.message.value, {
                 username: ctx.tags?.displayName || ctx.source?.username || "",
               }),
             );
           }
 
-          if (this.settings?.joinMessage.forSpecificUsers.enabled.value && ctx.source?.username) {
-            if (
-              this.settings.joinMessage.forSpecificUsers.users.value.includes(
-                ctx.tags?.displayName || ctx.source.username,
-              )
-            ) {
-              this.send(
-                interpolate(this.settings.joinMessage.forSpecificUsers.message.value, {
-                  username: ctx.tags?.displayName || ctx.source.username,
-                }),
-              );
-            }
+          if (
+            forSpecificUsers.enabled.value &&
+            ctx.source?.username &&
+            forSpecificUsers.users.value.includes(ctx.tags?.displayName || ctx.source.username)
+          ) {
+            this.send(
+              interpolate(forSpecificUsers.message.value, {
+                username: ctx.tags?.displayName || ctx.source.username,
+              }),
+            );
           }
 
           break;
@@ -238,14 +247,17 @@ export class ChannelConnection {
     this.automsgTimer = undefined;
     this.isSetup = false;
 
-    clearInterval(this.settingsInterval);
-    this.settingsInterval = undefined;
-
     this._irc.removeHandler(this.channelName);
     // @ts-ignore-next-line
     this._irc = undefined;
     // @ts-ignore-next-line
     this._api = undefined;
+    // @ts-ignore-next-line
+    this.r6dle = undefined;
+    // @ts-ignore-next-line
+    this.r6stats = undefined;
+    // @ts-ignore-next-line
+    this.ollamaAI = undefined;
 
     // @ts-ignore-next-line
     this.commandHandler = undefined;
