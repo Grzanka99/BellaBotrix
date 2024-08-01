@@ -4,6 +4,7 @@ import NavigationLink from "../ui/NavigationLink.vue";
 import FormButton from "../ui/FormButton.vue";
 import SpacerWithTitle from "../ui/SpacerWithTitle.vue";
 import { useStorage } from "@vueuse/core";
+import RequirePerms from "../auth/RequirePerms.server.vue";
 
 const routes = computed<TRoute[]>(() => [
   {
@@ -19,7 +20,7 @@ const routes = computed<TRoute[]>(() => [
   {
     to: "/panel/trigger-words",
     displayName: "trigger words",
-    icon: "material-symbols:match-word-rounded"
+    icon: "material-symbols:match-word-rounded",
   },
   {
     to: "/panel/solo",
@@ -43,19 +44,13 @@ const routes = computed<TRoute[]>(() => [
   },
 ]);
 
-
 const accountOnlyRoutes = [
   {
     to: "/panel/access",
     displayName: "access",
     icon: "material-symbols:security",
   },
-]
-
-
-const auth = useAuth();
-const isGlobalAdmin = computed(() => auth.session.value?.perms?.includes('admin'));
-const canAccessGlobalSettings = computed(() => isGlobalAdmin.value || auth.session.value?.perms?.includes('r6dleadmin'));
+];
 
 const channelName = useStorage<string | undefined>(
   "selectedChannelName",
@@ -67,24 +62,36 @@ const globalSettings = [
   {
     to: "/panel/r6dle",
     displayName: "r6dle",
-    icon: 'material-symbols:person',
-    adminType: 'r6dleadmin',
+    icon: "material-symbols:person",
+    adminType: "r6dleadmin",
+  },
+];
+
+const adminSettings = [
+  {
+    to: "/panel/admin/permissions",
+    displayName: "permissions",
+    icon: "material-symbols:user-attributes-outline",
+    adminType: "admin",
   },
   {
-    to: "/panel/permissions",
-    displayName: "permissions",
-    icon: 'material-symbols:user-attributes-outline',
-    adminType: 'admin',
-  }
-]
-
-
+    to: "/panel/admin/ai/system-prompts",
+    displayName: "AI S. Prompts",
+    icon: "material-symbols:network-intelligence",
+    adminType: "admin",
+  },
+  {
+    to: "/panel/admin/ai/models",
+    displayName: "AI Models",
+    icon: "material-symbols:network-intelligence",
+    adminType: "admin",
+  },
+];
 
 const handleAuthRefirect = () => {
   // @ts-ignore
   window.location = "/api/auth-redirect";
-}
-
+};
 </script>
 <template>
   <nav id="navbar">
@@ -95,17 +102,26 @@ const handleAuthRefirect = () => {
         :to="route.to"
         :display-name="route.displayName"
         :icon="route.icon" />
-      <template v-if="canAccessGlobalSettings">
-        <SpacerWithTitle text="Global/Admin settings" />
-        <template
-          v-for="route in globalSettings">
+      <RequirePerms :require="['r6dleadmin']" type="hide">
+        <SpacerWithTitle text="Global settings" />
+        <template v-for="route in globalSettings">
+          <RequirePerms :require="[route.adminType]" type="hide">
+            <NavigationLink
+              :to="route.to"
+              :display-name="route.displayName"
+              :icon="route.icon" />
+          </RequirePerms>
+        </template>
+      </RequirePerms>
+      <RequirePerms :require="[]" type="hide">
+        <SpacerWithTitle text="Admin settings" />
+        <template v-for="route in adminSettings">
           <NavigationLink
-            v-if="isGlobalAdmin || $auth.session.value?.perms?.includes(route.adminType)"
             :to="route.to"
             :display-name="route.displayName"
             :icon="route.icon" />
         </template>
-      </template>
+      </RequirePerms>
       <SpacerWithTitle text="User-only settings" />
       <NavigationLink v-for="route in accountOnlyRoutes" :to="route.to" :display-name="route.displayName"
         :icon="route.icon" />
@@ -152,6 +168,5 @@ const handleAuthRefirect = () => {
       font-size: 1.6rem;
     }
   }
-
 }
 </style>

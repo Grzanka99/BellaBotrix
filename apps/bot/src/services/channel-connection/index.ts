@@ -1,11 +1,11 @@
-import type { TSettings } from "bellatrix";
+import { SSettings, type TSettings } from "bellatrix";
 import { gc } from "bun";
 import { activityHandler } from "handlers/activity-handler";
 import { chatterTimeHandler } from "handlers/activity-handler/chatters-time";
 import { CommandHandler } from "handlers/commands";
 import { triggerWordsHandler } from "handlers/trigger-words";
 import { setDefaultCommandsForChannel } from "services/commands";
-import { prisma } from "services/db";
+import { prisma, storage } from "services/db";
 import { OllamaAI } from "services/ollama";
 import { R6Dle } from "services/r6dle";
 import { R6Stats } from "services/r6stats";
@@ -30,11 +30,9 @@ export class ChannelConnection {
   private channelId: number | undefined = undefined;
   private ownerId: number;
   private isSetup = false;
-  private _settings: TSettings | undefined = undefined;
 
   private chattersInterval: Timer | undefined;
   private automsgInterval: Timer | undefined;
-  private settingsInterval: Timer | undefined;
 
   private automsgTimer: ChannelTimer | undefined;
 
@@ -43,6 +41,8 @@ export class ChannelConnection {
   private r6dle: R6Dle;
   private r6stats: R6Stats;
   private ollamaAI: OllamaAI;
+
+  private settingsKey: string;
 
   private get logger() {
     return {
@@ -64,6 +64,8 @@ export class ChannelConnection {
     this.r6dle = new R6Dle(this.channelName);
     this.r6stats = R6Stats.instance;
     this.ollamaAI = new OllamaAI(this.channelName);
+
+    this.settingsKey = `${args.channelName}-settings`;
 
     prisma.channel
       .findUnique({
@@ -89,9 +91,26 @@ export class ChannelConnection {
   }
 
   private async fetchSettings() {
-    this._settings = await getSettings(this.ownerId);
+    this.settings = await getSettings(this.ownerId);
+    this.settings;
+  }
 
-    return this._settings;
+  private set settings(v: TSettings) {
+    storage.set(this.settingsKey, v);
+  }
+
+  public get settings(): TSettings | undefined {
+    const settings = storage.get(this.settingsKey);
+    if (!settings) {
+      return undefined;
+    }
+    const parsed = SSettings.safeParse(settings.value);
+
+    if (!parsed.success) {
+      return undefined;
+    }
+
+    return parsed.data;
   }
 
   public async setup(): Promise<void> {
@@ -112,15 +131,13 @@ export class ChannelConnection {
     this.automsgInterval = setInterval(() => this.automsgChecker(), 300_000);
 
     // NOTE: Settings
-    this.logger.info("Scheduling settings refresh for 10 seconds");
+    this.logger.info("Syncing settings with database");
     await this.fetchSettings();
-    this.settingsInterval = setInterval(() => {
-      this.fetchSettings().then((value) => {
-        if (!this.ollamaAI) {
-          return;
-        }
-      });
-    }, 10_000);
+
+    if (!this.settings) {
+      logger.error("Cannot sync user settings");
+      throw "Cannot sync user settings";
+    }
 
     // NOTE: OllamaAI
     this.ollamaAI.startHistoryCleaner(this.channelName);
@@ -131,29 +148,35 @@ export class ChannelConnection {
         return;
       }
 
+      if (!this.settings) {
+        logger.error("Cannot sync user settings");
+        throw "Cannot sync user settings";
+      }
+
       switch (ctx.type) {
         case "PRIVMSG": {
-          if (!ctx.channel || !ctx.tags || !ctx.message) {
+          if (!ctx.channel || !ctx.tags || !ctx.message || !this.channelId || !this.api) {
             break;
-          }
-
-          // NOTE: All commands
-          if (this.settings) {
-            this.commandHandler.handle({
-              ...ctx,
-              api: this.api,
-              settings: this.settings,
-              send: this.send.bind(this),
-              r6dle: this.r6dle,
-              r6stats: this.r6stats,
-            });
           }
 
           // NOTE: Increasing points when user types on chat
           activityHandler(ctx);
 
+          // NOTE: All commands
+          this.commandHandler.handle({
+            ...ctx,
+            api: this.api,
+            settings: this.settings,
+            send: this.send.bind(this),
+            r6dle: this.r6dle,
+            r6stats: this.r6stats,
+            ollamaAi: this.ollamaAI,
+          });
+
+          const { triggerWords, ollamaAI } = this.settings;
+
           // NOTE: "hot words" that trigger some response from bot
-          if (this.channelId && this.api && this.settings?.triggerWords.enabled.value) {
+          if (triggerWords.enabled.value) {
             triggerWordsHandler({
               ...ctx,
               channelId: this.channelId,
@@ -162,14 +185,14 @@ export class ChannelConnection {
           }
 
           // NOTE: Ollama AI responses
-          if (this.settings?.ollamaAI.enabled.value && this.ollamaAI) {
+          if (ollamaAI.enabled.value && this.ollamaAI) {
             const shouldRun = this.ollamaAI.shouldRunOnThatMessage(ctx.message);
             if (shouldRun) {
-              this.ollamaAI.setHistorySize(this.settings.ollamaAI.keepHistory.value);
+              this.ollamaAI.setHistorySize(ollamaAI.keepHistory.value);
               const res = await this.ollamaAI.ask(ctx.message, ctx.tags.username, {
-                language: this.settings.ollamaAI.language.value,
-                model: this.settings.ollamaAI.model.value,
-                defaultPrompt: this.settings.ollamaAI.entryPrompt.value,
+                language: ollamaAI.language.value,
+                model: ollamaAI.model.value,
+                defaultPrompt: ollamaAI.entryPrompt.value,
               });
 
               if (res) {
@@ -181,26 +204,25 @@ export class ChannelConnection {
           break;
         }
         case "JOIN": {
-          if (this.settings?.joinMessage.forAllUsers.enabled.value) {
+          const { forAllUsers, forSpecificUsers } = this.settings.joinMessage;
+          if (forAllUsers.enabled.value) {
             this.send(
-              interpolate(this.settings.joinMessage.forAllUsers.message.value, {
+              interpolate(forAllUsers.message.value, {
                 username: ctx.tags?.displayName || ctx.source?.username || "",
               }),
             );
           }
 
-          if (this.settings?.joinMessage.forSpecificUsers.enabled.value && ctx.source?.username) {
-            if (
-              this.settings.joinMessage.forSpecificUsers.users.value.includes(
-                ctx.tags?.displayName || ctx.source.username,
-              )
-            ) {
-              this.send(
-                interpolate(this.settings.joinMessage.forSpecificUsers.message.value, {
-                  username: ctx.tags?.displayName || ctx.source.username,
-                }),
-              );
-            }
+          if (
+            forSpecificUsers.enabled.value &&
+            ctx.source?.username &&
+            forSpecificUsers.users.value.includes(ctx.tags?.displayName || ctx.source.username)
+          ) {
+            this.send(
+              interpolate(forSpecificUsers.message.value, {
+                username: ctx.tags?.displayName || ctx.source.username,
+              }),
+            );
           }
 
           break;
@@ -225,14 +247,17 @@ export class ChannelConnection {
     this.automsgTimer = undefined;
     this.isSetup = false;
 
-    clearInterval(this.settingsInterval);
-    this.settingsInterval = undefined;
-
     this._irc.removeHandler(this.channelName);
     // @ts-ignore-next-line
     this._irc = undefined;
     // @ts-ignore-next-line
     this._api = undefined;
+    // @ts-ignore-next-line
+    this.r6dle = undefined;
+    // @ts-ignore-next-line
+    this.r6stats = undefined;
+    // @ts-ignore-next-line
+    this.ollamaAI = undefined;
 
     // @ts-ignore-next-line
     this.commandHandler = undefined;
@@ -250,9 +275,5 @@ export class ChannelConnection {
 
   public get irc(): TwitchIrc {
     return this._irc;
-  }
-
-  public get settings() {
-    return this._settings;
   }
 }

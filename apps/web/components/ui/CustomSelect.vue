@@ -9,19 +9,23 @@ const props = defineProps<{
 
 const emit = defineEmits(["update:modelValue"]);
 
-const val = computed(() =>
-  props.options.find((el) => el.value === props.modelValue),
-);
+const val = computed(() => props.options.find((el) => el.value === props.modelValue));
+
+const target = ref(null);
 
 const handleChange = (option: string | number) => {
   emit("update:modelValue", option);
 };
 
 const optionsVisible = ref(false);
+
+onClickOutside(target, () => {
+  optionsVisible.value = false;
+});
 </script>
 
 <template>
-  <label class="custom-select" @click="optionsVisible = !optionsVisible">
+  <label class="custom-select" @click="optionsVisible = !optionsVisible" ref="target">
     <span class="custom-select__label">
       <Icon v-if="icon" :name="icon" />
       {{ val?.displayName }}

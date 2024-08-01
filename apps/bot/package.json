@@ -20,6 +20,7 @@
   "dependencies": {
     "bellatrix": "workspace:*",
     "r6dle": "workspace:*",
+    "sqlite-storage": "workspace:*",
     "@prisma/client": "^5.9.0",
     "zod": "^3.22.4"
   }

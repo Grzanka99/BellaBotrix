@@ -1,6 +1,6 @@
 import type { SubCommands } from "@prisma/client";
 import type { TOption } from "bellatrix";
-import { dbCommandToCommand, dbSubCommandToSubCommand } from "services/commands/commands.transform";
+import { dbSubCommandToSubCommand } from "services/commands/commands.transform";
 import { prisma } from "services/db";
 import type { THandleCoreCommandArgs, THandleParsedCommandArgs } from "services/types";
 

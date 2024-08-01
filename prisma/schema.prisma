@@ -136,3 +136,18 @@ model OllamaAIHistory {
   channel     String
   language    String
 }
+
+model OllamaAISetupPrompts {
+  id      Int     @id @default(autoincrement())
+  name    String?
+  text    String
+  enabled Boolean
+  order   Int
+}
+
+model OllamaAIModels {
+  id          Int     @id @default(autoincrement())
+  name        String
+  description String
+  enabled     Boolean
+}

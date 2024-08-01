@@ -1,4 +1,4 @@
-import { getUserPerms } from "~/server/utils/db";
+import { getUserPerms } from "~/server/utils/perms";
 import {
   SUpdatePermissionsDto,
   type TPerms,

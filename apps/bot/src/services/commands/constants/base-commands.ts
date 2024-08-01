@@ -111,6 +111,11 @@ export const BASE_COMMANDS: TMinimalCommandsList = [
     isCore: true,
   },
   {
+    name: "aiclearhistory",
+    message: { base: "" },
+    isCore: true,
+  },
+  {
     name: "r6dle",
     message: {
       base: "Either use !r6dle guess or !r6dle stats",

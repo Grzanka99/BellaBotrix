@@ -1,5 +1,6 @@
 {
   "devDependencies": {
+    "@biomejs/biome": "1.8.3",
     "@types/lodash.merge": "^4.6.9",
     "turbo": "latest"
   },
@@ -8,6 +9,7 @@
     "dev": "turbo dev",
     "dev:web": "turbo dev --scope=web",
     "dev:bot": "turbo dev --scope=bot",
+    "dev:sup": "turbo dev --scope=sup",
     "build": "turbo build --force",
     "prisma:version": "prisma --version",
     "prisma:generate": "prisma generate",

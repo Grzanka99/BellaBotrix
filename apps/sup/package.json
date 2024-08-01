@@ -1,0 +1,25 @@
+{
+  "name": "sup",
+  "type": "module",
+  "scripts": {
+    "start": "bun --bun run ./src/index.ts",
+    "dev": "bun --watch ./src/index.ts",
+    "build": "bun build ./src/index.ts --target=bun --outfile=./bin/sup --compile",
+    "compile:settings": "bun build ./src/index.ts --target=bun --outfile=./bin/sup --compile"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "1.1.2",
+    "@total-typescript/ts-reset": "^0.5.1",
+    "prisma": "^5.2.0",
+    "bun-types": "latest"
+  },
+  "peerDependencies": {
+    "typescript": "^5.0.0"
+  },
+  "dependencies": {
+    "sqlite-storage": "workspace:*",
+    "@prisma/client": "^5.9.0",
+    "elysia": "latest",
+    "zod": "^3.22.4"
+  }
+}

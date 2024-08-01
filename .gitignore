@@ -36,3 +36,6 @@ prisma/*-journal
 # Turbo
 .turbo
 .vercel
+
+*.sqlite
+*.db

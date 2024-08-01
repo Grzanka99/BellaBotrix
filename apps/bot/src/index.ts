@@ -1,4 +1,4 @@
-import { Channel } from "@prisma/client";
+import type { Channel } from "@prisma/client";
 import { gc } from "bun";
 import { ChannelConnection } from "services/channel-connection";
 import { prisma } from "services/db";

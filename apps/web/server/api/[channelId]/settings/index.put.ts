@@ -1,33 +1,21 @@
 import { SSettings, SSettingsUpdate, TSettings, type TSettingsUpdate } from "bellatrix";
 import mergeWith from "lodash.mergewith";
-import { getUserPerms } from "~/server/utils/db";
-import type { TAuthSession } from "~/types/auth.type";
+import { getUserPerms, checkPerms } from "~/server/utils/perms";
+import { indicateSettingsSync } from "~/server/utils/sync";
 import type { TPerms } from "~/types/permissions.type";
 
-function checkRoles(userRoles: TPerms[], requiredRoles: TPerms[]): boolean {
-  for (const role of requiredRoles) {
-    if (userRoles.includes(role)) {
-      return true;
-    }
-  }
-  return false;
-}
-
 function alterSettingsForNonAIUser(data: TSettingsUpdate, perms: TPerms[]): TSettingsUpdate {
-  if (data.ollamaAI && !checkRoles(["ai", "ai+", "admin"], perms)) {
-    return {
-      ...data,
-      ollamaAI: undefined,
-    };
+  if (data.ollamaAI && !checkPerms(["ai", "ai+", "admin"], perms)) {
+    return { ...data, ollamaAI: undefined };
   }
 
-  if (data.ollamaAI?.model && !checkRoles(["ai+", "admin"], perms)) {
+  if (
+    (data.ollamaAI?.model || data.ollamaAI?.keepHistory) &&
+    !checkPerms(["ai+", "admin"], perms)
+  ) {
     return {
       ...data,
-      ollamaAI: {
-        ...data.ollamaAI,
-        model: undefined,
-      },
+      ollamaAI: { ...data.ollamaAI, model: undefined, keepHistory: undefined },
     };
   }
 
@@ -36,7 +24,6 @@ function alterSettingsForNonAIUser(data: TSettingsUpdate, perms: TPerms[]): TSet
 
 export default defineEventHandler(async (event) => {
   const auth = await requireAuthSession(event);
-
   const perms = await getUserPerms(auth.data);
 
   const body = SSettingsUpdate.safeParse(await readBody(event));
@@ -98,6 +85,8 @@ export default defineEventHandler(async (event) => {
       where: { id: settings.id },
       data: { settings: mergedParsed.data },
     });
+
+    indicateSettingsSync(channel.id);
 
     return mergedParsed.data;
   } catch (_) {

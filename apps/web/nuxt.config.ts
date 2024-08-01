@@ -1,6 +1,9 @@
 // https://nuxt.com/docs/api/configuration/nuxt-config
 export default defineNuxtConfig({
   devtools: { enabled: false },
+  nitro: {
+    preset: "vercel",
+  },
   modules: ["@vueuse/nuxt", "@pinia/nuxt", "nuxt-icon"],
   runtimeConfig: {
     auth: {

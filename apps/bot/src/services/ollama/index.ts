@@ -1,32 +1,12 @@
+import type { OllamaAIModels } from "@prisma/client";
 import type { TOption } from "bellatrix";
 import { Ollama, type Message } from "ollama";
-import { prisma, prismaQueue } from "services/db";
+import { prisma, prismaQueue, storage } from "services/db";
 import { AsyncQueue } from "utils/async-queue";
+import { interpolate } from "utils/interpolate-string";
 import { logger } from "utils/logger";
 
 const OLLAMA_API_URL = Bun.env.OLLAMA_API_URL;
-const ALLOWED_MODELS = Bun.env.ALLOWED_MODELS || ["phi3"];
-
-const DEFAULT_PART: Message[] = [
-  {
-    role: "system",
-    content:
-      "You are twitch chat user. Keep your replies short, reply cannot exceed 500 characters.",
-  },
-  {
-    role: "system",
-    content: "You are watching this stream alongside other users that may mention you on chat",
-  },
-  {
-    role: "system",
-    content:
-      "Your name is BellaBotrix so everytime you see @BellaBotrix in message it reffers to you. Do not include your name in response",
-  },
-  {
-    role: "system",
-    content: "NEVER include @BellaBotrix or BellaBotrix in reply",
-  },
-];
 
 type TConfig = {
   language: string;
@@ -34,11 +14,42 @@ type TConfig = {
   defaultPrompt: string;
 };
 
+function newSystemMessage(content: string): Message {
+  return {
+    role: "system",
+    content,
+  };
+}
+
+async function getDefaultPrompts(config: TConfig): Promise<Message[]> {
+  const res = (await prisma.ollamaAISetupPrompts.findMany({ orderBy: { order: "asc" } })).filter(
+    (el) => el.enabled,
+  );
+
+  const mapped: Message[] = res.map((el) => {
+    switch (el.name) {
+      case "language": {
+        return newSystemMessage(interpolate(el.text, { language: config.language || "English" }));
+      }
+      case "entryPrompt": {
+        return newSystemMessage(config.defaultPrompt || el.text);
+      }
+    }
+
+    return newSystemMessage(el.text);
+  });
+
+  return mapped;
+}
+
 export class OllamaAI {
   private static ollama: Ollama | undefined;
   private static queue: AsyncQueue;
 
   private history: Message[] = [];
+
+  private static skeymodels = "ollamamodels";
+  private static synced = false;
 
   constructor(private channel: string) {
     if (!OllamaAI.ollama) {
@@ -48,6 +59,27 @@ export class OllamaAI {
     if (!OllamaAI.queue) {
       OllamaAI.queue = new AsyncQueue();
     }
+
+    if (!OllamaAI.synced) {
+      this.syncModels();
+    }
+  }
+
+  private async syncModels() {
+    const res = await prisma.ollamaAIModels.findMany();
+
+    storage.set(OllamaAI.skeymodels, res);
+    OllamaAI.synced = true;
+  }
+
+  private get models(): string[] {
+    const res = storage.get<OllamaAIModels[]>(OllamaAI.skeymodels);
+
+    if (!res) {
+      return [];
+    }
+
+    return res.value.filter((el) => el.enabled).map((el) => el.name);
   }
 
   private historySize = 0;
@@ -79,12 +111,12 @@ export class OllamaAI {
   }
 
   private getAllowdModel(model: string): string {
-    if (ALLOWED_MODELS.includes(model)) {
+    if (this.models.includes(model)) {
       return model;
     }
 
-    logger.info(`Falling back to model ${ALLOWED_MODELS[0]}`);
-    return ALLOWED_MODELS[0];
+    logger.info(`Falling back to model ${this.models[0]}`);
+    return this.models[0];
   }
 
   public shouldRunOnThatMessage(message: string): boolean {
@@ -93,13 +125,6 @@ export class OllamaAI {
     }
 
     return false;
-  }
-
-  private newSystemMessage(content: string): Message {
-    return {
-      role: "system",
-      content,
-    };
   }
 
   private async registerInDatabase(
@@ -124,18 +149,8 @@ export class OllamaAI {
     );
   }
 
-  private getMessagesFromConfig(config: TConfig): Message[] {
-    const defaultPrompt = config.defaultPrompt.length
-      ? this.newSystemMessage(config.defaultPrompt)
-      : this.newSystemMessage(
-          "Be a little toxic, you pretend to be Bellatrix Le'Strange from Harry Potter universum.",
-        );
-
-    const languagePrompt = config.language.length
-      ? this.newSystemMessage(`Always reply in ${config.language}`)
-      : this.newSystemMessage("Always reply in English");
-
-    return [defaultPrompt, languagePrompt];
+  public forceHistoryClear(): void {
+    this.history = [];
   }
 
   public async ask(q: string, username: string, config: TConfig): Promise<TOption<string>> {
@@ -144,17 +159,16 @@ export class OllamaAI {
       content: `User ${username} wrote: ${q}`,
     };
 
+    const defaulPrompts = await getDefaultPrompts(config);
+
+    const messages = [...defaulPrompts, ...this.history, message];
+
     try {
       const res = await OllamaAI.queue.enqueue(
         async () =>
           await OllamaAI.ollama?.chat({
             model: this.getAllowdModel(config.model),
-            messages: [
-              ...DEFAULT_PART,
-              ...this.getMessagesFromConfig(config),
-              ...this.history,
-              message,
-            ],
+            messages,
           }),
       );
 
