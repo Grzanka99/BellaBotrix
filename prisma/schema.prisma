@@ -151,3 +151,26 @@ model OllamaAIModels {
   description String
   enabled     Boolean
 }
+
+model Streams {
+  id             Int           @id @default(autoincrement())
+  unique_id      String        @unique
+  streamer_id    String
+  channel        String
+  started_at     String
+  finished_at    BigInt?
+  uniqueChatters Int?
+  StreamStats    StreamStats[]
+}
+
+model StreamStats {
+  id          Int     @id @default(autoincrement())
+  streamId    Int
+  stream      Streams @relation(fields: [streamId], references: [id])
+  timestamp   BigInt
+  viewers     Int     @default(0)
+  messages    Int     @default(0)
+  follows     Int     @default(0)
+  subscribers Int     @default(0)
+  newChatters Int     @default(0)
+}

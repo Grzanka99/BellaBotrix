@@ -13,31 +13,45 @@ import {
 
 export class TwitchApi {
   private channelToken: string | undefined = undefined;
-  private globalToken: string;
   private channelName: string;
   private userId: string | undefined = undefined;
   private moderators: TTwitchApiChatter[] = [];
 
-  constructor(channel: string, token: string) {
+  public static globalToken: string;
+
+  private constructor(channel: string) {
     logger.info("Creating new api connector");
     this.channelName = channel.replace("#", "");
-    this.globalToken = token;
+  }
 
-    this.setUserId().then((res) => {
-      this.userId = res;
-    });
+  private static instances = new Map<string, TwitchApi>();
 
-    this.getNewToken()
-      .then(() => {
-        logger.info(`Access token for channel ${this.channelName} obtained`);
-      })
-      .catch(() => {
-        logger.error(`Failed to optain access token for channel ${this.channelName}`);
-      });
+  public static getInstance(ch: string): TwitchApi {
+    const instance = TwitchApi.instances.get(ch);
+
+    if (instance) {
+      return instance;
+    }
+
+    const newInstance = new TwitchApi(ch);
+    TwitchApi.instances.set(ch, newInstance);
+
+    return newInstance;
+  }
+
+  public async init(): Promise<void> {
+    this.userId = await this.setUserId();
+
+    try {
+      await this.getNewToken();
+      logger.info(`Access token for channel ${this.channelName} obtained`);
+    } catch {
+      logger.error(`Failed to optain access token for channel ${this.channelName}`);
+    }
   }
 
   private async setUserId(): Promise<string> {
-    const res = await getTwitchApiUser(this.channelName, this.globalToken);
+    const res = await getTwitchApiUser(this.channelName, TwitchApi.globalToken);
 
     if (!res || !res.data.length) {
       logger.error(`Faild to get userId of user ${this.channelName}`);
@@ -128,7 +142,7 @@ export class TwitchApi {
   }
 
   public async getUserId(username: string): Promise<TOption<string>> {
-    const res = await getTwitchApiUser(username, this.globalToken);
+    const res = await getTwitchApiUser(username, TwitchApi.globalToken);
 
     if (!res || !res.data.length) {
       return undefined;

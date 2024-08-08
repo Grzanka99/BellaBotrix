@@ -2,6 +2,7 @@ import type { Channel } from "@prisma/client";
 import { gc } from "bun";
 import { ChannelConnection } from "services/channel-connection";
 import { prisma } from "services/db";
+import { TwitchApi } from "services/twitch-api";
 import { getOAuthToken } from "services/twitch-api/api-connector";
 import { TwitchIrc } from "services/twitch-irc";
 import { logger } from "utils/logger";
@@ -34,6 +35,8 @@ export async function startBot(): Promise<void> {
   if (!ircClient) {
     return;
   }
+
+  TwitchApi.globalToken = mainOAuthToken;
 
   async function updateConnection(ch: Channel): Promise<void> {
     const user = await prisma.webuiUser.findFirst({ where: { channelId: ch.id } });

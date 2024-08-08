@@ -4,7 +4,7 @@ const sql = (...str: Array<TemplateStringsArray | string>) => {
   return str.join().trim();
 };
 
-type Store<T> = {
+export type Store<T> = {
   key: string;
   value: T;
 };
