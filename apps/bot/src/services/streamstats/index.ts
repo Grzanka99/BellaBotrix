@@ -33,7 +33,7 @@ export class StreamStatsGatherer {
   private statsInterval: Timer | undefined = undefined;
   private standbyInterval: Timer | undefined = undefined;
 
-  private async startGathering(startedAt: string, streamerId: string, interval = 3_000) {
+  private async startGathering(startedAt: string, streamerId: string, interval = 30_000) {
     logger.info(`${this.channel} is now live, starting gathering stats`);
     storage.set(`${this.channel}_is_live`, true);
 
@@ -75,7 +75,7 @@ export class StreamStatsGatherer {
     await prisma.streams.update({
       where: { unique_id: this.activeStream },
       data: {
-        finished_at: Date.now(),
+        finished_at: String(Date.now()),
       },
     });
   }
@@ -119,7 +119,7 @@ export class StreamStatsGatherer {
         data: {
           streamId: this.activeStreamId,
           viewers: info.viewer_count,
-          timestamp: Date.now(),
+          timestamp: String(Date.now()),
           messages: tmpmsg,
           newChatters: tmpnewcht,
         },

@@ -18,3 +18,15 @@ export async function indicateAIModelsSync(): Promise<void> {
     body: `{"key": "${SYNC_KEY}"}`,
   });
 }
+
+export async function isLive(ch: string): Promise<boolean> {
+  const url = `${SYNC_URL}/islive/${ch}`;
+
+  const res = await (await fetch(url)).json();
+
+  if (typeof res === "boolean" && res) {
+    return true;
+  }
+
+  return false;
+}

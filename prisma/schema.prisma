@@ -158,7 +158,7 @@ model Streams {
   streamer_id    String
   channel        String
   started_at     String
-  finished_at    BigInt?
+  finished_at    String?
   uniqueChatters Int?
   StreamStats    StreamStats[]
 }
@@ -167,7 +167,7 @@ model StreamStats {
   id          Int     @id @default(autoincrement())
   streamId    Int
   stream      Streams @relation(fields: [streamId], references: [id])
-  timestamp   BigInt
+  timestamp   String
   viewers     Int     @default(0)
   messages    Int     @default(0)
   follows     Int     @default(0)
