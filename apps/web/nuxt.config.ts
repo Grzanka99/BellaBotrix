@@ -5,6 +5,7 @@ export default defineNuxtConfig({
     preset: "vercel",
   },
   modules: ["@vueuse/nuxt", "@pinia/nuxt", "nuxt-icon"],
+  plugins: [{ src: "./plugins/apexcharts.client.ts", mode: "client" }],
   runtimeConfig: {
     auth: {
       name: "nuxt-session",

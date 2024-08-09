@@ -1,6 +1,6 @@
 import { prisma, prismaQueue, storage } from "services/db";
 import { TwitchApi } from "services/twitch-api";
-import type { TTwitchIrcContext } from "services/types";
+import type { TTwitchApiChatter, TTwitchIrcContext } from "services/types";
 import { logger } from "utils/logger";
 
 export class StreamStatsGatherer {
@@ -10,8 +10,6 @@ export class StreamStatsGatherer {
 
   private activeStream: string | undefined = undefined;
   private activeStreamId = -1;
-
-  private uniqueChatters = new Set<string>();
 
   constructor(private channel: string) {
     this.api = TwitchApi.getInstance(channel);
@@ -33,12 +31,12 @@ export class StreamStatsGatherer {
   private statsInterval: Timer | undefined = undefined;
   private standbyInterval: Timer | undefined = undefined;
 
-  private async startGathering(startedAt: string, streamerId: string, interval = 30_000) {
+  private async startGathering(startedAt: string, streamerId: string, interval = 3_000) {
     logger.info(`${this.channel} is now live, starting gathering stats`);
     storage.set(`${this.channel}_is_live`, true);
 
-    this.messages = 0;
-    this.newChatters = 0;
+    storage.set(this.messagesKey, 0);
+    storage.set(this.newChattersKey, 0);
     this.activeStream = `${startedAt}@${this.channel}`;
 
     const res = await prisma.streams.upsert({
@@ -72,31 +70,60 @@ export class StreamStatsGatherer {
       return;
     }
 
+    const uniqueChatters = storage.get<string[]>(this.uniqueChattersKey);
+    storage.delete(this.uniqueChattersKey);
+
     await prisma.streams.update({
       where: { unique_id: this.activeStream },
       data: {
         finished_at: String(Date.now()),
+        uniqueChatters: uniqueChatters?.value.length,
       },
     });
   }
 
-  private messages = 0;
-  private newChatters = 0;
+  private get messagesKey() {
+    return `${this.channel}_stats_messages_in_that`;
+  }
+
+  private get newChattersKey() {
+    return `${this.channel}_stats_new_chatters`;
+  }
 
   public reportMessage(ctx: TTwitchIrcContext) {
-    this.messages = this.messages + 1;
+    let messages = storage.get<number>(this.messagesKey)?.value || 0;
+    let newChatters = storage.get<number>(this.newChattersKey)?.value || 0;
+
+    messages = messages + 1;
+    storage.set(this.messagesKey, messages);
 
     if (ctx.tags?.firstMessage) {
-      this.newChatters = this.newChatters + 1;
+      newChatters = newChatters + 1;
+      storage.set(this.newChattersKey, this.newChattersKey);
     }
+  }
+
+  private get uniqueChattersKey() {
+    return `${this.channel}_unique_chatters`;
+  }
+
+  private handleUniqueChatters(chatters: TTwitchApiChatter[]) {
+    const current = storage.get<Array<string>>(this.uniqueChattersKey);
+    const asSet = new Set(current?.value || undefined);
+
+    for (const chatter of chatters) {
+      asSet.add(chatter.user_id);
+    }
+
+    storage.set(this.uniqueChattersKey, Array.from(asSet));
   }
 
   private async handleGathering() {
     const info = await this.api.getStreamInfo();
 
     if (!info) {
-      this.messages = 0;
-      this.newChatters = 0;
+      storage.set(this.messagesKey, 0);
+      storage.set(this.newChattersKey, 0);
       this.startStandby();
       return;
     }
@@ -105,14 +132,12 @@ export class StreamStatsGatherer {
       this.activeStream = `${info.started_at}@${this.channel}`;
     }
 
-    const tmpmsg = this.messages;
-    const tmpnewcht = this.newChatters;
-    this.messages = 0;
-    this.newChatters = 0;
+    const tmpmsg = storage.get<number>(this.messagesKey)?.value || 0;
+    const tmpnewcht = storage.get<number>(this.newChattersKey)?.value || 0;
+    storage.set(this.messagesKey, 0);
+    storage.set(this.newChattersKey, 0);
 
-    for (const chatter of this.api.chatters) {
-      this.uniqueChatters.add(chatter.user_id);
-    }
+    this.handleUniqueChatters(this.api.chatters);
 
     await prismaQueue.enqueue(() =>
       prisma.streamStats.create({
