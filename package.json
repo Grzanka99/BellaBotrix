@@ -7,7 +7,7 @@
   "packageManager": "bun@1.0.21",
   "scripts": {
     "dev": "turbo dev",
-    "dev:web": "turbo dev --scope=web",
+    "dev:web": "turbo dev --scope=web --scope=sup",
     "dev:bot": "turbo dev --scope=bot",
     "dev:sup": "turbo dev --scope=sup",
     "build": "turbo build --force",

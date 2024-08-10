@@ -1,22 +1,20 @@
 <script setup lang="ts">
 defineProps<{
-  label?: string,
-  error?: false | string,
+  label?: string;
+  error?: false | string;
   name: string;
-  placeholder?: string,
-  modelValue: number,
-  disabled?: boolean,
-  max?: number,
-  min?: number,
-}>()
-
-const emit = defineEmits<{
-  (e: 'update:modelValue', v: number): void;
+  placeholder?: string;
+  modelValue: number;
+  disabled?: boolean;
+  max?: number;
+  min?: number;
 }>();
 
+const emit = defineEmits<(e: "update:modelValue", v: number) => void>();
+
 const handleInput = (e: Event) => {
-  emit('update:modelValue', Number((e.target as HTMLInputElement).value));
-}
+  emit("update:modelValue", Number((e.target as HTMLInputElement).value));
+};
 </script>
 
 <template>
@@ -24,7 +22,7 @@ const handleInput = (e: Event) => {
     <span class="form-text-input__label" v-if="label">{{ label }}</span>
     <input class="form-text-input__input" :class="{ 'invalid': !!error }" :disabled="disabled"
       type="number" :name="name" :placeholder="placeholder" :value="modelValue"
-      @input="handleInput" />
+      @input="handleInput" :min="min" :max="max" />
   </label>
 </template>
 

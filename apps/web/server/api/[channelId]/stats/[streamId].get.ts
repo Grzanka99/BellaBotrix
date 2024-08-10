@@ -9,7 +9,7 @@ export default defineEventHandler(async (event) => {
 
   const actualUniqueId = streamId.replace("__HASHTAG__", "#");
 
-  const stats = prisma.streamStats.findMany({
+  const stats = await prisma.streamStats.findMany({
     where: {
       stream: {
         unique_id: actualUniqueId,

@@ -31,7 +31,7 @@ export class StreamStatsGatherer {
   private statsInterval: Timer | undefined = undefined;
   private standbyInterval: Timer | undefined = undefined;
 
-  private async startGathering(startedAt: string, streamerId: string, interval = 3_000) {
+  private async startGathering(startedAt: string, streamerId: string, interval = 30_000) {
     logger.info(`${this.channel} is now live, starting gathering stats`);
     storage.set(`${this.channel}_is_live`, true);
 
@@ -154,8 +154,6 @@ export class StreamStatsGatherer {
 
   private async handleStandby() {
     const info = await this.api.getStreamInfo();
-
-    console.log(info, "checking for start");
 
     if (!info) {
       return;
