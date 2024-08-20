@@ -2,7 +2,7 @@ import type { ZodIssue } from "zod";
 
 type TLoseAutocomplete<T extends string> = T | (string & {});
 
-export function useValidation<T extends string = string,>() {
+export function useValidation<T extends string = string>() {
   const errors = ref<ZodIssue[]>([]);
 
   const validate = (field: TLoseAutocomplete<T>): string | undefined => {
