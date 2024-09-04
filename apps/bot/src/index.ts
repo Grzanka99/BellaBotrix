@@ -26,15 +26,19 @@ export async function startBot(): Promise<void> {
 
   logger.info(`Creating Twitch IRC client for ${channels.length} channel`);
 
-  const ircClient = await new TwitchIrc(
+  const ircClient = TwitchIrc.instance(
     "ws://irc-ws.chat.twitch.tv:80",
     Bun.env.CLIENT_ID || "",
     Bun.env.PASSWORD || "",
-  ).connect();
+  );
+
+  await ircClient.connect();
 
   if (!ircClient) {
     return;
   }
+
+  ircClient.startPingCheck();
 
   TwitchApi.globalToken = mainOAuthToken;
 
