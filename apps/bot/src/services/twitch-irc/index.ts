@@ -37,7 +37,6 @@ export class TwitchIrc {
     setInterval(() => {
       const lastping = Number(storage.get("lastping")?.value);
       const now = Date.now();
-      console.log(now - lastping, PING_TRESHHOLD);
       if (now - lastping > PING_TRESHHOLD) {
         this.reconnect();
       }

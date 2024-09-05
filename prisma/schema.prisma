@@ -129,10 +129,10 @@ model OllamaAIHistory {
   id          Int    @id @default(autoincrement())
   model       String
   historySize Int
-  entryPrompt String
+  entryPrompt String @db.MediumText()
   username    String
-  userMessage String
-  response    String
+  userMessage String @db.MediumText()
+  response    String @db.MediumText()
   channel     String
   language    String
 }
@@ -140,7 +140,7 @@ model OllamaAIHistory {
 model OllamaAISetupPrompts {
   id      Int     @id @default(autoincrement())
   name    String?
-  text    String
+  text    String  @db.MediumText()
   enabled Boolean
   order   Int
 }
