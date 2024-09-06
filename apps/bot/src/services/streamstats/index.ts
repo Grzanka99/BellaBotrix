@@ -3,6 +3,8 @@ import { TwitchApi } from "services/twitch-api";
 import type { TTwitchApiChatter, TTwitchIrcContext } from "services/types";
 import { logger } from "utils/logger";
 
+const STANDBY_TIMEOUT = 60_000;
+
 export class StreamStatsGatherer {
   public static instances = new Map<string, StreamStatsGatherer>();
 
@@ -64,7 +66,7 @@ export class StreamStatsGatherer {
 
     this.standbyInterval = setInterval(async () => {
       await this.handleStandby();
-    }, 60_000);
+    }, STANDBY_TIMEOUT);
 
     if (!this.activeStream) {
       return;
