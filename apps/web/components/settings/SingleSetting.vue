@@ -6,7 +6,6 @@ defineProps<{
   option: TSettingOption<unknown>;
   disabled?: boolean;
 }>();
-
 </script>
 
 <template>
@@ -41,10 +40,6 @@ defineProps<{
   min-height: 75px;
 
   grid-template-columns: minmax(175px, 1fr) minmax(200px, 450px) 4fr;
-
-  &:last-child {
-    border-bottom: 1px solid var(--stroke);
-  }
 
   &--disabled {
     cursor: not-allowed;
