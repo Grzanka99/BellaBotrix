@@ -129,10 +129,10 @@ model OllamaAIHistory {
   id          Int    @id @default(autoincrement())
   model       String
   historySize Int
-  entryPrompt String
+  entryPrompt String @db.MediumText()
   username    String
-  userMessage String
-  response    String
+  userMessage String @db.MediumText()
+  response    String @db.MediumText()
   channel     String
   language    String
 }
@@ -140,7 +140,7 @@ model OllamaAIHistory {
 model OllamaAISetupPrompts {
   id      Int     @id @default(autoincrement())
   name    String?
-  text    String
+  text    String  @db.MediumText()
   enabled Boolean
   order   Int
 }
@@ -150,4 +150,27 @@ model OllamaAIModels {
   name        String
   description String
   enabled     Boolean
+}
+
+model Streams {
+  id             Int           @id @default(autoincrement())
+  unique_id      String        @unique
+  streamer_id    String
+  channel        String
+  started_at     String
+  finished_at    String?
+  uniqueChatters Int?
+  StreamStats    StreamStats[]
+}
+
+model StreamStats {
+  id          Int     @id @default(autoincrement())
+  streamId    Int
+  stream      Streams @relation(fields: [streamId], references: [id])
+  timestamp   String
+  viewers     Int     @default(0)
+  messages    Int     @default(0)
+  follows     Int     @default(0)
+  subscribers Int     @default(0)
+  newChatters Int     @default(0)
 }

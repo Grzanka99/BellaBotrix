@@ -39,14 +39,13 @@ export default defineNuxtPlugin(async (nuxtApp) => {
   }
 
   return {
-    provide:{auth:
-    
-    {
-      loggedIn,
-      session,
-      redirectTo,
-      updateSession,
+    provide: {
+      auth: {
+        loggedIn,
+        session,
+        redirectTo,
+        updateSession,
+      },
     },
-    }
   };
 });

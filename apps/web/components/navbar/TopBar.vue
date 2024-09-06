@@ -5,10 +5,7 @@ import CustomSelect from "~/components/ui/CustomSelect.vue";
 import FormButton from "../ui/FormButton.vue";
 
 const channel = useStorage<number | undefined>("selectedChannel", undefined);
-const channelName = useStorage<string | undefined>(
-  "selectedChannelName",
-  undefined,
-);
+const channelName = useStorage<string | undefined>("selectedChannelName", undefined);
 const channelId = useStorage<string | undefined>("selectedChannelId", undefined);
 
 const { data, refresh } = await useFetch("/api/chacc");
@@ -44,6 +41,7 @@ const isDark = useDark();
 const toggleDark = useToggle(isDark);
 
 watch(channel, () => {
+  window.localStorage.removeItem("selectedStream");
   window.location.reload();
 });
 </script>

@@ -2,6 +2,7 @@ import type { Channel } from "@prisma/client";
 import { gc } from "bun";
 import { ChannelConnection } from "services/channel-connection";
 import { prisma } from "services/db";
+import { TwitchApi } from "services/twitch-api";
 import { getOAuthToken } from "services/twitch-api/api-connector";
 import { TwitchIrc } from "services/twitch-irc";
 import { logger } from "utils/logger";
@@ -25,15 +26,21 @@ export async function startBot(): Promise<void> {
 
   logger.info(`Creating Twitch IRC client for ${channels.length} channel`);
 
-  const ircClient = await new TwitchIrc(
+  const ircClient = TwitchIrc.instance(
     "ws://irc-ws.chat.twitch.tv:80",
     Bun.env.CLIENT_ID || "",
     Bun.env.PASSWORD || "",
-  ).connect();
+  );
+
+  await ircClient.connect();
 
   if (!ircClient) {
     return;
   }
+
+  ircClient.startPingCheck();
+
+  TwitchApi.globalToken = mainOAuthToken;
 
   async function updateConnection(ch: Channel): Promise<void> {
     const user = await prisma.webuiUser.findFirst({ where: { channelId: ch.id } });

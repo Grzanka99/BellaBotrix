@@ -1,5 +1,6 @@
 import { Elysia } from "elysia";
 import { handleAIModelsSync } from "lib/handle-aimodels-sync";
+import { handleIsLive } from "lib/handle-is-live";
 import { handleSettingsSync } from "lib/handle-settings-sync";
 
 const SYNC_KEY = Bun.env.SYNC_KEY || "verysecurekey";
@@ -28,6 +29,23 @@ app.post("/aimodels/sync", ({ error, body }) => {
   handleAIModelsSync();
 
   return true;
+});
+app.get("/islive/:channelName", ({ params, error }) => {
+  const channel = String(params.channelName);
+
+  if (!channel.length) {
+    return error(404);
+  }
+
+  const chName = `#${channel.replaceAll("#", "")}`;
+
+  const res = handleIsLive(chName);
+
+  if (!res) {
+    return error(404);
+  }
+
+  return res.value;
 });
 
 app.listen(5000);

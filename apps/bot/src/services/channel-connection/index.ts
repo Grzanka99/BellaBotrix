@@ -10,6 +10,7 @@ import { OllamaAI } from "services/ollama";
 import { R6Dle } from "services/r6dle";
 import { R6Stats } from "services/r6stats";
 import { getSettings } from "services/settings";
+import { StreamStatsGatherer } from "services/streamstats";
 import { ChannelTimer } from "services/timers";
 import { TwitchApi } from "services/twitch-api";
 import type { TwitchIrc } from "services/twitch-irc";
@@ -41,6 +42,7 @@ export class ChannelConnection {
   private r6dle: R6Dle;
   private r6stats: R6Stats;
   private ollamaAI: OllamaAI;
+  private streamStatsGatherer: StreamStatsGatherer;
 
   private settingsKey: string;
 
@@ -55,7 +57,7 @@ export class ChannelConnection {
   constructor(args: TArgs) {
     logger.info(`Creating channel connection for channel: ${args.channelName}`);
     this._irc = args.ircClient;
-    this._api = new TwitchApi(args.channelName, args.authToken);
+    this._api = TwitchApi.getInstance(args.channelName);
     this.channelName = args.channelName;
     this.ownerId = args.ownerId;
     this.commandHandler = new CommandHandler(args.channelName);
@@ -64,6 +66,7 @@ export class ChannelConnection {
     this.r6dle = new R6Dle(this.channelName);
     this.r6stats = R6Stats.instance;
     this.ollamaAI = new OllamaAI(this.channelName);
+    this.streamStatsGatherer = StreamStatsGatherer.getInstance(this.channelName);
 
     this.settingsKey = `${args.channelName}-settings`;
 
@@ -121,11 +124,17 @@ export class ChannelConnection {
     this.logger.info("Setting up connection");
     await setDefaultCommandsForChannel(this.channelName);
 
+    // NOTE: Setting up api
+    await this.api.init();
+
     // NOTE: Chatters
     this.api.startChattersAutorefresh(5000);
     this.chattersInterval = setInterval(async () => {
       await chatterTimeHandler(this.channelName, this.api.chatters);
     }, 30_000);
+
+    // NOTE: Stats gathering;
+    await this.streamStatsGatherer.init();
 
     // NOTE: Automsg
     this.automsgInterval = setInterval(() => this.automsgChecker(), 300_000);
@@ -158,6 +167,8 @@ export class ChannelConnection {
           if (!ctx.channel || !ctx.tags || !ctx.message || !this.channelId || !this.api) {
             break;
           }
+
+          this.streamStatsGatherer.reportMessage(ctx);
 
           // NOTE: Increasing points when user types on chat
           activityHandler(ctx);
@@ -258,6 +269,10 @@ export class ChannelConnection {
     this.r6stats = undefined;
     // @ts-ignore-next-line
     this.ollamaAI = undefined;
+
+    this.streamStatsGatherer.destroy();
+    // @ts-ignore-next-line
+    this.streamStatsGatherer = undefined;
 
     // @ts-ignore-next-line
     this.commandHandler = undefined;

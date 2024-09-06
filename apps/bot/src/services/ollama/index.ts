@@ -46,8 +46,6 @@ export class OllamaAI {
   private static ollama: Ollama | undefined;
   private static queue: AsyncQueue;
 
-  private history: Message[] = [];
-
   private static skeymodels = "ollamamodels";
   private static synced = false;
 
@@ -60,9 +58,17 @@ export class OllamaAI {
       OllamaAI.queue = new AsyncQueue();
     }
 
+    if (!storage.has(this.historyStorageKey)) {
+      storage.set(this.historyStorageKey, []);
+    }
+
     if (!OllamaAI.synced) {
       this.syncModels();
     }
+  }
+
+  private get historyStorageKey() {
+    return `${this.channel}-ollama-history`;
   }
 
   private async syncModels() {
@@ -89,11 +95,14 @@ export class OllamaAI {
   }
 
   private addToHistory(message: Message) {
-    if (this.history.length >= this.historySize) {
-      this.history.shift();
+    const history = (storage.get(this.historyStorageKey)?.value || []) as Message[];
+
+    if (history.length >= this.historySize) {
+      history.shift();
     }
 
-    this.history.push(message);
+    history.push(message);
+    storage.set(this.historyStorageKey, history);
   }
 
   private isCleanerRunning = false;
@@ -105,8 +114,10 @@ export class OllamaAI {
 
     // NOTE: Auto removing context/old messages after 5 minutes, calling shift twice to remove also responses;
     setInterval(() => {
-      this.history.shift();
-      this.history.shift();
+      const history = (storage.get(this.historyStorageKey)?.value || []) as Message[];
+      history.shift();
+      history.shift();
+      storage.set(this.historyStorageKey, history);
     }, 180_000);
   }
 
@@ -150,7 +161,7 @@ export class OllamaAI {
   }
 
   public forceHistoryClear(): void {
-    this.history = [];
+    storage.set(this.historyStorageKey, []);
   }
 
   public async ask(q: string, username: string, config: TConfig): Promise<TOption<string>> {
@@ -159,9 +170,11 @@ export class OllamaAI {
       content: `User ${username} wrote: ${q}`,
     };
 
+    const history = (storage.get(this.historyStorageKey)?.value || []) as Message[];
+
     const defaulPrompts = await getDefaultPrompts(config);
 
-    const messages = [...defaulPrompts, ...this.history, message];
+    const messages = [...defaulPrompts, ...history, message];
 
     try {
       const res = await OllamaAI.queue.enqueue(

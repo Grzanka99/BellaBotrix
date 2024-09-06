@@ -1,45 +1,83 @@
-import { TTwitchIrcContext } from "services/types";
-import { TOption } from "types";
+import type { TTwitchIrcContext } from "services/types";
+import type { TOption } from "types";
 import { logger } from "utils/logger";
-import { MessageEvent, WebSocket } from "ws";
+import { type MessageEvent, WebSocket } from "ws";
 import { parseMessage } from "./parsers";
+import { storage } from "services/db";
+
+// NOTE: I think 10 minutes should be safe time
+const PING_TRESHHOLD = 600_000;
+
+type TResType = (value: TOption<boolean> | PromiseLike<TOption<boolean>>) => void;
 
 export class TwitchIrc {
   private ws: WebSocket;
-  private nick: string;
-  private password: string;
   private handlers: Map<string, (ctx: TTwitchIrcContext) => void> = new Map();
 
-  constructor(url: string, nick: string, password: string) {
-    this.nick = nick;
-    this.password = password;
+  private static _instance: TwitchIrc | undefined;
+
+  private constructor(
+    private url: string,
+    private nick: string,
+    private password: string,
+  ) {
     this.ws = new WebSocket(url);
   }
 
-  public async connect(): Promise<TOption<TwitchIrc>> {
-    return new Promise((res) => {
+  public static instance(url: string, nick: string, password: string) {
+    if (!TwitchIrc._instance) {
+      TwitchIrc._instance = new TwitchIrc(url, nick, password);
+      return TwitchIrc._instance;
+    }
+
+    return TwitchIrc._instance;
+  }
+
+  public startPingCheck() {
+    setInterval(() => {
+      const lastping = Number(storage.get("lastping")?.value);
+      const now = Date.now();
+      if (now - lastping > PING_TRESHHOLD) {
+        this.reconnect();
+      }
+    }, 60_000);
+  }
+
+  public async connect(): Promise<void> {
+    await new Promise((resolve: TResType) => {
       try {
         this.ws.addEventListener("open", () => {
-          this.onOpen(res);
+          this.onOpen(resolve);
         });
-        this.ws.addEventListener("message", (res) => this.onMessage(res));
+        this.ws.addEventListener("message", (result) => this.onMessage(result));
       } catch (_) {
-        res(undefined);
+        resolve(undefined);
       }
     });
   }
 
-  private onOpen(res: {
-    (value: TOption<TwitchIrc> | PromiseLike<TOption<TwitchIrc>>): void;
-  }): void {
+  private async reconnect(): Promise<void> {
+    logger.warning("Triggering reconnect");
+    this.ws.removeAllListeners();
+    this.ws.close();
+
+    this.ws = new WebSocket(this.url);
+
+    await this.connect();
+    this.restoreHandlers();
+  }
+
+  private onOpen(res: TResType): void {
     this.ws.send("CAP REQ :twitch.tv/membership twitch.tv/tags twitch.tv/commands");
     this.ws.send(`PASS ${this.password}`);
     this.ws.send(`NICK ${this.nick}`);
-    res(this);
+    storage.set("lastping", Date.now());
+    res(true);
   }
 
   private handlePingMessage(msg: string): void {
     if (msg.startsWith("PING")) {
+      storage.set("lastping", Date.now());
       logger.info(`Received ping: ${msg.substring("PING".length)}`);
       const pong = `PONG${msg.substring("PING".length)}`;
       logger.info(`Sending pong: ${pong}`);
@@ -95,6 +133,21 @@ export class TwitchIrc {
     this.ws.send(`JOIN ${channel}`);
     this.handlers.set(channel, handler);
     logger.info(`Joined room: ${channel}`);
+  }
+
+  public restoreHandlers() {
+    const oldHandlers = new Map();
+
+    for (const [key, handler] of this.handlers) {
+      oldHandlers.set(key, handler);
+    }
+
+    this.handlers.clear();
+
+    for (const [key, handler] of oldHandlers) {
+      this.handlers.delete(key);
+      this.addHandler(key, handler);
+    }
   }
 
   public removeHandler(channel: string) {
