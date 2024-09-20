@@ -1,6 +1,7 @@
 import type { StreamStats } from "@prisma/client";
 import { useStorage } from "@vueuse/core";
 import type { TSelectOption } from "~/types/ui.type";
+import { avarage, roundtoprecision } from "~/utils/calculating";
 
 export const useStatsChart = () => {
   const channel = useStorage("selectedChannel", undefined);
@@ -8,8 +9,8 @@ export const useStatsChart = () => {
   const selectedStreamStorage = useStorage<string>("selectedStream", "");
   const selectedStream = ref<string>(selectedStreamStorage.value);
 
-  const { data: stats, refresh: refreshStats } = useFetch(
-    () => `/api/${channel.value}/stats/${selectedStream.value.replace("#", "__HASHTAG__")}`,
+  const { data: stats, refresh: refreshStats } = useFetch<StreamStats[]>(
+    () => `/api/${String(channel.value)}/stats/${selectedStream.value.replace("#", "__HASHTAG__")}`,
   );
   const { data: streams, refresh: refreshStreams } = useFetch(
     () => `/api/${channel.value}/stats/streams`,
@@ -93,6 +94,18 @@ export const useStatsChart = () => {
     },
   ]);
 
+  const streamData = computed(() => {
+    const viewers: number[] = stats.value?.map((el) => el.viewers) || [];
+    const messages: number[] = stats.value?.map((el) => el.messages) || [];
+
+    return {
+      avgViewers: roundtoprecision(avarage(viewers)),
+      maxViewers: Math.max(...viewers),
+      avgMsg: roundtoprecision(avarage(messages)),
+      totalMsg: sumarr(messages),
+    };
+  });
+
   const chartData = computed(() => {
     return {
       options: {
@@ -131,5 +144,6 @@ export const useStatsChart = () => {
     chartData,
     selectedStream,
     streamsSelectOptions,
+    streamData,
   };
 };

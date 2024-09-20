@@ -1,4 +1,6 @@
-export default defineEventHandler(async (event) => {
+import type { StreamStats } from "@prisma/client";
+
+export default defineEventHandler(async (event): Promise<StreamStats[]> => {
   await requireAuthSession(event);
 
   const streamId = event.context.params?.streamId as string | undefined;
@@ -9,13 +11,17 @@ export default defineEventHandler(async (event) => {
 
   const actualUniqueId = streamId.replace("__HASHTAG__", "#");
 
-  const stats = await prisma.streamStats.findMany({
-    where: {
-      stream: {
-        unique_id: actualUniqueId,
+  try {
+    const stats = await prisma.streamStats.findMany({
+      where: {
+        stream: {
+          unique_id: actualUniqueId,
+        },
       },
-    },
-  });
+    });
 
-  return stats;
+    return stats;
+  } catch (e) {
+    throw createError({ statusCode: 500 });
+  }
 });

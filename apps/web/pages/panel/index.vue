@@ -14,7 +14,7 @@ const status = computed(() => {
   return !!data.value;
 });
 
-const { chartData, selectedStream, streamsSelectOptions } = useStatsChart();
+const { chartData, selectedStream, streamsSelectOptions, streamData } = useStatsChart();
 
 useHead({
   title: "Dashboard",
@@ -24,8 +24,24 @@ useHead({
 <template>
   <div class="dashboard">
     <div class="dashboard__header">
-      <IsLiveIcon :is-live="status" />
-      <CustomSelect v-model="selectedStream" :options="streamsSelectOptions" />
+      <div class="dashboard__header__group">
+        <IsLiveIcon :is-live="status" />
+        <CustomSelect v-model="selectedStream" :options="streamsSelectOptions" />
+      </div>
+      <div class="dashboard__header__group stream-stats">
+        <span class="single-stream-stat">
+          average viewers: {{ streamData.avgViewers }}
+        </span>
+        <span class="single-stream-stat">
+          max viewers: {{ streamData.maxViewers }}
+        </span>
+        <span class="single-stream-stat">
+          average messages (per 30s): {{ streamData.avgMsg }}
+        </span>
+        <span class="single-stream-stat">
+          total messages: {{ streamData.totalMsg }}
+        </span>
+      </div>
     </div>
     <ClientOnly>
       <div class="chart-container">
@@ -43,7 +59,14 @@ useHead({
 
   &__header {
     display: flex;
+    flex-grow: 0;
     gap: var(--padding);
+    height: 40px;
+
+    &__group {
+      display: flex;
+      gap: var(--padding);
+    }
   }
 }
 
@@ -55,6 +78,25 @@ useHead({
   overflow: hidden;
   border: 1px solid var(--stroke);
   border-radius: var(--radius);
-  // background: red;
+}
+
+.stream-stats {
+  display: flex;
+  flex-wrap: wrap;
+  height: 100%;
+  align-items: center;
+  gap: 0;
+
+  .single-stream-stat {
+    display: flex;
+    height: 50%;
+    font-size: 1.8rem;
+    padding: var(--padding-half);
+    align-items: center;
+
+    &:not(:last-child) {
+      border-right: 1px solid var(--stroke);
+    }
+  }
 }
 </style>
