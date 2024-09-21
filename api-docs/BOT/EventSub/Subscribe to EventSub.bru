@@ -1,0 +1,29 @@
+meta {
+  name: Subscribe to EventSub
+  type: http
+  seq: 1
+}
+
+post {
+  url: http://127.0.0.1:8080/eventsub/subscriptions
+  body: json
+  auth: none
+}
+
+headers {
+  Client-Id: dummy
+}
+
+body:json {
+  {
+    "type": "user.update",
+    "version": "1",
+    "condition": {
+      "user_id": "1234"
+    },
+    "transport": {
+      "method": "websocket",
+      "session_id": "ae3ebb51_2e8c9c4b"
+    }
+  }
+}

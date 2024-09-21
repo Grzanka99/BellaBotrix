@@ -1,4 +1,4 @@
-import {
+import type {
   TTwitchApiChatter,
   TTwitchApiResponse,
   TTwitchApiStream,
@@ -7,7 +7,7 @@ import {
   TTwitchOAuthRefresh,
   TTwitchValidateToken,
 } from "services/types";
-import { TOption } from "types";
+import type { TOption } from "types";
 import { interpolate } from "utils/interpolate-string";
 
 const API_CLIENT_ID = Bun.env.API_CLIENT_ID;
@@ -34,7 +34,7 @@ export async function getChannelRefreshKey(code: string): Promise<TOption<TTwitc
     }`;
 
     const res = await fetch(url, { method: "POST" });
-    const json = await res.json<TTwitchOAuthRefresh>();
+    const json = (await res.json()) as TTwitchOAuthRefresh;
 
     return json;
   } catch {
@@ -58,7 +58,7 @@ export async function getChannelFollowers(
     headers: {
       Authorization: `Bearer ${token}`,
       "Client-Id": API_CLIENT_ID,
-    } as unknown,
+    },
   });
 
   const asjson = (await res.json()) as TTwitchApiResponse<TTwitchFollowers[]> & { total: number };
@@ -75,7 +75,7 @@ export async function validateToken(token: string): Promise<TOption<TTwitchValid
       },
     });
 
-    const json = await res.json<TTwitchValidateToken>();
+    const json = (await res.json()) as TTwitchValidateToken;
 
     return json;
   } catch {
@@ -93,7 +93,7 @@ export async function getNewToken(refreshToken: string): Promise<TOption<TTwitch
       return undefined;
     }
 
-    const json = await res.json<TTwitchOAuthRefresh>();
+    const json = (await res.json()) as TTwitchOAuthRefresh;
 
     return json;
   } catch {
@@ -129,10 +129,10 @@ export async function getTwitchApiUser(
       headers: {
         Authorization: `Bearer ${accessToken}`,
         "Client-Id": API_CLIENT_ID,
-      } as HeadersInit,
+      },
     });
 
-    return await res.json<TTwitchApiResponse<TTwitchApiUser[]>>();
+    return (await res.json()) as TTwitchApiResponse<TTwitchApiUser[]>;
   } catch {
     return undefined;
   }
@@ -148,14 +148,14 @@ export async function getChatters(
     headers: {
       Authorization: `Bearer ${token}`,
       "Client-Id": API_CLIENT_ID,
-    } as HeadersInit,
+    },
   });
 
   if (res.status !== 200) {
     return undefined;
   }
 
-  const json = await res.json<TTwitchApiResponse<TTwitchApiChatter[]>>();
+  const json = (await res.json()) as TTwitchApiResponse<TTwitchApiChatter[]>;
 
   return json;
 }
@@ -170,14 +170,14 @@ export async function getModerators(
     headers: {
       Authorization: `Bearer ${token}`,
       "Client-Id": API_CLIENT_ID,
-    } as HeadersInit,
+    },
   });
 
   if (res.status !== 200) {
     return undefined;
   }
 
-  const json = await res.json<TTwitchApiResponse<TTwitchApiChatter[]>>();
+  const json = (await res.json()) as TTwitchApiResponse<TTwitchApiChatter[]>;
   return json;
 }
 
@@ -191,13 +191,32 @@ export async function getStreams(
     headers: {
       Authorization: `Bearer ${token}`,
       "Client-Id": API_CLIENT_ID,
-    } as HeadersInit,
+    },
   });
 
   if (res.status !== 200) {
     return undefined;
   }
 
-  const json = await res.json<TTwitchApiResponse<TTwitchApiStream[]>>();
+  const json = (await res.json()) as TTwitchApiResponse<TTwitchApiStream[]>;
   return json;
+}
+
+export async function subscribeToChannelEventBus(
+  userid: string,
+  token: string,
+): Promise<TOption<unknown>> {
+  const url = "https://api.twitch.tv/helix/eventsub/subscriptions";
+
+  const res = await fetch(url, {
+    method: "post",
+    headers: {
+      Authorization: `Bearer ${token}`,
+      "Client-Id": API_CLIENT_ID,
+    },
+  });
+
+  const json = await res.json();
+
+  return undefined;
 }

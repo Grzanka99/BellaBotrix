@@ -1,0 +1,17 @@
+meta {
+  name: aimodels sync
+  type: http
+  seq: 2
+}
+
+post {
+  url: //localhost:5000/api/v1/unsafe/aimodels/sync
+  body: json
+  auth: none
+}
+
+body:json {
+  {
+    "key": "justsynckey"
+  }
+}
