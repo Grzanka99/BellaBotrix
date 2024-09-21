@@ -1,0 +1,17 @@
+meta {
+  name: settings sync
+  type: http
+  seq: 1
+}
+
+post {
+  url: //localhost:5000/api/v1/unsafe/1/settings/sync
+  body: json
+  auth: none
+}
+
+body:json {
+  {
+    "key": "justsynckey"
+  }
+}
