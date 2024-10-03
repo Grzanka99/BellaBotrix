@@ -24,6 +24,7 @@ const post = (url: string): Promise<Response> =>
     },
   });
 
+// NOTE: Done in twitch-api-connector;
 export async function getChannelRefreshKey(code: string): Promise<TOption<TTwitchOAuthRefresh>> {
   try {
     let url = `${OAUTH_URL}?client_id=${API_CLIENT_ID}`;
@@ -42,6 +43,7 @@ export async function getChannelRefreshKey(code: string): Promise<TOption<TTwitc
   }
 }
 
+// NOTE: Done in twitch-api-connector;
 export async function getChannelFollowers(
   userid: string,
   token: string,
@@ -65,6 +67,7 @@ export async function getChannelFollowers(
   return asjson;
 }
 
+// NOTE: Done in twitch-api-connector;
 export async function validateToken(token: string): Promise<TOption<TTwitchValidateToken>> {
   try {
     const url = "https://id.twitch.tv/oauth2/validate";
@@ -83,6 +86,7 @@ export async function validateToken(token: string): Promise<TOption<TTwitchValid
   }
 }
 
+// NOTE: Done in twitch-api-connector;
 export async function getNewToken(refreshToken: string): Promise<TOption<TTwitchOAuthRefresh>> {
   try {
     const res = await post(
@@ -101,6 +105,7 @@ export async function getNewToken(refreshToken: string): Promise<TOption<TTwitch
   }
 }
 
+// NOTE: Done in twitch-api-connector;
 export async function getOAuthToken(): Promise<TOption<string>> {
   const url = `${OAUTH_URL}?client_id=${API_CLIENT_ID}&client_secret=${API_CLIENT_SECRET}&grant_type=client_credentials`;
   try {
@@ -118,6 +123,7 @@ export async function getOAuthToken(): Promise<TOption<string>> {
   }
 }
 
+// NOTE: Done in twitch-api-connector;
 export async function getTwitchApiUser(
   username: string,
   accessToken: string,
@@ -138,6 +144,7 @@ export async function getTwitchApiUser(
   }
 }
 
+// NOTE: Done in twitch-api-connector;
 export async function getChatters(
   userid: string,
   token: string,
@@ -160,6 +167,7 @@ export async function getChatters(
   return json;
 }
 
+// NOTE: Done in twitch-api-connector;
 export async function getModerators(
   userid: string,
   token: string,
@@ -181,6 +189,7 @@ export async function getModerators(
   return json;
 }
 
+// NOTE: Done in twitch-api-connector;
 export async function getStreams(
   userid: string,
   token: string,
