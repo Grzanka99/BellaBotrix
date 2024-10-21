@@ -2,11 +2,10 @@
   "name": "twitch-api-connector",
   "version": "1.0.0",
   "private": "true",
-  "types": "./src/types.d.ts",
   "main": "./src/index.ts",
+  "types": "./index.d.ts",
   "exports": {
-    ".": "./src/index.ts",
-    "@types": "./src/types.d.ts"
+    ".": "./src/index.ts"
   },
   "devDependencies": {
     "bun-types": "latest"
@@ -15,6 +14,7 @@
     "typescript": "latest"
   },
   "dependencies": {
+    "typescript": "latest",
     "zod": "^3.22.4",
     "ky": "^1.7.2"
   }

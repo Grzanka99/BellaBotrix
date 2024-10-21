@@ -4,6 +4,15 @@ export default defineNuxtConfig({
   nitro: {
     preset: "vercel",
   },
+  vite: {
+    css: {
+      preprocessorOptions: {
+        scss: {
+          api: "modern",
+        },
+      },
+    },
+  },
   modules: ["@vueuse/nuxt", "@pinia/nuxt", "nuxt-icon"],
   plugins: [{ src: "./plugins/apexcharts.client.ts", mode: "client" }],
   runtimeConfig: {

@@ -20,9 +20,7 @@ export async function getChatters(
 
   try {
     const res = await ky.get(url, bearerTokenParams(token));
-
     const json = await res.json<TWrappedResponse<TApiChatter[]>>();
-
     const data = SWrappedResponse(z.array(SApiChatter)).parse(json);
 
     return { success: true, data };

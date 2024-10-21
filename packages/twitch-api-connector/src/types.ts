@@ -12,12 +12,12 @@ export type TResponse<T> =
 export const SWrappedResponse = <T>(t: z.ZodType<T>) =>
   z.object({
     data: t,
-    pagination: z.record(z.string()),
-    total: z.number(),
+    pagination: z.record(z.string()).optional(),
+    total: z.number().optional(),
   });
 
 export type TWrappedResponse<T> = {
   data: T;
-  pagination: Record<string, string>;
+  pagination?: Record<string, string>;
   total?: number;
 };

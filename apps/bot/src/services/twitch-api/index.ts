@@ -12,8 +12,8 @@ import type { TOption } from "types";
 import { logger } from "utils/logger";
 
 export class TwitchApi {
+  private readonly channelName: string;
   private channelToken: string | undefined = undefined;
-  private channelName: string;
   private userId: string | undefined = undefined;
   private moderators: TTwitchApiChatter[] = [];
 
