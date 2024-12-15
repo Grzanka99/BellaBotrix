@@ -2,9 +2,12 @@ import { logger } from "utils/logger";
 import { type MessageEvent, WebSocket } from "ws";
 import { SEventSubGeneralMessage, SEventSubMetadata } from "./types";
 import { handleEvents } from "./events";
+import { storage } from "services/db";
+import { EVENTSUB_SESSTION_ID_STORAGE_KEY_0 } from "common";
 
 export class TwitchEventSub {
   private ws: WebSocket;
+  private sessionId: string | undefined = undefined;
 
   private static _instance: TwitchEventSub | undefined;
 
@@ -44,8 +47,12 @@ export class TwitchEventSub {
   private keepaliveTimeout = 10;
   private lastevent = 0;
 
+  private keepAliveInterval: Timer | undefined = undefined;
+
   private async reconnect(url?: string) {
     logger.warning("[EventSub] Triggering reconnect");
+    clearInterval(this.keepAliveInterval);
+    this.keepAliveInterval = undefined;
     this.ws.removeAllListeners();
     this.ws.close();
 
@@ -56,16 +63,17 @@ export class TwitchEventSub {
   }
 
   private startPingCheck() {
-    setInterval(() => {
+    if (this.keepAliveInterval) {
+      return;
+    }
+
+    this.keepAliveInterval = setInterval(() => {
       this.lastevent = this.lastevent + 1;
-      console.log(this.lastevent, this.keepaliveTimeout);
       if (this.lastevent > this.keepaliveTimeout) {
         this.reconnect();
       }
     }, 1000);
   }
-
-  private subscribeToEvents() {}
 
   private onMessage(res: MessageEvent): void {
     if (!res.data || typeof res.data !== "string") {
@@ -83,8 +91,6 @@ export class TwitchEventSub {
 
     const data = asjson.data;
 
-    console.log(data);
-
     const metadata = SEventSubMetadata.safeParse(data.metadata);
     if (!metadata.success) {
       return;
@@ -99,6 +105,9 @@ export class TwitchEventSub {
         if (!("keepalive_timeout_seconds" in data.payload.session)) {
           break;
         }
+
+        this.sessionId = data.payload.session.id;
+        storage.set(EVENTSUB_SESSTION_ID_STORAGE_KEY_0, data.payload.session.id);
 
         this.keepaliveTimeout = data.payload.session.keepalive_timeout_seconds;
         this.startPingCheck();

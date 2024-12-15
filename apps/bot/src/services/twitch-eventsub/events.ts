@@ -1,9 +1,9 @@
-import { EEventSubEvents } from "./types";
+import { EventSubEvents } from "common";
 
 type TPayload = {
   subscription: {
     [key: string]: unknown;
-    type: EEventSubEvents;
+    type: string;
   };
   event: {
     [key: string]: unknown;
@@ -11,10 +11,27 @@ type TPayload = {
 };
 
 export function handleEvents(payload: TPayload) {
-  console.log(payload.subscription.transport);
+  console.log(payload.subscription.type);
   switch (payload.subscription.type) {
-    case EEventSubEvents.StreamOnline: {
+    case EventSubEvents.StreamOnline: {
       console.log("stream started");
+      break;
+    }
+    case EventSubEvents.ChannelSubscribe: {
+      console.log("Received subscription");
+      break;
+    }
+    case EventSubEvents.ChannelFollow: {
+      console.log("Received new follower");
+      break;
+    }
+    case EventSubEvents.ChannelRaid: {
+      console.log("Someoen raided your channel!");
+      break;
+    }
+    case EventSubEvents.ChannelCheer: {
+      console.log("Someone just cheered!");
+      break;
     }
   }
 }

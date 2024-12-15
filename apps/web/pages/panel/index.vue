@@ -45,7 +45,7 @@ useHead({
     </div>
     <ClientOnly>
       <div class="chart-container">
-        <apexchart type="line" :options="chartData.options" :series="chartData.series" />
+        <apexchart type="bar" :options="chartData.options" :series="chartData.series" />
       </div>
     </ClientOnly>
   </div>

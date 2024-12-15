@@ -148,7 +148,7 @@ export class TwitchApi {
       return undefined;
     }
 
-    return res.data[0].id;
+    return res.data.data[0].id;
   }
 
   public async getChannelChattersList(): Promise<TTwitchApiChatter[]> {

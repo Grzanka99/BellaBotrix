@@ -14,6 +14,10 @@
     "build": "turbo build --force",
     "prisma:version": "prisma --version",
     "prisma:generate": "prisma generate",
+    "twitch:mock": "twitch event websocket start-server",
+    "twitch:trigger:subscription": "twitch event trigger channel.subscribe --transport=websocket",
+    "twitch:trigger:online": "twitch event trigger stream.online --transport=websocket",
+    "twitch:trigger:ban": "twitch event trigger channel.ban --transport=websocket",
     "postinstall": "prisma generate"
   },
   "workspaces": [

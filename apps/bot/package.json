@@ -22,6 +22,7 @@
     "r6dle": "workspace:*",
     "sqlite-storage": "workspace:*",
     "twitch-api-connector": "workspace:*",
+    "common": "workspace:*",
     "@prisma/client": "^5.9.0",
     "zod": "^3.22.4",
     "ollama": "^0.5.6"
