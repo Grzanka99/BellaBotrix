@@ -7,3 +7,4 @@ export * from "./lib/get-channel-followers";
 export * from "./lib/get-chatters";
 export * from "./lib/get-moderators";
 export * from "./lib/get-streams";
+export * from "./lib/bans";

@@ -136,5 +136,5 @@ export class TwitchEventSub {
 }
 
 // const eventsub = TwitchEventSub.instance("wss://eventsub.wss.twitch.tv/ws");
-const eventsub = TwitchEventSub.instance("ws://127.0.0.1:8080/ws");
-await eventsub.connect();
+// const eventsub = TwitchEventSub.instance("ws://127.0.0.1:8080/ws");
+// await eventsub.connect();
