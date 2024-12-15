@@ -7,7 +7,6 @@ export default defineEventHandler(async (event) => {
     "moderator:read:chatters",
     "moderation:read",
     "channel:moderate",
-    "channel:manage:moderators",
     "moderator:read:followers",
     "moderator:manage:banned_users",
     "moderator:manage:blocked_terms",
