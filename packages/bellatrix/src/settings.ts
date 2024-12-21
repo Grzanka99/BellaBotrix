@@ -8,6 +8,21 @@ export function SSettingOptionSchema<T>(t: z.ZodType<T>) {
   });
 }
 
+export const SAutomodSettings = z.object({
+  enabled: SSettingOptionSchema(z.boolean()),
+  firstMessageFilter: z.object({
+    enabled: SSettingOptionSchema(z.boolean()),
+    banMessage: SSettingOptionSchema(z.string()),
+  }),
+  emotesLimit: z.object({
+    enabled: SSettingOptionSchema(z.boolean()),
+    limit: SSettingOptionSchema(z.number()),
+    sanctions: SSettingOptionSchema(z.record(z.string(), z.string())),
+    warningMessage: SSettingOptionSchema(z.string()),
+    banMessage: SSettingOptionSchema(z.string()),
+  }),
+});
+
 export const SSettings = z.object({
   commands: z.object({
     enabled: SSettingOptionSchema(z.boolean()),
@@ -45,15 +60,7 @@ export const SSettings = z.object({
     keepHistory: SSettingOptionSchema(z.number()),
     entryPrompt: SSettingOptionSchema(z.string()),
   }),
-  automod: z.object({
-    emotesLimit: z.object({
-      enabled: SSettingOptionSchema(z.boolean()),
-      limit: SSettingOptionSchema(z.number()),
-      sanctions: SSettingOptionSchema(z.record(z.string(), z.string())),
-      warningMessage: SSettingOptionSchema(z.string()),
-      banMessage: SSettingOptionSchema(z.string()),
-    }),
-  }),
+  automod: SAutomodSettings,
 });
 
 export const SSettingsUpdate = SSettings.deepPartial();
@@ -66,3 +73,4 @@ export type TSettingOption<T> = {
 
 export type TSettings = z.infer<typeof SSettings>;
 export type TSettingsUpdate = z.infer<typeof SSettingsUpdate>;
+export type TAutomodSettings = z.infer<typeof SAutomodSettings>;

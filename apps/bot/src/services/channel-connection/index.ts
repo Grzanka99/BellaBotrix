@@ -4,7 +4,7 @@ import { activityHandler } from "handlers/activity-handler";
 import { chatterTimeHandler } from "handlers/activity-handler/chatters-time";
 import { CommandHandler } from "handlers/commands";
 import { triggerWordsHandler } from "handlers/trigger-words";
-import { AntispamAI } from "services/automod/antispam";
+import { AutomodService } from "services/automod";
 import { setDefaultCommandsForChannel } from "services/commands";
 import { prisma, storage } from "services/db";
 import { OllamaAI } from "services/ollama";
@@ -44,7 +44,7 @@ export class ChannelConnection {
   private r6stats: R6Stats;
   private ollamaAI: OllamaAI;
   private streamStatsGatherer: StreamStatsGatherer;
-  private antispam: AntispamAI;
+  private automod: AutomodService;
 
   private settingsKey: string;
 
@@ -69,7 +69,7 @@ export class ChannelConnection {
     this.r6stats = R6Stats.instance;
     this.ollamaAI = new OllamaAI(this.channelName);
     this.streamStatsGatherer = StreamStatsGatherer.getInstance(this.channelName);
-    this.antispam = AntispamAI.instance;
+    this.automod = AutomodService.getInstance(this.channelName);
 
     this.settingsKey = `${args.channelName}-settings`;
 
@@ -171,12 +171,8 @@ export class ChannelConnection {
             break;
           }
 
-          if (ctx.tags.firstMessage) {
-            this.antispam.isMessageSpam(ctx.message).then((res) => {
-              if (res && ctx.tags?.userId) {
-                this.api.banUserById(ctx.tags.userId);
-              }
-            });
+          if (this.settings.automod.enabled.value) {
+            this.automod.handle(this.settings.automod, ctx, this.send.bind(this));
           }
 
           this.streamStatsGatherer.reportMessage(ctx);
@@ -284,6 +280,8 @@ export class ChannelConnection {
     this.streamStatsGatherer.destroy();
     // @ts-ignore-next-line
     this.streamStatsGatherer = undefined;
+    // @ts-ignore-next-line
+    this.automod = undefined;
 
     // @ts-ignore-next-line
     this.commandHandler = undefined;

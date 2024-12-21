@@ -110,6 +110,24 @@ export const DEFAULT_SETTINGS: TSettings = {
     },
   },
   automod: {
+    enabled: {
+      value: false,
+      description: "Some attempt of auto-moderating channel",
+    },
+    firstMessageFilter: {
+      enabled: {
+        value: false,
+        description:
+          "Should BellaBotrix filtered-out potentialy scam messages that are first message",
+      },
+      banMessage: {
+        value: "spam or scam",
+        description: "What should be ban message included with ban",
+        vars: {
+          username: "username",
+        },
+      },
+    },
     emotesLimit: {
       enabled: {
         value: false,
