@@ -172,7 +172,7 @@ export class ChannelConnection {
           }
 
           if (this.settings.automod.enabled.value) {
-            this.automod.handle(this.settings.automod, ctx, this.send.bind(this));
+            this.automod.handle(this.settings.automod, ctx);
           }
 
           this.streamStatsGatherer.reportMessage(ctx);

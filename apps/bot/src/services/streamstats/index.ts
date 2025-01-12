@@ -11,7 +11,11 @@ export class StreamStatsGatherer {
   private api: TwitchApi;
 
   private activeStream: string | undefined = undefined;
-  private activeStreamId = -1;
+  private _activeStreamId = -1;
+
+  public get activeStreamId(): number | -1 {
+    return this._activeStreamId;
+  }
 
   constructor(private channel: string) {
     this.api = TwitchApi.getInstance(channel);
@@ -52,7 +56,7 @@ export class StreamStatsGatherer {
       update: { started_at: startedAt },
     });
 
-    this.activeStreamId = res.id;
+    this._activeStreamId = res.id;
 
     this.statsInterval = setInterval(() => {
       this.handleGathering();
@@ -144,7 +148,7 @@ export class StreamStatsGatherer {
     await prismaQueue.enqueue(() =>
       prisma.streamStats.create({
         data: {
-          streamId: this.activeStreamId,
+          streamId: this._activeStreamId,
           viewers: info.viewer_count,
           timestamp: String(Date.now()),
           messages: tmpmsg,

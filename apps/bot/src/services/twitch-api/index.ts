@@ -153,12 +153,12 @@ export class TwitchApi {
     return res.data.data[0].id;
   }
 
-  public async banUserById(user_id: string): Promise<unknown> {
+  public async banUserById(user_id: string, reason?: string): Promise<unknown> {
     if (!this.userId || !this.channelToken) {
       return undefined;
     }
 
-    await banUser(this.userId, this.channelToken, user_id);
+    await banUser(this.userId, this.channelToken, user_id, reason);
   }
 
   public async unbanUserById(user_id: string): Promise<unknown> {

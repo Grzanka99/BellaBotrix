@@ -174,3 +174,15 @@ model StreamStats {
   subscribers Int     @default(0)
   newChatters Int     @default(0)
 }
+
+model AutomodEvents {
+  id        Int    @id @default(autoincrement())
+  streamId  Int
+  timestamp String
+  action    String
+  handler   String
+  duration  Int    @default(-1)
+  target    String
+  channel   String
+  message   String @default("")
+}
