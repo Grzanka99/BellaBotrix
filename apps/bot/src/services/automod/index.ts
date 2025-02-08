@@ -67,6 +67,7 @@ export class AutomodService {
       return instance;
     }
 
+    logger.info(`[automod] Setting automode instance for channel: ${ch}`);
     const newInstance = new AutomodService(ch);
 
     AutomodService._instances.set(ch, newInstance);
