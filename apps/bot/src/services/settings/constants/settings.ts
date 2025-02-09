@@ -111,12 +111,12 @@ export const DEFAULT_SETTINGS: TSettings = {
   },
   automod: {
     enabled: {
-      value: false,
+      value: true,
       description: "Some attempt of auto-moderating channel",
     },
     firstMessageFilter: {
       enabled: {
-        value: false,
+        value: true,
         description:
           "Should BellaBotrix filtered-out potentialy scam messages that are first message",
       },
