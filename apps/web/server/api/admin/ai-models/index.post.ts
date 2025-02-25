@@ -21,6 +21,7 @@ export default defineEventHandler(async (event) => {
         name: parsed.data.name,
         description: parsed.data.description,
         enabled: true,
+        provider: parsed.data.provider,
       },
     });
 

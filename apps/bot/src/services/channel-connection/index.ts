@@ -7,7 +7,7 @@ import { triggerWordsHandler } from "handlers/trigger-words";
 import { AutomodService } from "services/automod";
 import { setDefaultCommandsForChannel } from "services/commands";
 import { prisma, storage } from "services/db";
-import { OllamaAI } from "services/ollama";
+import { AIConnector } from "services/ai-connectors";
 import { R6Dle } from "services/r6dle";
 import { R6Stats } from "services/r6stats";
 import { getSettings } from "services/settings";
@@ -42,7 +42,7 @@ export class ChannelConnection {
 
   private r6dle: R6Dle;
   private r6stats: R6Stats;
-  private ollamaAI: OllamaAI;
+  private aiConnector: AIConnector;
   private streamStatsGatherer: StreamStatsGatherer;
   private automod: AutomodService;
 
@@ -67,7 +67,7 @@ export class ChannelConnection {
     // TODO: Move it out of constructor maybe
     this.r6dle = new R6Dle(this.channelName);
     this.r6stats = R6Stats.instance;
-    this.ollamaAI = new OllamaAI(this.channelName);
+    this.aiConnector = AIConnector.getInstance(this.channelName);
     this.streamStatsGatherer = StreamStatsGatherer.getInstance(this.channelName);
     this.automod = AutomodService.getInstance(this.channelName);
 
@@ -152,8 +152,8 @@ export class ChannelConnection {
     }
 
     // NOTE: OllamaAI
-    this.ollamaAI.startHistoryCleaner(this.channelName);
-    this.ollamaAI.setHistorySize(this.settings?.ollamaAI.keepHistory.value || 5);
+    this.aiConnector.startHistoryCleaner(this.channelName);
+    this.aiConnector.setHistorySize(this.settings?.ollamaAI.keepHistory.value || 5);
 
     this.irc.addHandler(this.channelName, async (ctx) => {
       if (ctx.self) {
@@ -188,7 +188,7 @@ export class ChannelConnection {
             send: this.send.bind(this),
             r6dle: this.r6dle,
             r6stats: this.r6stats,
-            ollamaAi: this.ollamaAI,
+            ollamaAi: this.aiConnector,
           });
 
           const { triggerWords, ollamaAI } = this.settings;
@@ -203,11 +203,11 @@ export class ChannelConnection {
           }
 
           // NOTE: Ollama AI responses
-          if (ollamaAI.enabled.value && this.ollamaAI) {
-            const shouldRun = this.ollamaAI.shouldRunOnThatMessage(ctx.message);
+          if (ollamaAI.enabled.value && this.aiConnector) {
+            const shouldRun = this.aiConnector.shouldRunOnThatMessage(ctx.message);
             if (shouldRun) {
-              this.ollamaAI.setHistorySize(ollamaAI.keepHistory.value);
-              const res = await this.ollamaAI.ask(ctx.message, ctx.tags.username, {
+              this.aiConnector.setHistorySize(ollamaAI.keepHistory.value);
+              const res = await this.aiConnector.ask(ctx.message, ctx.tags.username, {
                 language: ollamaAI.language.value,
                 model: ollamaAI.model.value,
                 defaultPrompt: ollamaAI.entryPrompt.value,
@@ -275,7 +275,7 @@ export class ChannelConnection {
     // @ts-ignore-next-line
     this.r6stats = undefined;
     // @ts-ignore-next-line
-    this.ollamaAI = undefined;
+    this.aiConnector = undefined;
 
     this.streamStatsGatherer.destroy();
     // @ts-ignore-next-line

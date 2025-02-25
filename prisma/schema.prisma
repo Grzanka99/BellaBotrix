@@ -149,6 +149,7 @@ model OllamaAIModels {
   id          Int     @id @default(autoincrement())
   name        String
   description String
+  provider    String  @default("ollama")
   enabled     Boolean
 }
 

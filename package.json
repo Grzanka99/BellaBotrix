@@ -25,6 +25,7 @@
     "packages/*"
   ],
   "dependencies": {
+    "@google/generative-ai": "^0.21.0",
     "lodash.merge": "^4.6.2"
   }
 }

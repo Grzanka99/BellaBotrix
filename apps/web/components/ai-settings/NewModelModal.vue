@@ -1,10 +1,10 @@
 <script setup lang="ts">
-import Modal from "../ui/Modal.vue";
-import FormButton from "../ui/FormButton.vue";
-import CustomSelect from "../ui/CustomSelect.vue";
-import FormTextarea from "../ui/FormTextarea.vue";
 import { useAIModelsStore } from "~/store/ai-models.store";
 import type { TSelectOption } from "~/types/ui.type";
+import CustomSelect from "../ui/CustomSelect.vue";
+import FormButton from "../ui/FormButton.vue";
+import FormTextarea from "../ui/FormTextarea.vue";
+import Modal from "../ui/Modal.vue";
 
 defineProps<{
   open: boolean;
@@ -17,18 +17,37 @@ const s = useAIModelsStore();
 const description = ref("");
 
 const options = computed<TSelectOption<string>[]>(() => {
-  return s.availableModels.map((el) => ({
-    displayName: `${el.name} (${el.parameterSize})`,
-    value: el.name,
-  }));
+  return [
+    {
+      displayName: "Gemini 2.0 Flash",
+      value: "gemini-2.0-flash",
+    },
+    ...s.availableModels.map((el) => ({
+      displayName: `${el.name} (${el.parameterSize})`,
+      value: el.name,
+    })),
+  ];
 });
 
+const providers = [
+  {
+    displayName: "Google Gemini",
+    value: "gemini",
+  },
+  {
+    displayName: "Ollama",
+    value: "ollama",
+  },
+];
+
 const name = ref(options.value?.[0]?.value || "");
+const provider = ref(providers[0].value || "");
 
 const handleAdd = async () => {
   await s.handleCreate({
     name: name.value,
     description: description.value,
+    provider: provider.value,
   });
 
   name.value = "";
@@ -49,6 +68,7 @@ const handleAdd = async () => {
           name="description"
           label="Description"
           v-model="description" />
+        <CustomSelect :options="providers" v-model="provider" />
       </div>
       <div class="new-model-form__buttons">
         <FormButton type="button" @click="$emit('cancel')">Cancel</FormButton>
