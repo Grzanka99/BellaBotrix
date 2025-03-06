@@ -1,5 +1,5 @@
 import type { TOption, TSettings } from "bellatrix";
-import type { OllamaAI } from "services/ollama";
+import type { AIConnector } from "services/ai-connectors/connector";
 import type { R6Dle } from "services/r6dle";
 import type { R6Stats } from "services/r6stats";
 import type { TwitchApi } from "services/twitch-api";
@@ -100,7 +100,7 @@ export type THandleCommadArgs = TTwitchIrcContext & {
   settings: TSettings;
   r6dle: R6Dle;
   r6stats: R6Stats;
-  ollamaAi: OllamaAI;
+  ollamaAi: AIConnector;
   send: (msg: string) => void;
 };
 

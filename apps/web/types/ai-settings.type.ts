@@ -15,11 +15,13 @@ export const SUpdateAIModelDto = z.object({
   name: z.string().optional(),
   description: z.string().optional(),
   enabled: z.boolean().optional(),
+  provider: z.string().optional(),
 });
 
 export const SCreateAIModelDto = z.object({
   name: z.string(),
   description: z.string(),
+  provider: z.string(),
 });
 
 export type TAvailableModel = {
