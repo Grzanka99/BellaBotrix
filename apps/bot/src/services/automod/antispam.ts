@@ -1,6 +1,6 @@
-import { AutomodAI } from "./aiautomod";
+import { AutomodAIGemini } from "./aiautomod";
 
-const truescams2 = [
+const truescams = [
   "Best Viewers and Followers on StreamBoo .com ( cutt.ly/rw5dSmCO )",
   "Best viewers on urlr.me/JWkxg",
   "Best viewers on ***",
@@ -21,12 +21,12 @@ const truescams2 = [
 ];
 
 export class AntispamAI {
-  private automodai: AutomodAI;
+  private automodai: AutomodAIGemini;
 
   static #instance: AntispamAI;
 
   private constructor() {
-    this.automodai = AutomodAI.instance;
+    this.automodai = AutomodAIGemini.instance;
   }
 
   public static get instance(): AntispamAI {
@@ -48,9 +48,9 @@ export class AntispamAI {
       "Messages in polish or starting with explanation mark are likely ok",
       "ts is means teamspeak and its fine",
       "L4 is sick leave and its fine",
-      "Memes and emojis and thinks like LUL, XD etc are fine",
+      "Memes and emojis and things like LUL, XD etc are fine",
       "Do not mark provocative messages or troll messages as scams",
-      `Example scam and spam messages: ${truescams2}`,
+      `Example scam and spam messages: ${truescams}`,
     ];
 
     const res = await this.automodai.ask(msg, system);
