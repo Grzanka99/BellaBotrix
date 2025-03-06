@@ -177,22 +177,34 @@ export class AIConnector {
 
       const modelinfo = this.models.find((el) => el.name === config.model);
 
+      const message = `User ${username} wrote: ${q}`;
+
       let res = undefined;
 
       switch (modelinfo?.provider) {
         case "gemini": {
-          res = await AIConnector.geminiProvider.send(q, history, defaultPrompts, config.model);
+          res = await AIConnector.geminiProvider.send(
+            message,
+            history,
+            defaultPrompts,
+            config.model,
+          );
           break;
         }
         case "ollama": {
-          res = await AIConnector.ollamaProvider.send(q, history, defaultPrompts, config.model);
+          res = await AIConnector.ollamaProvider.send(
+            message,
+            history,
+            defaultPrompts,
+            config.model,
+          );
           break;
         }
         default: {
           logger.warning(
             `[AI_CONNECTOR] Defaulting to phi3 as error occured with config ${JSON.stringify(config)}`,
           );
-          res = await AIConnector.ollamaProvider.send(q, history, defaultPrompts, "phi3");
+          res = await AIConnector.ollamaProvider.send(message, history, defaultPrompts, "phi3");
           break;
         }
       }
