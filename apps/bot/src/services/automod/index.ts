@@ -84,7 +84,9 @@ export class AutomodService {
         const userId = ctx.tags?.userId;
         if (res && userId) {
           this.api.banUserById(userId, "spam or scam").then(() => {
-            this.log(EAutomodActions.Ban, userId, EAutomodHandlers.Antispam);
+            this.log(EAutomodActions.Ban, userId, EAutomodHandlers.Antispam, {
+              message: ctx.message,
+            });
           });
         }
       });
