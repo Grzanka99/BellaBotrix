@@ -38,6 +38,11 @@ const routes = computed<TRoute[]>(() => [
     icon: "material-symbols:alarm",
   },
   {
+    to: "/panel/automod-events",
+    displayName: "automod events",
+    icon: "material-symbols:robot",
+  },
+  {
     to: "/panel/settings",
     displayName: "settings",
     icon: "material-symbols:settings",
@@ -52,10 +57,7 @@ const accountOnlyRoutes = [
   },
 ];
 
-const channelName = useStorage<string | undefined>(
-  "selectedChannelName",
-  undefined,
-);
+const channelName = useStorage<string | undefined>("selectedChannelName", undefined);
 
 // NOTE: Admin only
 const globalSettings = [

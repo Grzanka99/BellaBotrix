@@ -9,5 +9,5 @@ const app = new Elysia();
 app.group(APIV1_UNSAFE_GROUP, UnsafeRoutes);
 app.group(APIV1_SAFE_GROUP, ProtectedRoutes);
 
-app.listen(5000);
+app.listen(Bun.env.SYNC_PORT || 5000);
 console.log(`🦊 Elysia is running at ${app.server?.hostname}:${app.server?.port}`);
