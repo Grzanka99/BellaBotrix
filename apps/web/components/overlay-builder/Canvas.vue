@@ -9,6 +9,9 @@ const localSave = useStorage<Record<string, TOverlayLocalStorageSave>>(LSK_OVERL
 const props = defineProps<{
   snapToGrid: boolean;
   gridSize: number;
+  width: number;
+  height: number;
+  scale: number;
 }>();
 
 function handleSave(itemId: string, values: TOverlayLocalStorageSave) {
@@ -22,9 +25,6 @@ onMounted(() => {
 });
 
 const canvas = ref<HTMLDivElement | undefined>(undefined);
-
-const width = ref(1920);
-const height = ref(1080);
 
 const gridStyle = computed(() => {
   return {
@@ -41,14 +41,28 @@ watch(focused, () => {
 </script>
 
 <template>
-  <div id="canvas" ref="canvas" :style="{
-    width: `${width}px`,
-    height: `${height}px`,
-    ...gridStyle
-  }">
-    <Draggable v-for="key in Object.keys(localSave)" :key="key" :canvas="canvas" :canvasH="height" :canvasW="width"
-      :snapToGrid="snapToGrid ? gridSize : undefined" :default-values="localSave[key]" @save="v => handleSave(key, v)"
-      @focusElement="focused = key" :focused="focused === key">
+  <div
+    id="canvas"
+    ref="canvas"
+    :style="{
+      width: `${props.width}px`,
+      height: `${props.height}px`,
+      transform: `scale(${scale / 100})`,
+      ...gridStyle
+    }"
+  >
+    <Draggable
+      v-for="key in Object.keys(localSave)"
+      :key="key"
+      :canvas="canvas"
+      :canvasH="props.height"
+      :canvasW="props.width"
+      :snapToGrid="snapToGrid ? gridSize : undefined"
+      :default-values="localSave[key]"
+      @save="v => handleSave(key, v)"
+      @focusElement="focused = key"
+      :focused="focused === key"
+    >
       some random text xD
     </Draggable>
   </div>
@@ -59,6 +73,5 @@ watch(focused, () => {
   position: relative;
   background-color: white;
   z-index: 1;
-  transform: scale(0.82);
 }
 </style>

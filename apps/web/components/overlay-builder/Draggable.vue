@@ -21,6 +21,25 @@ const emit = defineEmits<{
   (e: "focusElement"): void;
 }>();
 
+const watchW = computed(() => props.canvasW)
+const watchH = computed(() => props.canvasH);
+
+watch([watchW, watchH], () => {
+  if (!element.value) {
+    return;
+  }
+
+  const { height, width } = element.value.getBoundingClientRect();
+
+  if (Number.parseFloat(style.value.left) > watchW.value) {
+    style.value.left = `${watchW.value - width}px`
+  }
+
+  if (Number.parseFloat(style.value.top) > watchH.value) {
+    style.value.top = `${watchH.value - height}px`
+  }
+})
+
 const element = ref<HTMLDivElement | undefined>(undefined);
 const dragging = ref(false);
 const offset = ref({ y: 0, x: 0 });
@@ -111,25 +130,35 @@ const lineFromLeft = computed(() => {
   <div
     ref="element"
     class="draggable"
-    :class="{dragged: dragging || focused}"
+    :class="{ dragged: dragging || focused }"
     @mousedown="handleMouseDown"
     :style="style"
   >
     <slot />
   </div>
   <template v-if="focused">
-    <div class="line-from-left" :style="{width: style.left, top: lineFromTop}">
+    <div
+      class="line-from-left"
+      :style="{ width: style.left, top: lineFromTop }"
+    >
       <div>
-        {{style.left}}
+        {{ style.left }}
       </div>
     </div>
-    <div class="line-from-top" :style="{height: style.top, left: lineFromLeft}">
+    <div
+      class="line-from-top"
+      :style="{ height: style.top, left: lineFromLeft }"
+    >
       <div>
-        {{style.top}}
+        {{ style.top }}
       </div>
     </div>
   </template>
-  <div class="dummy" :style="{display: dragging ? 'block' : 'none'}" @mouseleave="handleMouseUp" />
+  <div
+    class="dummy"
+    :style="{ display: dragging ? 'block' : 'none' }"
+    @mouseleave="handleMouseUp"
+  />
 </template>
 
 <style>
@@ -156,7 +185,8 @@ const lineFromLeft = computed(() => {
   outline: 5px solid cyan;
 }
 
-.line-from-top, .line-from-left {
+.line-from-top,
+.line-from-left {
   --size: 4px;
 
   position: absolute;
@@ -165,6 +195,10 @@ const lineFromLeft = computed(() => {
   display: flex;
   justify-content: center;
   align-items: center;
+
+  >div {
+    color: var(--warn);
+  }
 }
 
 .line-from-left {
@@ -172,7 +206,7 @@ const lineFromLeft = computed(() => {
   left: 0;
   height: var(--size);
 
-  > div {
+  >div {
     position: relative;
     top: -10px;
   }
@@ -183,7 +217,7 @@ const lineFromLeft = computed(() => {
   top: 0;
   width: var(--size);
 
-  > div {
+  >div {
     position: relative;
     right: -10px;
     display: flex;

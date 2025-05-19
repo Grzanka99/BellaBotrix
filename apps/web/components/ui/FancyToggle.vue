@@ -20,16 +20,32 @@ const handleClick = (e: MouseEvent) => {
 </script>
 
 <template>
-  <label v-if="label" class="flex fancy-toggle__label">
-    <snap>{{label}}</snap>
-    <div class="flex fancy-toggle" :class="{ 'fancy-toggle--disabled': disabled, 'fancy-toggle--on': value }"
-      @click="handleClick">
-      <div class="fancy-toggle__orb" :class="{ 'fancy-toggle__orb--on': value }"></div>
+  <label
+    v-if="label"
+    class="flex fancy-toggle__label"
+  >
+    <span>{{ label }}</span>
+    <div
+      class="flex fancy-toggle"
+      :class="{ 'fancy-toggle--disabled': disabled, 'fancy-toggle--on': value }"
+      @click="handleClick"
+    >
+      <div
+        class="fancy-toggle__orb"
+        :class="{ 'fancy-toggle__orb--on': value }"
+      ></div>
     </div>
   </label>
-  <div v-else class="flex fancy-toggle" :class="{ 'fancy-toggle--disabled': disabled, 'fancy-toggle--on': value }"
-    @click="handleClick">
-    <div class="fancy-toggle__orb" :class="{ 'fancy-toggle__orb--on': value }"></div>
+  <div
+    v-else
+    class="flex fancy-toggle"
+    :class="{ 'fancy-toggle--disabled': disabled, 'fancy-toggle--on': value }"
+    @click="handleClick"
+  >
+    <div
+      class="fancy-toggle__orb"
+      :class="{ 'fancy-toggle__orb--on': value }"
+    ></div>
   </div>
 </template>
 
