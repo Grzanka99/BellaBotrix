@@ -41,26 +41,15 @@ watch(focused, () => {
 </script>
 
 <template>
-  <div id="canvas" ref="canvas"
-    :style="{
-      width: `${width}px`,
-      height: `${height}px`,
-      ...gridStyle
-    }"
-  >
-    <Draggable
-      v-for="key in Object.keys(localSave)"
-      :key="key"
-      :canvas="canvas"
-      :canvasH="height"
-      :canvasW="width"
-      :snapToGrid="snapToGrid ? gridSize : undefined"
-      :default-values="localSave[key]"
-      @save="v => handleSave(key, v)"
-      @focusElement="focused = key"
-      :focused="focused === key"
-    >
-      od zajebania tekstu
+  <div id="canvas" ref="canvas" :style="{
+    width: `${width}px`,
+    height: `${height}px`,
+    ...gridStyle
+  }">
+    <Draggable v-for="key in Object.keys(localSave)" :key="key" :canvas="canvas" :canvasH="height" :canvasW="width"
+      :snapToGrid="snapToGrid ? gridSize : undefined" :default-values="localSave[key]" @save="v => handleSave(key, v)"
+      @focusElement="focused = key" :focused="focused === key">
+      some random text xD
     </Draggable>
   </div>
 </template>
