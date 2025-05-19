@@ -11,7 +11,7 @@ type TPayload = {
 };
 
 export function handleEvents(payload: TPayload) {
-  console.log(payload.subscription.type);
+  console.log(payload);
   switch (payload.subscription.type) {
     case EventSubEvents.StreamOnline: {
       console.log("stream started");

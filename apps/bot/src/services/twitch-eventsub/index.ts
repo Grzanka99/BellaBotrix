@@ -11,6 +11,14 @@ export class TwitchEventSub {
 
   private static _instance: TwitchEventSub | undefined;
 
+  private get logger() {
+    return {
+      info: (m: string) => logger.info(`[EVENT_SUB] ${m}`),
+      warning: (m: string) => logger.warning(`[EVENT_SUB] ${m}`),
+      error: (m: string) => logger.error(`[EVENT_SUB] ${m}`),
+    };
+  }
+
   private constructor(private url: string) {
     this.ws = new WebSocket(url);
   }
@@ -28,7 +36,7 @@ export class TwitchEventSub {
     await new Promise((resolve) => {
       try {
         this.ws.addEventListener("open", () => {
-          console.log("connection is open");
+          this.logger.info("connection is open");
         });
         this.ws.addEventListener("message", (r) => this.onMessage(r));
       } catch (_) {
@@ -50,7 +58,7 @@ export class TwitchEventSub {
   private keepAliveInterval: Timer | undefined = undefined;
 
   private async reconnect(url?: string) {
-    logger.warning("[EventSub] Triggering reconnect");
+    this.logger.warning("Triggering reconnect");
     clearInterval(this.keepAliveInterval);
     this.keepAliveInterval = undefined;
     this.ws.removeAllListeners();
