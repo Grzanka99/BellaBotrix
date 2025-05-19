@@ -3,6 +3,7 @@ import { useStorage } from "@vueuse/core";
 import Draggable from "./Draggable.vue";
 import type { TOverlayLocalStorageSave } from "~/types/overlay.type";
 import { LSK_OVERLAY_FOCUSED, LSK_OVERLAY_SAVE } from "~/constants";
+import Chat from "./elements/Chat.vue";
 
 const localSave = useStorage<Record<string, TOverlayLocalStorageSave>>(LSK_OVERLAY_SAVE, {});
 
@@ -63,7 +64,7 @@ watch(focused, () => {
       @focusElement="focused = key"
       :focused="focused === key"
     >
-      some random text xD
+      <Chat />
     </Draggable>
   </div>
 </template>

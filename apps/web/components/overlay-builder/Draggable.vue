@@ -21,7 +21,7 @@ const emit = defineEmits<{
   (e: "focusElement"): void;
 }>();
 
-const watchW = computed(() => props.canvasW)
+const watchW = computed(() => props.canvasW);
 const watchH = computed(() => props.canvasH);
 
 watch([watchW, watchH], () => {
@@ -32,13 +32,13 @@ watch([watchW, watchH], () => {
   const { height, width } = element.value.getBoundingClientRect();
 
   if (Number.parseFloat(style.value.left) > watchW.value) {
-    style.value.left = `${watchW.value - width}px`
+    style.value.left = `${watchW.value - width}px`;
   }
 
   if (Number.parseFloat(style.value.top) > watchH.value) {
-    style.value.top = `${watchH.value - height}px`
+    style.value.top = `${watchH.value - height}px`;
   }
-})
+});
 
 const element = ref<HTMLDivElement | undefined>(undefined);
 const dragging = ref(false);
@@ -172,8 +172,6 @@ const lineFromLeft = computed(() => {
 .draggable {
   position: absolute;
   display: flex;
-  background: red;
-  border: 2px solid green;
 
   justify-content: center;
   align-items: center;

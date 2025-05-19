@@ -16,11 +16,5 @@
 		"indentSize": 2,
 		"lineWidth": 100,
 		"ignore": []
-	},
-	"vue": {
-		"formatter": {
-			"enabled": true,
-			"attributePosition": "multiline"
-		}
 	}
 }

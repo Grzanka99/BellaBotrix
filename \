@@ -6,20 +6,8 @@ export type TOverlayLocalStorageSave = {
   [key: string]: string;
 };
 
-export enum EElementType {
-  Chat = "chat",
-  Text = "text",
-  Alert = "alert",
-  Image = "image",
-}
-
 export enum EAlertType {
   All = "ALL",
-  Subscribtion = "SUBSCRIBTION",
-  Follow = "FOLLOW",
-  Raid = "RAID",
-  Donate = "DONATE",
-  Other = "Other",
 }
 
 const SPosition = z.object({
@@ -34,31 +22,24 @@ const SSize = z.object({
 
 const SOverlayElement = z.discriminatedUnion("element", [
   z.object({
-    element: z.literal(EElementType.Chat),
+    element: z.literal("chat"),
     uuid: z.string().uuid(),
     position: SPosition,
     size: SSize,
   }),
   z.object({
-    element: z.literal(EElementType.Text),
+    element: z.literal("text"),
     uuid: z.string().uuid(),
     position: SPosition,
     size: SSize,
     content: z.string(),
   }),
   z.object({
-    element: z.literal(EElementType.Alert),
+    element: z.literal("alert"),
     uuid: z.string().uuid(),
     position: SPosition,
     size: SSize,
-    alertType: z.nativeEnum(EAlertType),
-  }),
-  z.object({
-    element: z.literal(EElementType.Image),
-    uuid: z.string().uuid(),
-    position: SPosition,
-    size: SSize,
-    src: z.string(),
+    alertType: z.enum(["all", "subscription", "follow", "raid", "donate", "other"]),
   }),
 ]);
 
