@@ -2,7 +2,7 @@
 import { watchDebounced, useStorage } from "@vueuse/core";
 import { v4 as uuidv4 } from "uuid";
 
-const messages = ref<Array<{ username: string; color: string; message: string }>>([]);
+const messages = ref<Array<{ id: string; username: string; color: string; message: string }>>([]);
 
 const height = ref(600);
 
@@ -53,8 +53,11 @@ function generateMessage() {
     messages.value.shift();
   }
 
+  const id = uuidv4();
+
   messages.value.push({
-    username: uuidv4().substring(0, 10),
+    id,
+    username: uuidv4().substring(0, 8),
     message: uuidv4(),
     color: getRandomRgbColor(),
   });
@@ -83,15 +86,7 @@ onMounted(() => {
         :key="msg.message"
         class="entry"
       >
-        <span
-          :style="{ color: msg.color }"
-          class="entry__username"
-        >
-          <b>
-            {{ msg.username }}:
-          </b>
-        </span>
-        <span class="entry__message">{{ msg.message }}</span>
+        <b :style="{color: msg.color}">{{ msg.username }}: </b> {{ msg.message }}
       </li>
     </TransitionGroup>
   </div>
@@ -103,7 +98,7 @@ onMounted(() => {
   width: 400px;
   /* background: rgba(123, 123, 123, 0.5); */
   overflow: hidden;
-  color: red;
+  font-size: var(--font-size);
 }
 
 .chatbox {
@@ -114,27 +109,43 @@ onMounted(() => {
 }
 
 .entry {
-  display: inline-flex;
-  gap: var(--padding-half);
+  /* display: inline-flex; */
+  /* gap: var(--padding-half); */
   padding-top: var(--padding-half);
   width: 100%;
+
+  /* 1 pixel black shadow to left, top, right and bottom */
+  text-shadow: 1px 1px 1px var(--stroke);
+  color: var(--text);
 
   .entry__username {
     text-wrap: nowrap;
     width: max-content;
   }
+
+  .entry__message {}
 }
 
 .chats-move,
-.chats-enter-active,
-.chats-leave-active {
+.chats-enter-active {
   transition: all 0.5s ease;
 }
 
-.chats-enter-from,
+
+
+.chats-leave-active.chats-move {
+  transition: all 0.3s ease;
+}
+
 .chats-leave-to {
   opacity: 0;
-  transform: translateX(100px);
+  transform: translateX(-50px) scale(0.9);
+}
+
+.chats-enter-from {
+  opacity: 0.5;
+  /* transform: translateY(100px); */
+  transform: translateY(100px) scale(0);
 }
 
 .chats-leave-active {

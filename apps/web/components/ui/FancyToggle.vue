@@ -53,8 +53,9 @@ const handleClick = (e: MouseEvent) => {
 .fancy-toggle__label {
   gap: var(--padding);
   padding: var(--padding-half);
-  background: var(--text);
-  color: var(--background);
+  background: var(--background);
+  border: 1px solid var(--stroke-light);
+  color: var(--text);
   border-radius: var(--radius);
 }
 

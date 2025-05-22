@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { useStorage } from "@vueuse/core";
 import Draggable from "./Draggable.vue";
-import type { TOverlayLocalStorageSave } from "~/types/overlay.type";
+import { EElementType, type TOverlayLocalStorageSave } from "~/types/overlay.type";
 import { LSK_OVERLAY_FOCUSED, LSK_OVERLAY_SAVE } from "~/constants";
 import Chat from "./elements/Chat.vue";
 
@@ -16,7 +16,10 @@ const props = defineProps<{
 }>();
 
 function handleSave(itemId: string, values: TOverlayLocalStorageSave) {
-  localSave.value[itemId] = values;
+  localSave.value[itemId] = {
+    ...localSave.value[itemId],
+    ...values,
+  };
 }
 
 onMounted(() => {
@@ -64,7 +67,11 @@ watch(focused, () => {
       @focusElement="focused = key"
       :focused="focused === key"
     >
-      <Chat />
+      <Chat v-if="localSave[key].element === EElementType.Chat" />
+      <textarea
+        v-else-if="localSave[key].element === EElementType.Text"
+        type="text"
+      />
     </Draggable>
   </div>
 </template>

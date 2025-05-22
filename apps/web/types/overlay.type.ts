@@ -1,11 +1,5 @@
 import { z } from "zod";
 
-export type TOverlayLocalStorageSave = {
-  top: string;
-  left: string;
-  [key: string]: string;
-};
-
 export enum EElementType {
   Chat = "chat",
   Text = "text",
@@ -13,13 +7,20 @@ export enum EElementType {
   Image = "image",
 }
 
+export type TOverlayLocalStorageSave = {
+  top: string;
+  left: string;
+  element: EElementType;
+  [key: string]: string;
+};
+
 export enum EAlertType {
   All = "ALL",
   Subscribtion = "SUBSCRIBTION",
   Follow = "FOLLOW",
   Raid = "RAID",
   Donate = "DONATE",
-  Other = "Other",
+  Other = "OTHER",
 }
 
 const SPosition = z.object({

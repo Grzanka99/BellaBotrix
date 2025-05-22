@@ -7,4 +7,5 @@ export type TRoute = {
 export type TSelectOption<T = string | number> = {
   value: T;
   displayName: string;
+  disabled?: boolean;
 };

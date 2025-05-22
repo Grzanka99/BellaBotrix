@@ -2,7 +2,7 @@
 import Canvas from "~/components/overlay-builder/Canvas.vue";
 import { useStorage } from "@vueuse/core";
 import { v4 as uuidv4 } from "uuid";
-import type { TOverlayLocalStorageSave } from "~/types/overlay.type";
+import { EElementType, type TOverlayLocalStorageSave } from "~/types/overlay.type";
 import {
   LSK_OVERLAY_FOCUSED,
   LSK_OVERLAY_GRID,
@@ -17,6 +17,7 @@ import FormNumberInput from "~/components/ui/FormNumberInput.vue";
 import FancyToggle from "~/components/ui/FancyToggle.vue";
 import type { TSelectOption } from "~/types/ui.type";
 import CustomSelect from "~/components/ui/CustomSelect.vue";
+import SelectButton from "~/components/ui/SelectButton.vue";
 
 const localSave = useStorage<Record<string, TOverlayLocalStorageSave>>(LSK_OVERLAY_SAVE, {});
 const focused = useStorage(LSK_OVERLAY_FOCUSED, "");
@@ -25,13 +26,6 @@ const snapToGrid = useStorage(LSK_OVERLAY_SNAP, false);
 const canvasWidth = useStorage(LSK_OVERLAY_W, 1920);
 const canvasHeight = useStorage(LSK_OVERLAY_H, 1080);
 const canvasScale = useStorage(LSK_OVERLAY_SCALE, 90);
-
-function handleAddNewElement() {
-  localSave.value[uuidv4()] = {
-    top: "100px",
-    left: "0px",
-  };
-}
 
 function handleRemoveFocused() {
   if (focused.value in localSave.value) {
@@ -54,6 +48,22 @@ function handleCanvasSizeChange(v: string) {
   canvasWidth.value = width;
 }
 
+const elementsOptions: TSelectOption<EElementType>[] = [
+  { value: EElementType.Chat, displayName: "Chat" },
+  { value: EElementType.Text, displayName: "Text" },
+  { value: EElementType.Alert, displayName: "Alert", disabled: true },
+  { value: EElementType.Image, displayName: "Image", disabled: true },
+];
+
+function handleAddNewElement(v: string | number) {
+  console.log(v);
+  localSave.value[uuidv4()] = {
+    top: "100px",
+    left: "0px",
+    element: v as EElementType,
+  };
+}
+
 useHead({ title: "Overlay Builder" });
 definePageMeta({ layout: "overlay-builder" });
 </script>
@@ -68,13 +78,11 @@ definePageMeta({ layout: "overlay-builder" });
       :scale="canvasScale"
     />
     <div class="overlay-controls">
-      <FormButton
-        type="button"
+      <SelectButton
+        :options="elementsOptions"
         @click="handleAddNewElement"
-        width="150px"
-      >
-        add new element
-      </FormButton>
+        actionIcon="material-symbols:add-box"
+      />
       <FormNumberInput
         name="grid-size"
         v-model="gridSize"

@@ -180,7 +180,7 @@ const lineFromLeft = computed(() => {
 }
 
 .dragged {
-  outline: 5px solid cyan;
+  outline: 2px solid var(--warn);
 }
 
 .line-from-top,
