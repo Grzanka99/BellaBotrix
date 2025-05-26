@@ -68,9 +68,3 @@ export class AntispamAI {
     return res1;
   }
 }
-
-const antispam = AntispamAI.instance;
-
-for (const el of truescams) {
-  console.log(await antispam.isMessageSpam(el));
-}
