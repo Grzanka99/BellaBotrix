@@ -3,6 +3,7 @@ const props = defineProps<{
   value: boolean;
   disabled?: boolean;
   label?: string;
+  labelReverse?: boolean;
 }>();
 
 const emit = defineEmits<{
@@ -24,7 +25,7 @@ const handleClick = (e: MouseEvent) => {
     v-if="label"
     class="flex fancy-toggle__label"
   >
-    <span>{{ label }}</span>
+    <span v-if="!labelReverse">{{ label }}</span>
     <div
       class="flex fancy-toggle"
       :class="{ 'fancy-toggle--disabled': disabled, 'fancy-toggle--on': value }"
@@ -35,6 +36,7 @@ const handleClick = (e: MouseEvent) => {
         :class="{ 'fancy-toggle__orb--on': value }"
       ></div>
     </div>
+    <span v-if="labelReverse">{{ label }}</span>
   </label>
   <div
     v-else

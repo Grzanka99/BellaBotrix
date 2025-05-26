@@ -3,7 +3,7 @@ import type { TResponse, TWrappedResponse } from "types";
 import { bearerTokenParams, logger } from "utils";
 import { z } from "zod";
 
-const SApiChatter = z.array(
+const SApiChatters = z.array(
   z.object({
     user_id: z.string(),
     user_login: z.string(),
@@ -11,20 +11,20 @@ const SApiChatter = z.array(
   }),
 );
 
-type TApiChatter = z.infer<typeof SApiChatter>;
+type TApiChatters = z.infer<typeof SApiChatters>;
 
 export async function getModerators(
   userid: string,
   token: string,
-): Promise<TResponse<TApiChatter[]>> {
+): Promise<TResponse<TApiChatters>> {
   const url = `https://api.twitch.tv/helix/moderation/moderators?broadcaster_id=${userid}`;
 
   try {
     const res = await ky.get(url, bearerTokenParams(token));
 
-    const json = await res.json<TWrappedResponse<TApiChatter[]>>();
+    const json = await res.json<TWrappedResponse<TApiChatters[]>>();
 
-    const data = z.array(SApiChatter).parse(json.data);
+    const data = SApiChatters.parse(json.data);
 
     return { success: true, data };
   } catch (e) {

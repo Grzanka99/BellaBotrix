@@ -25,6 +25,9 @@ export const CommandSchema = z.object({
   alias: z.array(z.string()).optional(),
   isCore: z.boolean(),
   subCommands: z.array(SubCommandSchema).optional(),
+  paid: z.boolean(),
+  price: z.number().int(),
+  errorMessage: z.string(),
 });
 
 export const MinimalCommandSchema = CommandSchema.omit({

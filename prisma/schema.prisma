@@ -12,24 +12,29 @@ datasource db {
 }
 
 model Commands {
-  id          Int     @id @default(autoincrement())
-  uniqueName  String  @unique
-  name        String
-  enabled     Boolean
-  message     Json?
-  alias       String  @default("")
-  channelName String  @default("")
-  isCore      Boolean @default(false)
+  id           Int     @id @default(autoincrement())
+  uniqueName   String  @unique
+  name         String
+  enabled      Boolean
+  message      Json?
+  alias        String  @default("")
+  channelName  String  @default("")
+  isCore       Boolean @default(false)
+  price        Int     @default(0)
+  paid         Boolean @default(false)
+  errorMessage String  @default("")
 }
 
 model SubCommands {
-  id            Int    @id @default(autoincrement())
-  uniqueName    String @unique
+  id            Int     @id @default(autoincrement())
+  uniqueName    String  @unique
   name          String
   parentCommand String
   message       Json?
-  alias         String @default("")
-  channelName   String @default("")
+  alias         String  @default("")
+  channelName   String  @default("")
+  price         Int     @default(0)
+  paid          Boolean @default(false)
 }
 
 model User {
@@ -78,10 +83,11 @@ model ChannelAccess {
 }
 
 model Timers {
-  id        Int    @id @default(autoincrement())
+  id        Int     @id @default(autoincrement())
   channelId Int
   timeout   Int
   message   String
+  enabled   Boolean @default(true)
 }
 
 model TriggerWords {

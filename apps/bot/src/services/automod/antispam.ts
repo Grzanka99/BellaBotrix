@@ -1,22 +1,26 @@
 import { AutomodAIGemini } from "./aiautomod";
+import * as console from "node:console";
 
 const truescams = [
+  "Bͦest vie̟wers on streamboo .com ( remove the space ) @d3z2PHZO",
+  "Bͦest vie̟wers on streamboo .com ( remove the space ) @Wtp0W2D5",
+  "Cheap ̔Viewers on streamboo .com ( remove the space ) @8dKEDgD3",
   "Best Viewers and Followers on StreamBoo .com ( cutt.ly/rw5dSmCO )",
   "Best viewers on urlr.me/JWkxg",
   "Best viewers on ***",
   "Best Viewers on castachart.com",
   "Best viewers on breezi.info/plax",
-  "Best vie̮wers on happyjudi77.info/tk8p",
+  "Best viewers on happyjudi77.info/tk8p",
   "Best viewers on hialeahgardenskarate.com/gyv9",
   "Best viewers on cutt.ly/GePIC3Og  @j06SqnR9",
   "Best viewers on  streamboo .com (remove the space)  @dYioGhDy",
-  "Bestͮ vie͐wers ̷on streamboo .com (remove the space)",
-  "Che̢ap vie̮wers on",
+  "Best viewers on streamboo .com (remove the space)",
+  "Cheap viewers on",
   "Best viewers on instantviewers.ru",
-  "Best V̐iewers ͚on followersnetwork.ru  @BOhs6Ww6",
-  "Cheap V̐iewers ͚on hugefollowers.ru  @39YwqlM7",
-  "Cheap V̐iewers ͚on rapidfollowers.ru  @1KX1Bc8t",
-  "Best V̐iewers ͚on followandgrow.ru  @ChrW9Xm9",
+  "Best Viewers on followersnetwork.ru  @BOhs6Ww6",
+  "Cheap Viewers on hugefollowers.ru  @39YwqlM7",
+  "Cheap Viewers on rapidfollowers.ru  @1KX1Bc8t",
+  "Best Viewers on followandgrow.ru  @ChrW9Xm9",
   "Wanna become famous? Buy followers, primes and views",
 ];
 
@@ -63,4 +67,10 @@ export class AntispamAI {
 
     return res1;
   }
+}
+
+const antispam = AntispamAI.instance;
+
+for (const el of truescams) {
+  console.log(await antispam.isMessageSpam(el));
 }

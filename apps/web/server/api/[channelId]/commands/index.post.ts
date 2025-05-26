@@ -19,7 +19,7 @@ export default defineEventHandler(async (event) => {
     });
   }
 
-  const { name, message } = parsed.data;
+  const { name, message, paid, price, errorMessage } = parsed.data;
 
   const uniqueName = getUniqueName(name, ch.name);
 
@@ -39,6 +39,9 @@ export default defineEventHandler(async (event) => {
       message: { base: message },
       enabled: true,
       alias: "",
+      paid,
+      price,
+      errorMessage,
     },
   });
 

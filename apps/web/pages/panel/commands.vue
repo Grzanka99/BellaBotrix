@@ -28,21 +28,28 @@ useHead({
       @submit="(p) => {
         commands.handleCreate(p);
         newCommandModalOpen = false;
-      }
-        "
-      @cancel="newCommandModalOpen = false" />
+      }"
+      @cancel="newCommandModalOpen = false"
+    />
     <div id="commands-page-controls">
       <div id="commands-page-controls__search">
         <FormTextInput
           name="query"
           placeholder="Search by name..."
-          v-model="commands.queryFileter" />
-        <FormButton type="button" @click="commands.queryFileter = ''">
+          v-model="commands.queryFileter"
+        />
+        <FormButton
+          type="button"
+          @click="commands.queryFileter = ''"
+        >
           clear
         </FormButton>
       </div>
       <div id="commands-page-controls__new-cmd">
-        <FormButton type="button" @click="newCommandModalOpen = true">
+        <FormButton
+          type="button"
+          @click="newCommandModalOpen = true"
+        >
           Add new command
         </FormButton>
       </div>
