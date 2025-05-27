@@ -16,9 +16,9 @@ export const SUpdateCommand = z.object({
   enabled: z.coerce.boolean().optional(),
   message: z.record<z.ZodString>(z.string()).optional(),
   alias: z.coerce.string().optional(),
-  paid: z.boolean(),
-  price: z.number().int(),
-  errorMessage: z.string(),
+  paid: z.boolean().optional(),
+  price: z.number().int().optional(),
+  errorMessage: z.string().optional(),
 });
 
 export const SUpdateSubCommand = z.object({

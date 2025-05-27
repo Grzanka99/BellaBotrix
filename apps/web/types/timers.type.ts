@@ -4,7 +4,7 @@ export const SUpdateTimer = z.object({
   id: z.coerce.number(),
   message: z.coerce.string().optional(),
   timeout: z.coerce.number().min(0).optional(),
-  enabled: z.boolean(),
+  enabled: z.boolean().optional(),
 });
 
 export const SCreateTimer = z.object({

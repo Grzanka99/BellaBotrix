@@ -10,9 +10,10 @@ import {
 import FormTextInput from "~/components/ui/FormTextInput.vue";
 import FormButton from "~/components/ui/FormButton.vue";
 import { useTimersStore } from "~/store/timers.store";
-import { type Timers } from "@prisma/client";
+import type { Timers } from "@prisma/client";
 import TimerEditForm from "~/components/timers/TimerEditForm.vue";
 import NewTimerForm from "~/components/timers/NewTimerForm.vue";
+import FancyToggle from "~/components/ui/FancyToggle.vue";
 
 const timers = useTimersStore();
 onMounted(() => {
@@ -22,7 +23,7 @@ onUnmounted(() => {
   timers.stopRefresh();
 });
 
-const gridTemplate = "1fr 150px 120px 120px";
+const gridTemplate = "100px 1fr 150px 120px 120px";
 
 const toEdit = ref<Timers | undefined>(undefined);
 
@@ -39,7 +40,10 @@ useHead({
     :original-timer="toEdit"
     @cancel="toEdit = undefined"
   />
-  <NewTimerForm v-if="newTimerForm" @cancel="newTimerForm = false" />
+  <NewTimerForm
+    v-if="newTimerForm"
+    @cancel="newTimerForm = false"
+  />
   <div id="timers-page">
     <div id="timers-page-controls">
       <div id="timers-page-controls__search">
@@ -48,14 +52,16 @@ useHead({
           placeholder="Search by username..."
           v-model="timers.queryFilter"
         />
-        <FormButton type="button" @click="timers.queryFilter = ''"
-          >clear</FormButton
-        >
+        <FormButton
+          type="button"
+          @click="timers.queryFilter = ''"
+        >clear</FormButton>
       </div>
       <div id="timers-page-controls__new-timer">
-        <FormButton @click="newTimerForm = true" type="button"
-          >Add new timer</FormButton
-        >
+        <FormButton
+          @click="newTimerForm = true"
+          type="button"
+        >Add new timer</FormButton>
       </div>
     </div>
     <Table>
@@ -71,10 +77,20 @@ useHead({
             v-for="timer in timers.filtered"
             :grid-template="gridTemplate"
           >
+            <TableCell centered>
+              <FancyToggle
+                :value="timer.enabled"
+                @change="enabled => timers.handleUpdate({ id: timer.id, enabled })"
+              />
+            </TableCell>
             <TableCell>{{ timer.message }}</TableCell>
             <TableCell>{{ timer.timeout }}</TableCell>
             <TableCell centered>
-              <FormButton type="button" smaller @click="toEdit = timer">
+              <FormButton
+                type="button"
+                smaller
+                @click="toEdit = timer"
+              >
                 <Icon name="material-symbols:edit" />
                 edit
               </FormButton>

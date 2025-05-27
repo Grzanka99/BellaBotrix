@@ -18,7 +18,7 @@ export default defineEventHandler(async (event) => {
     });
   }
 
-  const { timeout, message } = parsed.data;
+  const { timeout, message, enabled } = parsed.data;
 
   try {
     const newTimer = await prisma.timers.create({
@@ -26,6 +26,7 @@ export default defineEventHandler(async (event) => {
         channelId: ch.id,
         message,
         timeout,
+        enabled,
       },
     });
 

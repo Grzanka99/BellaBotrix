@@ -30,12 +30,8 @@ async function handleSingleChatter(chatter: TTwitchApiChatter, channel: string):
     } else {
       await prismaQueue.enqueue(() =>
         prisma.user.update({
-          where: {
-            id: user.id,
-          },
-          data: {
-            points: user.points + 1,
-          },
+          where: { id: user.id },
+          data: { points: user.points + 1 },
         }),
       );
     }

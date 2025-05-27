@@ -14,7 +14,6 @@ defineEmits(["close"]);
     <Teleport to="body">
       <div
         class="modal-backdrop"
-        @click.self="$emit('close')"
         v-if="open"
       >
         <div
