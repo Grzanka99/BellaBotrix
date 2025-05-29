@@ -48,6 +48,7 @@ function handleMouseMove(e: MouseEvent) {
   if (!props.canvas || !element.value) {
     return;
   }
+  console.log(e);
 
   e.preventDefault();
 

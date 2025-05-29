@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { useStorage } from "@vueuse/core";
 import Draggable from "./Draggable.vue";
+import Resizable from "./Resizable.vue";
 import { EElementType, type TOverlayLocalStorageSave } from "~/types/overlay.type";
 import { LSK_OVERLAY_FOCUSED, LSK_OVERLAY_SAVE } from "~/constants";
 import Chat from "./elements/Chat.vue";
@@ -67,11 +68,12 @@ watch(focused, () => {
       @focusElement="focused = key"
       :focused="focused === key"
     >
-      <Chat v-if="localSave[key].element === EElementType.Chat" />
-      <textarea
-        v-else-if="localSave[key].element === EElementType.Text"
-        type="text"
-      />
+      <Resizable>
+        <Chat v-if="localSave[key].element === EElementType.Chat" />
+        <div v-else-if="localSave[key].element === EElementType.Text">
+          hellow there
+        </div>
+      </Resizable>
     </Draggable>
   </div>
 </template>
