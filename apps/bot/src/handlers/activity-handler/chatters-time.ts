@@ -20,6 +20,10 @@ export async function chatterTimeHandler(
     userslist.push(`${chatter.user_name.toLowerCase().trim()}:${chatter.user_id}@${channel}`);
   }
 
+  if (!userslist.length) {
+    return;
+  }
+
   const querystring = toProperArrayInputString(userslist);
   const query = Prisma.raw(`CALL increase_users_points(array[${querystring}])`);
   await prismaQueue.enqueue(() => prisma.$queryRaw(query));
