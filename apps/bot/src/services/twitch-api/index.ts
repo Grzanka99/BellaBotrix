@@ -216,6 +216,10 @@ export class TwitchApi {
       return undefined;
     }
 
+    if (!res.data.data.length) {
+      return undefined;
+    }
+
     return res.data.data[0];
   }
 

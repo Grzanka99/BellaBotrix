@@ -287,8 +287,13 @@ useHead({
       </SettingsGroup>
     </RequirePerms>
     <RequirePerms :require="['automod']" type='hide'>
-
-      <SettingsGroup group-name="Automod still work in progress">xD</SettingsGroup>
+      <SettingsGroup group-name="Automod AI" v-if="automod">
+        <SingleSetting name="enabled" :option="automod.enabled">
+          <FancyToggle
+            :value="automod.enabled.value"
+            @change="(value) => settings.handleUpdate({ automod: { enabled: { value } } })" />
+        </SingleSetting>
+      </SettingsGroup>
     </RequirePerms>
   </div>
 </template>

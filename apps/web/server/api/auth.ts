@@ -1,4 +1,5 @@
 import { getChannelRefreshKey, validateToken } from "../utils/api-connector";
+import { indicateChannelsListUpdate } from "../utils/sync";
 
 export default defineEventHandler(async (event) => {
   const errorRedirect = async () => await sendRedirect(event, "/panel?authfailed=true");
@@ -43,6 +44,8 @@ export default defineEventHandler(async (event) => {
   await prisma.channelAccess.create({
     data: { userid: auth.data.id, channelId: channel.id },
   });
+
+  indicateChannelsListUpdate();
 
   return await sendRedirect(event, "/panel");
 });

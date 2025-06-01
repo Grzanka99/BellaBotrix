@@ -9,7 +9,7 @@
   "scripts": {
     "dev": "turbo dev",
     "dev:web": "turbo dev --filter=web --filter=sup",
-    "dev:bot": "turbo dev --filter=bot",
+    "dev:bot": "turbo dev --filter=bot --filter=sup",
     "dev:sup": "turbo dev --filter=sup",
     "build": "turbo build --force",
     "prisma:version": "prisma --version",

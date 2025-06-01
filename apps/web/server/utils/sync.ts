@@ -18,3 +18,8 @@ export async function isLive(ch: string): Promise<boolean> {
   const res = await ky.get(url).json<{ islive: boolean }>();
   return res.islive;
 }
+
+export async function indicateChannelsListUpdate(): Promise<void> {
+  const url = `${SYNC_URL}/api/v1/unsafe/channelslistupdate`;
+  await ky.get(url);
+}
