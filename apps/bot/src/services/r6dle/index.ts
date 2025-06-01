@@ -53,16 +53,16 @@ export class R6Dle {
         });
       })
       .then(() => {
-        logger.info("Setting interval to refresh R6Dle operators every 60 seconds");
-        if (R6Dle.operatorsRefreshRunner) {
-          return;
-        }
-
-        R6Dle.operatorsRefreshRunner = true;
-
-        setInterval(async () => {
-          await this.fetchOperators();
-        }, 60_000);
+        // logger.info("Setting interval to refresh R6Dle operators every 60 seconds");
+        // if (R6Dle.operatorsRefreshRunner) {
+        //   return;
+        // }
+        //
+        // R6Dle.operatorsRefreshRunner = true;
+        //
+        // setInterval(async () => {
+        //   await this.fetchOperators();
+        // }, 60_000);
       });
   }
 
