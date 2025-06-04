@@ -1,11 +1,11 @@
 <script setup lang="ts">
 import type { OllamaAIModels } from "@prisma/client";
-import Modal from "../ui/Modal.vue";
-import FormButton from "../ui/FormButton.vue";
-import CustomSelect from "../ui/CustomSelect.vue";
-import FormTextarea from "../ui/FormTextarea.vue";
 import { useAIModelsStore } from "~/store/ai-models.store";
 import type { TSelectOption } from "~/types/ui.type";
+import CustomSelect from "../ui/CustomSelect.vue";
+import FormButton from "../ui/FormButton.vue";
+import FormTextarea from "../ui/FormTextarea.vue";
+import Modal from "../ui/Modal.vue";
 
 const props = defineProps<{
   originalModel: OllamaAIModels;
@@ -17,19 +17,38 @@ const s = useAIModelsStore();
 
 const name = ref(props.originalModel.name || "");
 const description = ref(props.originalModel.description || "");
+const provider = ref(props.originalModel.provider || "");
 
-const options = computed<TSelectOption[]>(() => {
-  return s.availableModels.map((el) => ({
-    displayName: `${el.name} (${el.parameterSize})`,
-    value: el.name,
-  }));
+const options = computed<TSelectOption<string>[]>(() => {
+  return [
+    {
+      displayName: "Gemini 2.0 Flash",
+      value: "gemini-2.0-flash",
+    },
+    ...s.availableModels.map((el) => ({
+      displayName: `${el.name} (${el.parameterSize})`,
+      value: el.name,
+    })),
+  ];
 });
+
+const providers = [
+  {
+    displayName: "Google Gemini",
+    value: "gemini",
+  },
+  {
+    displayName: "Ollama",
+    value: "ollama",
+  },
+];
 
 const handleSave = async () => {
   await s.handleUpdate({
     id: props.originalModel.id,
     name: name.value,
     description: description.value,
+    provider: provider.value,
   });
 
   emit("cancel");
@@ -47,6 +66,7 @@ const handleSave = async () => {
           name="description"
           label="Description"
           v-model="description" />
+        <CustomSelect :options="providers" v-model="provider" />
       </div>
       <div class="edit-model-form__buttons">
         <FormButton type="button" @click="$emit('cancel')">Cancel</FormButton>

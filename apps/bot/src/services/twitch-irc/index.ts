@@ -57,7 +57,7 @@ export class TwitchIrc {
   }
 
   private async reconnect(): Promise<void> {
-    logger.warning("Triggering reconnect");
+    logger.warning("[ChatIRC] Triggering reconnect");
     this.ws.removeAllListeners();
     this.ws.close();
 

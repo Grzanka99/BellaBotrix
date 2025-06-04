@@ -2,11 +2,13 @@
 const props = defineProps<{
   value: boolean;
   disabled?: boolean;
-}>()
+  label?: string;
+  labelReverse?: boolean;
+}>();
 
 const emit = defineEmits<{
-  (e: 'change', v: boolean): void;
-}>()
+  (e: "change", v: boolean): void;
+}>();
 
 const handleClick = (e: MouseEvent) => {
   if (props.disabled) {
@@ -14,18 +16,51 @@ const handleClick = (e: MouseEvent) => {
     return;
   }
 
-  emit('change', !props.value);
+  emit("change", !props.value);
 };
 </script>
 
 <template>
-  <label class="flex fancy-toggle" :class="{ 'fancy-toggle--disabled': disabled, 'fancy-toggle--on': value }"
-    @click="handleClick">
-    <div class="fancy-toggle__orb" :class="{ 'fancy-toggle__orb--on': value }"></div>
+  <label
+    v-if="label"
+    class="flex fancy-toggle__label"
+  >
+    <span v-if="!labelReverse">{{ label }}</span>
+    <div
+      class="flex fancy-toggle"
+      :class="{ 'fancy-toggle--disabled': disabled, 'fancy-toggle--on': value }"
+      @click="handleClick"
+    >
+      <div
+        class="fancy-toggle__orb"
+        :class="{ 'fancy-toggle__orb--on': value }"
+      ></div>
+    </div>
+    <span v-if="labelReverse">{{ label }}</span>
   </label>
+  <div
+    v-else
+    class="flex fancy-toggle"
+    :class="{ 'fancy-toggle--disabled': disabled, 'fancy-toggle--on': value }"
+    @click="handleClick"
+  >
+    <div
+      class="fancy-toggle__orb"
+      :class="{ 'fancy-toggle__orb--on': value }"
+    ></div>
+  </div>
 </template>
 
 <style lang="scss" scoped>
+.fancy-toggle__label {
+  gap: var(--padding);
+  padding: var(--padding-half);
+  background: var(--background);
+  border: 1px solid var(--stroke-light);
+  color: var(--text);
+  border-radius: var(--radius);
+}
+
 .fancy-toggle {
   --base: 20px;
   --offset: 3px;

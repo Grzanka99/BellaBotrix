@@ -1,4 +1,4 @@
-import { prisma } from "services/db";
+import { prisma, prismaQueue } from "services/db";
 import { interpolate } from "utils/interpolate-string";
 import type { THandleCommadArgs } from "services/types";
 import { CoreCommandsHandlers } from "./core-commands";
@@ -57,6 +57,42 @@ export class CommandHandler {
       return undefined;
     }
 
+    if (parsedCommand.paid) {
+      if (!args.tags) {
+        return undefined;
+      }
+
+      const user = await prismaQueue.enqueue(() =>
+        prisma.user.findUnique({
+          where: {
+            userid: `${args.tags?.userId}@${this.channel}`,
+            channel: this.channel,
+          },
+        }),
+      );
+
+      if (!user) {
+        return undefined;
+      }
+
+      if (user.points < parsedCommand.price) {
+        const res = interpolate(parsedCommand.errorMessage, {
+          username: `@${args.tags.username}` || "",
+          points: parsedCommand.price,
+        });
+
+        args.send(res);
+        return undefined;
+      }
+
+      await prismaQueue.enqueue(() =>
+        prisma.user.update({
+          where: { id: user.id },
+          data: { points: user.points - parsedCommand.price },
+        }),
+      );
+    }
+
     if (parsedCommand.isCore && CoreCommandsHandlers[parsedCommand.name] && args.tags) {
       const res = await CoreCommandsHandlers[parsedCommand.name].handle({
         ...args,
@@ -76,7 +112,8 @@ export class CommandHandler {
 
     const res = interpolate(parsedCommand.message.base, {
       username: args.tags?.username || "",
-      this: this.channel,
+      price: parsedCommand.price,
+      channel: this.channel,
     });
 
     args.send(res);

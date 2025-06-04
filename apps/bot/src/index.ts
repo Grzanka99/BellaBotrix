@@ -1,10 +1,11 @@
 import type { Channel } from "@prisma/client";
 import { gc } from "bun";
 import { ChannelConnection } from "services/channel-connection";
-import { prisma } from "services/db";
+import { prisma, storage } from "services/db";
 import { TwitchApi } from "services/twitch-api";
-import { getOAuthToken } from "services/twitch-api/api-connector";
 import { TwitchIrc } from "services/twitch-irc";
+import { CK_CHANNELS_SYNC } from "sqlite-storage";
+import { getOAuthToken } from "twitch-api-connector";
 import { logger } from "utils/logger";
 
 export async function startBot(): Promise<void> {
@@ -14,11 +15,14 @@ export async function startBot(): Promise<void> {
   logger.info("Bootstrap");
 
   logger.info("Obtaining main OAuth token");
-  const mainOAuthToken = await getOAuthToken();
-  if (!mainOAuthToken) {
+  const oauthTokenRes = await getOAuthToken();
+  if (!oauthTokenRes.success) {
     logger.error("Error obtaining main OAuth token, quitting");
     return;
   }
+
+  const mainOAuthToken = oauthTokenRes.data.access_token;
+
   logger.info("Main OAuth token obtained");
 
   logger.info("Getting enabled channels from DB");
@@ -65,7 +69,30 @@ export async function startBot(): Promise<void> {
   }
 
   logger.info("Setting interval to refresh channels list");
+
+  let lastUpdateTimestamp: number = Date.now();
   setInterval(async () => {
+    if (!storage.has(CK_CHANNELS_SYNC)) {
+      storage.set(CK_CHANNELS_SYNC, lastUpdateTimestamp);
+    }
+
+    const updateFromStorage = storage.get<number>(CK_CHANNELS_SYNC);
+
+    if (!updateFromStorage) {
+      storage.set(CK_CHANNELS_SYNC, lastUpdateTimestamp);
+      return;
+    }
+
+    if (updateFromStorage.value === lastUpdateTimestamp) {
+      return;
+    }
+
+    logger.info(
+      `Refreshing channel connections: ${lastUpdateTimestamp} -> ${updateFromStorage.value}`,
+    );
+
+    lastUpdateTimestamp = updateFromStorage.value;
+
     const res = await prisma.channel.findMany({ where: { enabled: true } });
 
     for (const ch of res) {

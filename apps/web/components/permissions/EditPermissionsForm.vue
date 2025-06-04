@@ -36,6 +36,7 @@ const permissionsOptions: TSelectOption<TPerms>[] = [
   { value: 'moderator', displayName: 'Moderator' },
   { value: 'ai', displayName: 'AI Access' },
   { value: 'ai+', displayName: 'AI Access with privileges' },
+  { value: 'automod', displayName: 'Automod' },
 ]
 
 </script>

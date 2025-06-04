@@ -7,6 +7,7 @@ const SPerms = z.union([
   z.literal("admin"),
   z.literal("ai"),
   z.literal("ai+"),
+  z.literal("automod"),
 ]);
 
 export type TPerms = z.infer<typeof SPerms>;

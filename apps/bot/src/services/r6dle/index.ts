@@ -1,4 +1,4 @@
-import { capitalize, type TOption } from "bellatrix";
+import { type TOption, capitalize } from "bellatrix";
 import type { TR6dleOperatorV2 } from "r6dle";
 import { prisma, prismaQueue } from "services/db";
 import { logger } from "utils/logger";
@@ -53,16 +53,16 @@ export class R6Dle {
         });
       })
       .then(() => {
-        logger.info("Setting interval to refresh R6Dle operators every 60 seconds");
-        if (R6Dle.operatorsRefreshRunner) {
-          return;
-        }
-
-        R6Dle.operatorsRefreshRunner = true;
-
-        setInterval(async () => {
-          await this.fetchOperators();
-        }, 60_000);
+        // logger.info("Setting interval to refresh R6Dle operators every 60 seconds");
+        // if (R6Dle.operatorsRefreshRunner) {
+        //   return;
+        // }
+        //
+        // R6Dle.operatorsRefreshRunner = true;
+        //
+        // setInterval(async () => {
+        //   await this.fetchOperators();
+        // }, 60_000);
       });
   }
 
@@ -127,8 +127,7 @@ export class R6Dle {
 
     if (!res) {
       logger.info(`None r6dle game found for channel ${this.channel}`);
-      const newGame = await this.newGame();
-      return newGame;
+      return await this.newGame();
     }
 
     logger.info(`Game r6dle of id ${res.id} for channel ${this.channel} loaded`);
@@ -193,13 +192,13 @@ export class R6Dle {
     if (!chosen) {
       return { response: { badOperator: isOperator }, correct: false };
     }
-    R6Dle;
+
     if (JSON.stringify(chosen) === JSON.stringify(current)) {
       await prismaQueue.enqueue(async () => {
         if (!this.gameId) {
           return undefined;
         }
-        return await prisma.r6DleGuessHistory.create({
+        return prisma.r6DleGuessHistory.create({
           data: {
             gameId: this.gameId,
             player: player,
@@ -221,7 +220,7 @@ export class R6Dle {
         return;
       }
 
-      return await prisma.r6DleGuessHistory.create({
+      return prisma.r6DleGuessHistory.create({
         data: {
           gameId: this.gameId,
           player: player,

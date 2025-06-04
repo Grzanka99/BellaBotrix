@@ -1,61 +1,14 @@
 import type { TOption, TSettings } from "bellatrix";
-import { OllamaAI } from "services/ollama";
+import type { AIConnector } from "services/ai-connectors/connector";
 import type { R6Dle } from "services/r6dle";
-import { R6Stats } from "services/r6stats";
+import type { R6Stats } from "services/r6stats";
 import type { TwitchApi } from "services/twitch-api";
 import type { TCommand, TSubCommand } from "types/schema/commands.schema";
-
-export type TTwitchApiUser = {
-  id: string;
-  login: string;
-  display_name: string;
-  type: string;
-  broadcaster_type: string;
-  description: string;
-  profile_image_url: string;
-  offline_image_url: string;
-  view_count: number;
-  created_at: string;
-};
 
 export type TTwitchApiChatter = {
   user_id: string;
   user_login: string;
   user_name: string;
-};
-
-export type TTwitchApiResponse<T> = {
-  data: T;
-  pagination: Record<string, string>;
-};
-
-export type TTwitchApiUnauthorized = {
-  error: string;
-  status: 401;
-  message: string;
-};
-
-export type TTwitchOAuthRefresh = {
-  access_token: string;
-  expires_in: number;
-  refresh_token: string;
-  scope: string[];
-  token_type: string;
-};
-
-export type TTwitchFollowers = {
-  user_id: string;
-  user_name: string;
-  user_loging: string;
-  followed_at: string;
-};
-
-export type TTwitchValidateToken = {
-  client_id: string;
-  login: string;
-  scopes: string[];
-  user_id: string;
-  expires_in: number;
 };
 
 export type TTwitchApiStream = {
@@ -74,12 +27,6 @@ export type TTwitchApiStream = {
   thumbnail_url: string;
   is_mature: boolean;
 };
-
-export enum EEvenType {
-  Message = "message",
-  Roomstate = "roomstate",
-  Join = "join",
-}
 
 export type TTwitchMessageInfo = {
   clientNonce: string;
@@ -153,7 +100,7 @@ export type THandleCommadArgs = TTwitchIrcContext & {
   settings: TSettings;
   r6dle: R6Dle;
   r6stats: R6Stats;
-  ollamaAi: OllamaAI;
+  ollamaAi: AIConnector;
   send: (msg: string) => void;
 };
 

@@ -8,6 +8,8 @@ export default defineEventHandler(async (event) => {
     "moderation:read",
     "channel:moderate",
     "moderator:read:followers",
+    "moderator:manage:banned_users",
+    "moderator:manage:blocked_terms",
   ];
 
   await sendRedirect(

@@ -20,7 +20,7 @@ defineProps<{
 
 const s = useCommandsStore();
 
-const gridTemplate = "100px 2fr 4fr 2fr 120px 120px";
+const gridTemplate = "100px 1.5fr 2fr 4fr 2fr 120px 120px";
 const toEdit = ref<TCommandWithSubCommands | undefined>(undefined);
 
 const onCancel = () => {
@@ -32,21 +32,27 @@ const onCancel = () => {
   <EditCommandModal
     v-if="toEdit"
     :original-command="toEdit"
-    @cancel="onCancel" />
+    @cancel="onCancel"
+  />
   <Table>
     <TableHead :grid-template="gridTemplate">
       <TableHeader></TableHeader>
       <TableHeader>name</TableHeader>
+      <TableHeader>price</TableHeader>
       <TableHeader>message</TableHeader>
       <TableHeader>aliases</TableHeader>
     </TableHead>
     <TableBody>
       <template v-if="commands.length">
-        <TableRow v-for="command in commands" :grid-template="gridTemplate">
+        <TableRow
+          v-for="command in commands"
+          :grid-template="gridTemplate"
+        >
           <TableCell centered>
             <FancyToggle
               :value="command.enabled"
-              @change="(enabled) => s.handleUpdate(command.id, { enabled })" />
+              @change="(enabled) => s.handleUpdate(command.id, { enabled })"
+            />
           </TableCell>
           <TableCell>
             {{ command.name }}
@@ -55,17 +61,28 @@ const onCancel = () => {
             </template>
           </TableCell>
           <TableCell>
+            {{ command.paid ? `${command.price} points` : 'free' }}
+          </TableCell>
+          <TableCell>
             <CommandMessage :message="command.message" />
           </TableCell>
           <TableCell>{{ command.alias }}</TableCell>
           <TableCell centered>
-            <FormButton type="button" @click.native="toEdit = command" smaller>
+            <FormButton
+              type="button"
+              @click.native="toEdit = command"
+              smaller
+            >
               <Icon name="material-symbols:edit" />
               edit
             </FormButton>
           </TableCell>
           <TableCell centered>
-            <FormButton @click.native="s.handleDelete(command.id)" type="button" smaller>
+            <FormButton
+              @click.native="s.handleDelete(command.id)"
+              type="button"
+              smaller
+            >
               <Icon name="material-symbols:delete-forever" />
               delete
             </FormButton>

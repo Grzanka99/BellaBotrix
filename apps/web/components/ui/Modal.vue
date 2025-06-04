@@ -3,6 +3,7 @@ defineProps<{
   open: boolean;
   header?: string;
   description?: string;
+  fixedTop?: boolean;
 }>();
 
 defineEmits(["close"]);
@@ -11,14 +12,24 @@ defineEmits(["close"]);
 <template>
   <ClientOnly>
     <Teleport to="body">
-      <div class="modal-backdrop" @click.self="$emit('close')" v-if="open">
-        <div class="modal">
+      <div
+        class="modal-backdrop"
+        v-if="open"
+      >
+        <div
+          class="modal"
+          :class="{ 'modal-fixedtop': fixedTop }"
+        >
           <Icon
             name="material-symbols:close-rounded"
             class="modal__close-icon"
             @click.self="$emit('close')"
-            size="20px" />
-          <div class="modal-header" v-if="header || description">
+            size="20px"
+          />
+          <div
+            class="modal-header"
+            v-if="header || description"
+          >
             <h3 v-if="header">{{ header }}</h3>
             <h5 v-if="description">{{ description }}</h5>
           </div>
@@ -66,7 +77,21 @@ defineEmits(["close"]);
     top: var(--padding);
     right: var(--padding);
     cursor: pointer;
+    border-radius: var(--radius-round);
+
+    width: var(--font-big);
+    height: var(--font-big);
+    padding: var(--padding-quarter);
+
+    &:hover {
+      background-color: var(--stroke);
+    }
   }
+}
+
+.modal-fixedtop {
+  top: calc(var(--padding-double) * 4);
+  align-self: normal;
 }
 
 .modal-header {

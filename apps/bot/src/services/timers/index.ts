@@ -1,7 +1,7 @@
 import { gc } from "bun";
 import { prisma } from "services/db";
 import { logger } from "utils/logger";
-import { SingleTimer, TTimerSender } from "./single-timer";
+import { SingleTimer, type TTimerSender } from "./single-timer";
 
 export class ChannelTimer {
   private id: number | undefined;
@@ -31,6 +31,7 @@ export class ChannelTimer {
     const timers = await prisma.timers.findMany({
       where: {
         channelId: this.id,
+        enabled: true,
         NOT: {
           timeout: 0,
         },

@@ -32,18 +32,29 @@ const handleReset = () => {
 </script>
 
 <template>
-  <form @submit.prevent="handleSave" class="edit-subcommand-form">
+  <form
+    @submit.prevent="handleSave"
+    class="edit-subcommand-form"
+  >
     <h4>{{ originalSubcommand.name }}: Message</h4>
     <FormTextarea
       v-for="(_, key) in message"
       :label="key"
       :name="`message-${key}`"
       v-model="message[key]"
-      :restore="originalSubcommand.message?.[key]" />
+      :restore="originalSubcommand.message?.[key]"
+    />
     <h4>{{ originalSubcommand.name }}: Alias</h4>
-    <FormTextInput type="text" name="alias" v-model="alias" />
+    <FormTextInput
+      type="text"
+      name="alias"
+      v-model="alias"
+    />
     <div class="edit-subcommand-form__buttons">
-      <FormButton type="button" @click="handleReset">reset {{ originalSubcommand.name }}</FormButton>
+      <FormButton
+        type="button"
+        @click="handleReset"
+      >reset {{ originalSubcommand.name }}</FormButton>
       <FormButton type="submit">update {{ originalSubcommand.name }}</FormButton>
     </div>
   </form>

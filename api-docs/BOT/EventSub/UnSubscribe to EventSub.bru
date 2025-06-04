@@ -1,0 +1,19 @@
+meta {
+  name: UnSubscribe to EventSub
+  type: http
+  seq: 2
+}
+
+delete {
+  url: http://127.0.0.1:8080/eventsub/subscriptions?id=b113b214-23ac-763d-00d8-144a8c605713
+  body: none
+  auth: none
+}
+
+params:query {
+  id: b113b214-23ac-763d-00d8-144a8c605713
+}
+
+headers {
+  Client-Id: dummy
+}
