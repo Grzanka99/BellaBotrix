@@ -39,3 +39,4 @@ prisma/*-journal
 
 *.sqlite
 *.db
+config.load

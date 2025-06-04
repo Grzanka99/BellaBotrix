@@ -4,10 +4,10 @@ import { activityHandler } from "handlers/activity-handler";
 import { chatterTimeHandler } from "handlers/activity-handler/chatters-time";
 import { CommandHandler } from "handlers/commands";
 import { triggerWordsHandler } from "handlers/trigger-words";
+import { AIConnector } from "services/ai-connectors";
 import { AutomodService } from "services/automod";
 import { setDefaultCommandsForChannel } from "services/commands";
 import { prisma, storage } from "services/db";
-import { AIConnector } from "services/ai-connectors";
 import { R6Dle } from "services/r6dle";
 import { R6Stats } from "services/r6stats";
 import { getSettings } from "services/settings";
@@ -17,6 +17,7 @@ import { TwitchApi } from "services/twitch-api";
 import type { TwitchIrc } from "services/twitch-irc";
 import { interpolate } from "utils/interpolate-string";
 import { logger } from "utils/logger";
+import { TTwitchIrcContext } from "../types";
 
 type TArgs = {
   ircClient: TwitchIrc;
@@ -119,6 +120,106 @@ export class ChannelConnection {
     return parsed.data;
   }
 
+  public get isLive(): boolean {
+    const res = storage.get<boolean>(`${this.channelName}_is_live`);
+
+    if (!res) {
+      return false;
+    }
+
+    return res.value;
+  }
+
+  private async ircHandler(ctx: TTwitchIrcContext): Promise<void> {
+    if (ctx.self) {
+      return;
+    }
+
+    if (!this.settings) {
+      this.logger.error("Cannot sync user settings");
+      throw "Cannot sync user settings";
+    }
+
+    switch (ctx.type) {
+      case "PRIVMSG": {
+        if (!ctx.channel || !ctx.tags || !ctx.message || !this.channelId || !this.api) {
+          break;
+        }
+
+        if (this.settings.automod.enabled.value) {
+          this.automod.handle(this.settings.automod, ctx);
+        }
+
+        this.streamStatsGatherer.reportMessage(ctx);
+        activityHandler(ctx);
+
+        this.commandHandler.handle({
+          ...ctx,
+          api: this.api,
+          settings: this.settings,
+          send: this.send.bind(this),
+          r6dle: this.r6dle,
+          r6stats: this.r6stats,
+          ollamaAi: this.aiConnector,
+        });
+
+        const { triggerWords, ollamaAI } = this.settings;
+
+        if (triggerWords.enabled.value) {
+          triggerWordsHandler({
+            ...ctx,
+            channelId: this.channelId,
+            send: this.send.bind(this),
+          });
+        }
+
+        if (ollamaAI.enabled.value && this.aiConnector) {
+          const shouldRun = this.aiConnector.shouldRunOnThatMessage(ctx.message);
+          if (!shouldRun) {
+            break;
+          }
+
+          this.aiConnector.setHistorySize(ollamaAI.keepHistory.value);
+          const res = await this.aiConnector.ask(ctx.message, ctx.tags.username, {
+            language: ollamaAI.language.value,
+            model: ollamaAI.model.value,
+            defaultPrompt: ollamaAI.entryPrompt.value,
+          });
+
+          if (res) {
+            this.send(`@${ctx.tags.username}, ${res}`);
+          }
+        }
+
+        break;
+      }
+      case "JOIN": {
+        const { forAllUsers, forSpecificUsers } = this.settings.joinMessage;
+        if (forAllUsers.enabled.value) {
+          this.send(
+            interpolate(forAllUsers.message.value, {
+              username: ctx.tags?.displayName || ctx.source?.username || "",
+            }),
+          );
+        }
+
+        if (
+          forSpecificUsers.enabled.value &&
+          ctx.source?.username &&
+          forSpecificUsers.users.value.includes(ctx.tags?.displayName || ctx.source.username)
+        ) {
+          this.send(
+            interpolate(forSpecificUsers.message.value, {
+              username: ctx.tags?.displayName || ctx.source.username,
+            }),
+          );
+        }
+
+        break;
+      }
+    }
+  }
+
   public async setup(): Promise<void> {
     if (this.isSetup) {
       return;
@@ -133,6 +234,9 @@ export class ChannelConnection {
     // NOTE: Chatters
     this.api.startChattersAutorefresh(5000);
     this.chattersInterval = setInterval(async () => {
+      if (!this.isLive) {
+        return;
+      }
       await chatterTimeHandler(this.channelName, this.api.chatters);
     }, 30_000);
 
@@ -155,100 +259,7 @@ export class ChannelConnection {
     this.aiConnector.startHistoryCleaner(this.channelName);
     this.aiConnector.setHistorySize(this.settings?.ollamaAI.keepHistory.value || 5);
 
-    this.irc.addHandler(this.channelName, async (ctx) => {
-      if (ctx.self) {
-        return;
-      }
-
-      if (!this.settings) {
-        logger.error("Cannot sync user settings");
-        throw "Cannot sync user settings";
-      }
-
-      switch (ctx.type) {
-        case "PRIVMSG": {
-          if (!ctx.channel || !ctx.tags || !ctx.message || !this.channelId || !this.api) {
-            break;
-          }
-
-          if (this.settings.automod.enabled.value) {
-            this.automod.handle(this.settings.automod, ctx);
-          }
-
-          this.streamStatsGatherer.reportMessage(ctx);
-
-          // NOTE: Increasing points when user types on chat
-          activityHandler(ctx);
-
-          // NOTE: All commands
-          this.commandHandler.handle({
-            ...ctx,
-            api: this.api,
-            settings: this.settings,
-            send: this.send.bind(this),
-            r6dle: this.r6dle,
-            r6stats: this.r6stats,
-            ollamaAi: this.aiConnector,
-          });
-
-          const { triggerWords, ollamaAI } = this.settings;
-
-          // NOTE: "hot words" that trigger some response from bot
-          if (triggerWords.enabled.value) {
-            triggerWordsHandler({
-              ...ctx,
-              channelId: this.channelId,
-              send: this.send.bind(this),
-            });
-          }
-
-          // NOTE: Ollama AI responses
-          if (ollamaAI.enabled.value && this.aiConnector) {
-            const shouldRun = this.aiConnector.shouldRunOnThatMessage(ctx.message);
-            if (shouldRun) {
-              this.aiConnector.setHistorySize(ollamaAI.keepHistory.value);
-              const res = await this.aiConnector.ask(ctx.message, ctx.tags.username, {
-                language: ollamaAI.language.value,
-                model: ollamaAI.model.value,
-                defaultPrompt: ollamaAI.entryPrompt.value,
-              });
-
-              if (res) {
-                this.send(`@${ctx.tags.username}, ${res}`);
-              }
-            }
-          }
-
-          break;
-        }
-        case "JOIN": {
-          const { forAllUsers, forSpecificUsers } = this.settings.joinMessage;
-          if (forAllUsers.enabled.value) {
-            this.send(
-              interpolate(forAllUsers.message.value, {
-                username: ctx.tags?.displayName || ctx.source?.username || "",
-              }),
-            );
-          }
-
-          if (
-            forSpecificUsers.enabled.value &&
-            ctx.source?.username &&
-            forSpecificUsers.users.value.includes(ctx.tags?.displayName || ctx.source.username)
-          ) {
-            this.send(
-              interpolate(forSpecificUsers.message.value, {
-                username: ctx.tags?.displayName || ctx.source.username,
-              }),
-            );
-          }
-
-          break;
-        }
-      }
-
-      gc(false);
-    });
+    this.irc.addHandler(this.channelName, this.ircHandler.bind(this));
 
     this.isSetup = true;
     this.logger.info("Connection set up");

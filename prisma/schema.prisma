@@ -7,7 +7,7 @@ generator client {
 }
 
 datasource db {
-  provider = "mysql"
+  provider = "postgresql"
   url      = env("REMOTE_DB_URL")
 }
 
@@ -135,10 +135,10 @@ model OllamaAIHistory {
   id          Int    @id @default(autoincrement())
   model       String
   historySize Int
-  entryPrompt String @db.MediumText()
+  entryPrompt String @db.Text()
   username    String
-  userMessage String @db.MediumText()
-  response    String @db.MediumText()
+  userMessage String @db.Text()
+  response    String @db.Text()
   channel     String
   language    String
 }
@@ -146,7 +146,7 @@ model OllamaAIHistory {
 model OllamaAISetupPrompts {
   id      Int     @id @default(autoincrement())
   name    String?
-  text    String  @db.MediumText()
+  text    String  @db.Text()
   enabled Boolean
   order   Int
 }
