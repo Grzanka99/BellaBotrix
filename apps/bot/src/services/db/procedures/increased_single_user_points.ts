@@ -8,7 +8,7 @@ BEGIN
 		1,
 		substring(uniqueid from position(':' in uniqueid)+1),
 		substring(uniqueid from position('@' in uniqueid)+1),
-		substr(uniqueid, position(':' in uniqueid)+1, position('@' in uniqueid)-1)
+		substr(uniqueid, 0, position(':' in uniqueid)+1)
 	)
 	on conflict (userid) do
 		update set points = "User".points + 1
