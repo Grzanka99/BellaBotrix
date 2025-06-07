@@ -86,7 +86,6 @@ export class TwitchIrc {
   }
 
   private onMessage(res: MessageEvent): void {
-    console.log(res);
     if (!res.data || typeof res.data !== "string") {
       return;
     }
