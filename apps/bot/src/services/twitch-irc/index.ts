@@ -50,7 +50,7 @@ export class TwitchIrc {
           this.onOpen(resolve);
         });
         this.ws.addEventListener("message", (result) => this.onMessage(result));
-      } catch (_) {
+      } catch (err) {
         resolve(undefined);
       }
     });
@@ -86,6 +86,7 @@ export class TwitchIrc {
   }
 
   private onMessage(res: MessageEvent): void {
+    console.log(res);
     if (!res.data || typeof res.data !== "string") {
       return;
     }
