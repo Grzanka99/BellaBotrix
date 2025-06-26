@@ -19,7 +19,8 @@ export default defineEventHandler(async (event) => {
     });
   }
 
-  const { name, message, paid, price, errorMessage } = parsed.data;
+  const { name, message, paid, price, errorMessage, timeout, timeoutType, timeoutEnabled } =
+    parsed.data;
 
   const uniqueName = getUniqueName(name, ch.name);
 
@@ -42,6 +43,9 @@ export default defineEventHandler(async (event) => {
       paid,
       price,
       errorMessage,
+      timeout,
+      timeoutType,
+      timeoutEnabled,
     },
   });
 

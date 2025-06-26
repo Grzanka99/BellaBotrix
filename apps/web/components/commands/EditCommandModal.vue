@@ -8,16 +8,22 @@ import type { TCommandWithSubCommands } from "~/types/commands.type";
 import EditSubcommand from "./EditSubcommand.vue";
 import FancyToggle from "../ui/FancyToggle.vue";
 import FormNumberInput from "../ui/FormNumberInput.vue";
+import { ETimeoutType } from "bellatrix";
+import CustomSelect from "~/components/ui/CustomSelect.vue";
+import type { TSelectOption } from "~/types/ui.type";
 
 const props = defineProps<{
   originalCommand: TCommandWithSubCommands;
 }>();
 
-const emit = defineEmits<{
-  (e: "cancel"): void;
-}>();
+const emit = defineEmits<(e: "cancel") => void>();
 
 const s = useCommandsStore();
+
+const timeoutTypeOptions: TSelectOption<ETimeoutType>[] = [
+  { value: ETimeoutType.Command, displayName: "per command" },
+  { value: ETimeoutType.User, displayName: "per user" },
+];
 
 const alias = ref(props.originalCommand.alias);
 const message = ref<Record<string, string>>(
@@ -29,6 +35,10 @@ const message = ref<Record<string, string>>(
 const price = ref<number>(props.originalCommand.price || 0);
 const paid = ref<boolean>(props.originalCommand.paid || false);
 const errorMessage = ref(props.originalCommand.errorMessage || "");
+const timeoutEnabled = ref(props.originalCommand.timeoutEnabled);
+const timeout = ref(props.originalCommand.timeout || 30);
+// @ts-expect-error
+const timeoutType = ref<ETimeoutType>(props.originalCommand.timeoutType || ETimeoutType.User);
 
 const handleSave = async () => {
   await s.handleUpdate(props.originalCommand.id, {
@@ -37,6 +47,9 @@ const handleSave = async () => {
     price: price.value,
     paid: paid.value,
     errorMessage: errorMessage.value,
+    timeout: timeout.value,
+    timeoutType: timeoutType.value,
+    timeoutEnabled: timeoutEnabled.value,
   });
 
   emit("cancel");
@@ -85,6 +98,20 @@ const handleSave = async () => {
           name="errorMessage"
           v-model="errorMessage"
         />
+      </template>
+      <FancyToggle
+          label-reverse
+          label="timeout - should command invocation be limited"
+          :value="timeoutEnabled"
+          @change="e => timeoutEnabled = e"
+      />
+      <template v-if="timeoutEnabled">
+        <FormNumberInput
+            name="timeout"
+            v-model="timeout"
+            label="timeout (in seconds)"
+        />
+        <CustomSelect v-model="timeoutType" :options="timeoutTypeOptions" />
       </template>
       <div class="edit-command-form__buttons">
         <FormButton
