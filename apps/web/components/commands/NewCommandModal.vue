@@ -8,8 +8,12 @@ import { SCreateCommand, type TCreateCommand } from "~/types/commands.type";
 import { useCommandsStore } from "~/store/commands.store";
 import FormNumberInput from "../ui/FormNumberInput.vue";
 import FancyToggle from "../ui/FancyToggle.vue";
+import { ETimeoutType } from "bellatrix";
+import type { TSelectOption } from "~/types/ui.type";
+import CustomSelect from "~/components/ui/CustomSelect.vue";
 
 const DEFAUL_ERROR_MESSAGE = "You need minimum $points points to run this command!" as const;
+const DEFAULT_TIMEOUT = 30;
 const emit = defineEmits<{
   (e: "submit", payload: TCreateCommand): void;
   (e: "cancel"): void;
@@ -18,12 +22,20 @@ defineProps<{
   open: boolean;
 }>();
 
+const timeoutTypeOptions: TSelectOption<ETimeoutType>[] = [
+  { value: ETimeoutType.Command, displayName: "per command" },
+  { value: ETimeoutType.User, displayName: "per user" },
+];
+
 const name = ref("");
 const message = ref("");
 const price = ref(0);
 const paid = ref(false);
 const channelName = useStorage("selectedChannelName", undefined);
 const errorMessage = ref(DEFAUL_ERROR_MESSAGE);
+const timeoutEnabled = ref(false);
+const timeout = ref(DEFAULT_TIMEOUT);
+const timeoutType = ref(ETimeoutType.User);
 
 const alreadyExists = ref(false);
 
@@ -34,6 +46,9 @@ const parsed = computed(() => {
     price: price.value,
     paid: paid.value,
     errorMessage: errorMessage.value,
+    timeout: timeout.value,
+    timeoutType: timeoutType.value,
+    timeoutEnabled: timeoutEnabled.value,
   };
 
   if (!payload.name || !payload.message) {
@@ -92,6 +107,9 @@ const handleAddComand = async () => {
   paid.value = false;
   price.value = 0;
   errorMessage.value = DEFAUL_ERROR_MESSAGE;
+  timeout.value = DEFAULT_TIMEOUT;
+  timeoutType.value = ETimeoutType.User;
+  timeoutEnabled.value = false;
 };
 
 const handleCancel = () => {
@@ -101,6 +119,9 @@ const handleCancel = () => {
   paid.value = false;
   price.value = 0;
   errorMessage.value = DEFAUL_ERROR_MESSAGE;
+  timeout.value = DEFAULT_TIMEOUT;
+  timeoutType.value = ETimeoutType.User;
+  timeoutEnabled.value = false;
   emit("cancel");
 };
 </script>
@@ -149,6 +170,20 @@ const handleCancel = () => {
           name="errorMessage"
           v-model="errorMessage"
         />
+      </template>
+      <FancyToggle
+        label-reverse
+        label="timeout - should command invocation be limited"
+        :value="timeoutEnabled"
+        @change="e => timeoutEnabled = e"
+      />
+      <template v-if="timeoutEnabled">
+        <FormNumberInput
+            name="timeout"
+            v-model="timeout"
+            label="timeout (in seconds)"
+        />
+        <CustomSelect v-model="timeoutType" :options="timeoutTypeOptions" />
       </template>
       <div class="command-form__controls">
         <FormButton

@@ -1,4 +1,4 @@
-import { Commands } from "@prisma/client";
+import type { Commands } from "@prisma/client";
 import { SUpdateCommand } from "~/types/commands.type";
 
 export default defineEventHandler(async (event) => {

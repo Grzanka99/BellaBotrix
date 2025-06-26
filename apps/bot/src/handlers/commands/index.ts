@@ -1,8 +1,16 @@
-import { prisma, prismaQueue } from "services/db";
+import { prisma, prismaQueue, storage } from "services/db";
 import { interpolate } from "utils/interpolate-string";
 import type { THandleCommadArgs } from "services/types";
 import { CoreCommandsHandlers } from "./core-commands";
 import { dbCommandToCommand } from "services/commands/commands.transform";
+import { ETimeoutType } from "bellatrix";
+
+type TRateLimitedArgs = {
+  rateLimitType: ETimeoutType;
+  userUniqueID: string;
+  commandUniqueName: string;
+  limitInSeconds: number;
+};
 
 export class CommandHandler {
   private channel: string;
@@ -11,10 +19,36 @@ export class CommandHandler {
     this.channel = channel;
   }
 
+  private rateLimited(args: TRateLimitedArgs) {
+    const timestamp = Date.now();
+    let limitingKey = args.commandUniqueName;
+
+    if (args.rateLimitType === ETimeoutType.User) {
+      limitingKey = `${args.userUniqueID}+${args.commandUniqueName}`;
+    }
+
+    const limited = storage.get<number>(limitingKey);
+    if (!limited) {
+      storage.set(limitingKey, timestamp);
+      return false;
+    }
+
+    const diffSeconds = Math.round((timestamp - limited.value) / 1000);
+
+    if (diffSeconds < args.limitInSeconds) {
+      return true;
+    }
+
+    storage.set(limitingKey, timestamp);
+    return false;
+  }
+
   public async handle(args: THandleCommadArgs): Promise<undefined> {
-    if (!args.api || !args.settings.commands.enabled.value || !args.message) {
+    if (!args.api || !args.settings.commands.enabled.value || !args.message || !args.tags) {
       return undefined;
     }
+
+    const USER_ID = `${args.tags.userId}@${this.channel}`;
 
     const prefix = args.settings.commands.prefix.value;
 
@@ -54,6 +88,18 @@ export class CommandHandler {
     const parsedCommand = dbCommandToCommand(command);
 
     if (!parsedCommand) {
+      return undefined;
+    }
+
+    if (
+      command.timeoutEnabled &&
+      this.rateLimited({
+        rateLimitType: command.timeoutType as ETimeoutType,
+        commandUniqueName: command.uniqueName,
+        userUniqueID: USER_ID,
+        limitInSeconds: command.timeout,
+      })
+    ) {
       return undefined;
     }
 

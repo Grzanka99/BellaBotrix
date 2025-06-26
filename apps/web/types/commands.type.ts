@@ -1,4 +1,5 @@
 import type { Commands, SubCommands } from "@prisma/client";
+import { ETimeoutType } from "bellatrix";
 import { z } from "zod";
 
 export const SCreateCommand = z.object({
@@ -7,6 +8,9 @@ export const SCreateCommand = z.object({
   paid: z.boolean(),
   price: z.number().int(),
   errorMessage: z.string(),
+  timeout: z.number().int(),
+  timeoutEnabled: z.boolean(),
+  timeoutType: z.nativeEnum(ETimeoutType),
 });
 
 export type TCreateCommand = z.infer<typeof SCreateCommand>;
@@ -19,6 +23,9 @@ export const SUpdateCommand = z.object({
   paid: z.boolean().optional(),
   price: z.number().int().optional(),
   errorMessage: z.string().optional(),
+  timeout: z.number().int().optional(),
+  timeoutEnabled: z.boolean().optional(),
+  timeoutType: z.nativeEnum(ETimeoutType).optional(),
 });
 
 export const SUpdateSubCommand = z.object({
@@ -28,6 +35,9 @@ export const SUpdateSubCommand = z.object({
   paid: z.boolean(),
   price: z.number().int(),
   errorMessage: z.string(),
+  timeout: z.number().int().optional(),
+  timeoutEnabled: z.boolean().optional(),
+  timeoutType: z.nativeEnum(ETimeoutType).optional(),
 });
 
 export type TUpdateCommand = z.infer<typeof SUpdateCommand>;
