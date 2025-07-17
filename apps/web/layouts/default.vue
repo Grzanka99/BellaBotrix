@@ -13,10 +13,7 @@ onMounted(() => {
   }
 });
 
-const channelName = useStorage<string | undefined>(
-  "selectedChannelName",
-  undefined,
-);
+const channelName = useStorage<string | undefined>("selectedChannelName", undefined);
 
 useHead({
   titleTemplate: (titleChunk) => `${titleChunk} - ${channelName.value}`,
@@ -30,7 +27,10 @@ useHead({
     <ClientOnly>
       <TopBar />
       <div id="panel-content">
-        <slot />
+        <slot name="navigation" />
+        <div id="panel-content__padding">
+          <slot />
+        </div>
       </div>
     </ClientOnly>
   </div>
@@ -53,9 +53,16 @@ useHead({
 }
 
 #panel-content {
-  padding: var(--padding);
   height: 100%;
   grid-area: content;
   overflow-y: auto;
+
+  display: flex;
+
+  &__padding {
+    width: 100%;
+    height: 100%;
+    padding: var(--padding);
+  }
 }
 </style>

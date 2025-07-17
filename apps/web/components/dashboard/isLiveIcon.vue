@@ -5,7 +5,10 @@ defineProps<{
 </script>
 <template>
   <div class="isliveicon">
-    <div class="isliveicon__icon" :data-live="isLive"></div>
+    <div
+      class="isliveicon__icon"
+      :data-live="isLive"
+    ></div>
     <span class="isliveicon__text">
       {{ isLive ? 'live' : 'offline' }}
     </span>
@@ -15,9 +18,7 @@ defineProps<{
 <style lang="scss" scoped>
 .isliveicon {
   width: 125px;
-  border: 1px solid var(--stroke);
-  border-radius: var(--radius);
-  padding: var(--padding);
+  padding: var(--padding-half);
   display: flex;
   justify-content: center;
   align-items: center;

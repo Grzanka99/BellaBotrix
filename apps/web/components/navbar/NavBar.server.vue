@@ -13,6 +13,11 @@ const routes = computed<TRoute[]>(() => [
     icon: "material-symbols:dashboard",
   },
   {
+    to: "/panel/stream-stats",
+    displayName: "stream stats",
+    icon: "material-symbols:bar-chart",
+  },
+  {
     to: "/panel/commands",
     displayName: "commands",
     icon: "material-symbols:android-messages",
@@ -99,29 +104,19 @@ const handleAuthRefirect = () => {
   <nav id="navbar">
     <div class="routes">
       <SpacerWithTitle :text="`Channel: #${channelName}`" />
-      <NavigationLink
-        v-for="route in routes"
-        :to="route.to"
-        :display-name="route.displayName"
-        :icon="route.icon" />
+      <NavigationLink v-for="route in routes" :to="route.to" :display-name="route.displayName" :icon="route.icon" />
       <RequirePerms :require="['r6dleadmin']" type="hide">
         <SpacerWithTitle text="Global settings" />
         <template v-for="route in globalSettings">
           <RequirePerms :require="[route.adminType]" type="hide">
-            <NavigationLink
-              :to="route.to"
-              :display-name="route.displayName"
-              :icon="route.icon" />
+            <NavigationLink :to="route.to" :display-name="route.displayName" :icon="route.icon" />
           </RequirePerms>
         </template>
       </RequirePerms>
       <RequirePerms :require="[]" type="hide">
         <SpacerWithTitle text="Admin settings" />
         <template v-for="route in adminSettings">
-          <NavigationLink
-            :to="route.to"
-            :display-name="route.displayName"
-            :icon="route.icon" />
+          <NavigationLink :to="route.to" :display-name="route.displayName" :icon="route.icon" />
         </template>
       </RequirePerms>
       <SpacerWithTitle text="User-only settings" />
