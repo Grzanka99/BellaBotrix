@@ -5,6 +5,10 @@ import { CoreCommandsHandlers } from "./core-commands";
 import { dbCommandToCommand } from "services/commands/commands.transform";
 import { ETimeoutType } from "bellatrix";
 
+type TPositionalArgs = {
+  [key: `arg${number}`]: string;
+};
+
 type TRateLimitedArgs = {
   rateLimitType: ETimeoutType;
   userUniqueID: string;
@@ -41,6 +45,25 @@ export class CommandHandler {
 
     storage.set(limitingKey, timestamp);
     return false;
+  }
+
+  private extractPositionalArgs(msg: string, triggerWord: string): TPositionalArgs {
+    const msgPrepared = msg
+      .substring(msg.indexOf(triggerWord) + triggerWord.length, msg.length)
+      .trim()
+      .trimEnd();
+
+    const splitedArgs = msgPrepared.split(" ").filter((e) => e.length);
+
+    const args: TPositionalArgs = {
+      arg0: triggerWord,
+    };
+
+    for (let i = 1; i < splitedArgs.length + 1; i++) {
+      args[`arg${i}`] = splitedArgs[i - 1];
+    }
+
+    return args;
   }
 
   public async handle(args: THandleCommadArgs): Promise<undefined> {
@@ -82,6 +105,8 @@ export class CommandHandler {
     if (!command) {
       return undefined;
     }
+
+    const positionalArgs = this.extractPositionalArgs(args.message, triggerWord);
 
     // NOTE: JsonValue is specifix to prisma (I guess) but it can be consider string in that case
     // @ts-expect-error
@@ -147,7 +172,7 @@ export class CommandHandler {
         triggerWord,
       });
       if (res) {
-        args.send(res);
+        args.send(interpolate(res, positionalArgs));
       }
       return undefined;
     }
@@ -160,6 +185,7 @@ export class CommandHandler {
       username: args.tags?.username || "",
       price: parsedCommand.price,
       channel: this.channel,
+      ...positionalArgs,
     });
 
     args.send(res);
