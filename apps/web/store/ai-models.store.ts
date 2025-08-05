@@ -24,9 +24,9 @@ export const useAIModelsStore = defineStore("ai-models-store", () => {
 
   const startRefresh = () => {
     refreshTimer.value = setInterval(() => {
-      if (s1.value === "success") {
-        r1();
-      }
+      // if (s1.value === "success") {
+      //   r1();
+      // }
       if (s2.value === "success") {
         r2();
       }

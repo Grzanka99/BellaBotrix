@@ -27,7 +27,9 @@ export const SCreateAIModelDto = z.object({
 export type TAvailableModel = {
   name: string;
   model: string;
-  parameterSize: string;
+  description: string;
+  contextLength: number;
+  pricing: string;
 };
 
 export type TUpdateAISystemPromptDto = z.infer<typeof SUpdateAISystemPromptDto>;

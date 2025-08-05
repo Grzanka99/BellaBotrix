@@ -6,6 +6,7 @@ import type { THistoryItem } from "./types";
 import type { OllamaAIModels } from "@prisma/client";
 import { interpolate } from "utils/interpolate-string";
 import { GeminiAIProvider } from "./providers/gemini";
+import { OpenrouterAIProvider } from "./providers/openrouter";
 
 type TConfig = {
   language: string;
@@ -45,6 +46,7 @@ async function getDefaultPrompts(config: TConfig): Promise<THistoryItem[]> {
 export class AIConnector {
   private static ollamaProvider = OllamaAIProvider.instance;
   private static geminiProvider = GeminiAIProvider.instance;
+  private static openrouterProvider = OpenrouterAIProvider.instance;
 
   public static instances = new Map<string, AIConnector>();
 
@@ -77,7 +79,7 @@ export class AIConnector {
     return `${this.channel}-aichatter-history`;
   }
 
-  private async syncModels() {
+  public async syncModels() {
     const res = await prisma.ollamaAIModels.findMany();
 
     storage.set(AIConnector.skeymodels, res);
@@ -193,6 +195,15 @@ export class AIConnector {
         }
         case "ollama": {
           res = await AIConnector.ollamaProvider.send(
+            message,
+            history,
+            defaultPrompts,
+            config.model,
+          );
+          break;
+        }
+        case "openrouter": {
+          res = await AIConnector.openrouterProvider.send(
             message,
             history,
             defaultPrompts,
