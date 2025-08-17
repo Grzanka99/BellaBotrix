@@ -31,7 +31,7 @@ export async function startBot(): Promise<void> {
   logger.info(`Creating Twitch IRC client for ${channels.length} channel`);
 
   const ircClient = TwitchIrc.instance(
-    "ws://irc-ws.chat.twitch.tv:80",
+    "wss://irc-ws.chat.twitch.tv",
     Bun.env.CLIENT_ID || "",
     Bun.env.PASSWORD || "",
   );
