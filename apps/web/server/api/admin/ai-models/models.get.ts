@@ -1,30 +1,14 @@
 import { z } from "zod";
 import type { TAvailableModel } from "~/types/ai-settings.type";
 
-const OllamaAPIModel = z.object({
-  name: z.string(),
-  model: z.string(),
-  modified_at: z.string(),
-  size: z.number(),
-  digest: z.string(),
-  details: z.object({
-    parent_model: z.string(),
-    format: z.string(),
-    family: z.string(),
-    families: z.array(z.string()),
-    parameter_size: z.string(),
-    quantization_level: z.string(),
-  }),
-});
-
-const OllamaAPIModelResponse = z.object({
-  models: z.array(OllamaAPIModel),
+const OpenrouterAPIModelResponse = z.object({
+  data: z.array(z.any()),
 });
 
 export default defineEventHandler(async (event) => {
-  const OLLAMA_API = process.env.OLLAMA_API_URL;
+  const OPENROUTER_URL = process.env.OPENROUTER_API_URL;
 
-  if (!OLLAMA_API) {
+  if (!OPENROUTER_URL) {
     throw createError({ statusCode: 500 });
   }
 
@@ -36,18 +20,22 @@ export default defineEventHandler(async (event) => {
   }
 
   try {
-    const res = await fetch(`${OLLAMA_API}/api/tags`);
-    const parsed = OllamaAPIModelResponse.safeParse(await res.json());
+    const res = await fetch(`${OPENROUTER_URL}/models`);
+    const parsed = OpenrouterAPIModelResponse.safeParse(await res.json());
 
     if (!parsed.success) {
       return [];
     }
 
-    return parsed.data.models.map((el) => ({
+    const final: TAvailableModel[] = parsed.data.data.map((el) => ({
       name: el.name,
-      model: el.model,
-      parameterSize: el.details.parameter_size,
-    })) satisfies TAvailableModel[];
+      model: el.id,
+      description: el.description,
+      contextLength: el.context_length,
+      pricing: `In: ${el.pricing.prompt}$ / Out: ${el.pricing.completion}$`,
+    }));
+
+    return final;
   } catch (_) {
     throw createError({ statusCode: 500 });
   }

@@ -15,24 +15,13 @@ const emit = defineEmits<(e: "cancel") => void>();
 
 const s = useAIModelsStore();
 
-const name = ref(props.originalModel.name || "");
 const description = ref(props.originalModel.description || "");
-const provider = ref(props.originalModel.provider || "");
-
-const options = computed<TSelectOption<string>[]>(() => {
-  return [
-    {
-      displayName: "Gemini 2.0 Flash",
-      value: "gemini-2.0-flash",
-    },
-    ...s.availableModels.map((el) => ({
-      displayName: `${el.name} (${el.parameterSize})`,
-      value: el.name,
-    })),
-  ];
-});
 
 const providers = [
+  {
+    displayName: "OpenRouter",
+    value: "openrouter",
+  },
   {
     displayName: "Google Gemini",
     value: "gemini",
@@ -42,6 +31,36 @@ const providers = [
     value: "ollama",
   },
 ];
+
+const provider = ref(props.originalModel.provider || "");
+
+const options = computed<TSelectOption<string>[]>(() => {
+  switch (provider.value) {
+    case "gemini": {
+      return [
+        {
+          displayName: "Gemini 2.0 Flash",
+          value: "gemini-2.0-flash",
+        },
+      ];
+    }
+    case "openrouter": {
+      return [
+        ...s.availableModels.map((el) => ({
+          displayName: `${el.name} [ ${el.pricing} ]`,
+          value: el.model,
+        })),
+      ];
+    }
+    case "ollama": {
+      return [];
+    }
+    default:
+      return [];
+  }
+});
+
+const name = ref(props.originalModel.name || "");
 
 const handleSave = async () => {
   await s.handleUpdate({
@@ -56,20 +75,35 @@ const handleSave = async () => {
 </script>
 
 <template>
-  <Modal header="Edit model entry" @close="$emit('cancel')" open>
-    <form @submit.prevent="handleSave" class="edit-model-form">
+  <Modal
+    header="Edit model entry"
+    @close="$emit('cancel')"
+    open
+  >
+    <form
+      @submit.prevent="handleSave"
+      class="edit-model-form"
+    >
       <div class="edit-model-form__inputs">
-        <CustomSelect
+        <SearchSelect
           :options="options"
-          v-model="name" />
+          v-model="name"
+        />
         <FormTextarea
           name="description"
           label="Description"
-          v-model="description" />
-        <CustomSelect :options="providers" v-model="provider" />
+          v-model="description"
+        />
+        <CustomSelect
+          :options="providers"
+          v-model="provider"
+        />
       </div>
       <div class="edit-model-form__buttons">
-        <FormButton type="button" @click="$emit('cancel')">Cancel</FormButton>
+        <FormButton
+          type="button"
+          @click="$emit('cancel')"
+        >Cancel</FormButton>
         <FormButton type="submit">Save</FormButton>
       </div>
     </form>

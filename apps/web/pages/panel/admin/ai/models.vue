@@ -42,13 +42,23 @@ useHead({
 </script>
 
 <template>
-  <NewModelModal :open="newForm" @cancel="newForm = false" />
-  <EditModelModal v-if="toEdit" :original-model="toEdit" @cancel="toEdit = undefined" />
+  <NewModelModal
+    :open="newForm"
+    @cancel="newForm = false"
+  />
+  <EditModelModal
+    v-if="toEdit"
+    :original-model="toEdit"
+    @cancel="toEdit = undefined"
+  />
   <div class="ai-models-page">
     <div class="ai-models-page-controls">
       <div></div>
       <div class="ai-models-page-controls__new-model">
-        <FormButton type="button" @click="newForm = true">Add new model</FormButton>
+        <FormButton
+          type="button"
+          @click="newForm = true"
+        >Add new model</FormButton>
       </div>
     </div>
     <Table>
@@ -61,20 +71,29 @@ useHead({
         <TableHeader></TableHeader>
       </TableHead>
       <TableBody>
-        <TableRow v-for="model in s.models" :grid-template="gridTemplate" :key="model.id">
+        <TableRow
+          v-for="model in s.models"
+          :grid-template="gridTemplate"
+          :key="model.id"
+        >
           <TableCell centered>
             <FancyToggle
               :value="model.enabled"
               @change="enabled => s.handleUpdate({
                 id: model.id,
                 enabled
-              })" />
+              })"
+            />
           </TableCell>
           <TableCell>{{ model.name }}</TableCell>
-          <TableCell>{{model.provider}}</TableCell>
+          <TableCell>{{ model.provider }}</TableCell>
           <TableCell>{{ model.description }}</TableCell>
           <TableCell centered>
-            <FormButton type="button" smaller @click="toEdit = model">
+            <FormButton
+              type="button"
+              smaller
+              @click="toEdit = model"
+            >
               <Icon name="material-symbols:edit" />
               edit
             </FormButton>
@@ -83,7 +102,8 @@ useHead({
             <FormButton
               type="button"
               smaller
-              @click="s.handleDelete(model.id)">
+              @click="s.handleDelete(model.id)"
+            >
               <Icon name="material-symbols:delete-forever" />
               delete
             </FormButton>
