@@ -17,7 +17,7 @@ import { TwitchApi } from "services/twitch-api";
 import type { TwitchIrc } from "services/twitch-irc";
 import { interpolate } from "utils/interpolate-string";
 import { logger } from "utils/logger";
-import { TTwitchIrcContext } from "../types";
+import type { TTwitchIrcContext } from "../types";
 
 type TArgs = {
   ircClient: TwitchIrc;
@@ -286,11 +286,15 @@ export class ChannelConnection {
     // @ts-ignore-next-line
     this.r6stats = undefined;
     // @ts-ignore-next-line
+    this.aiConnector.destroy();
+    // @ts-ignore-next-line
     this.aiConnector = undefined;
 
     this.streamStatsGatherer.destroy();
     // @ts-ignore-next-line
     this.streamStatsGatherer = undefined;
+    // @ts-ignore-next-line
+    this.automod.destroy();
     // @ts-ignore-next-line
     this.automod = undefined;
 

@@ -113,6 +113,7 @@ export class AIConnector {
     storage.set(this.historyStorageKey, history);
   }
 
+  private cleanerInterval: Timer | undefined;
   private isCleanerRunning = false;
   public startHistoryCleaner(channel: string) {
     logger.info(`[${channel}] Starting history cleaner for instance of AIConnector`);
@@ -121,7 +122,7 @@ export class AIConnector {
     }
 
     // NOTE: Auto removing context/old messages after 5 minutes, calling shift twice to remove also responses;
-    setInterval(() => {
+    this.cleanerInterval = setInterval(() => {
       const history = (storage.get(this.historyStorageKey)?.value || []) as THistoryItem[];
       history.shift();
       history.shift();
@@ -240,5 +241,10 @@ export class AIConnector {
     } catch (_) {
       return undefined;
     }
+  }
+
+  public destroy() {
+    clearInterval(this.cleanerInterval);
+    AIConnector.instances.delete(this.channel);
   }
 }

@@ -57,7 +57,7 @@ export class AutomodService {
           },
         });
       });
-    } catch (_) {}
+    } catch (_) { }
   }
 
   public static getInstance(ch: string): AutomodService {
@@ -91,5 +91,9 @@ export class AutomodService {
         }
       });
     }
+  }
+
+  public destroy() {
+    AutomodService._instances.delete(this.channel);
   }
 }
