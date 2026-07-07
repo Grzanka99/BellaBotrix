@@ -60,7 +60,7 @@ export class TwitchApi {
       throw new Error("Could not obtain channel userid");
     }
 
-    return res.data.data[0].id;
+    return res.data.data[0]?.id;
   }
 
   private async getNewToken() {
