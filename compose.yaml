@@ -1,0 +1,41 @@
+# bot and sup don't talk over the network; they communicate through the SQLite
+# store at /data/shared.db (sup writes sync keys, bot polls/reads them), so both
+# mount the same volume. Only sup listens on a port.
+services:
+  sup:
+    image: bellabotrix:local
+    build:
+      context: .
+      dockerfile: Containerfile
+    container_name: bellabotrix-sup
+    restart: always
+    init: true
+    env_file:
+      - .env
+    environment:
+      - SHARED_DB_FILE=/data/shared.db
+      - SYNC_PORT=5000
+    command: ["bun", "run", "--cwd", "apps/sup", "start"]
+    ports:
+      - "${SUP_PORT:-5000}:5000"
+    volumes:
+      - bellabotrix-data:/data
+
+  bot:
+    image: bellabotrix:local
+    build:
+      context: .
+      dockerfile: Containerfile
+    container_name: bellabotrix-bot
+    restart: always
+    init: true
+    env_file:
+      - .env
+    environment:
+      - SHARED_DB_FILE=/data/shared.db
+    command: ["bun", "run", "--cwd", "apps/bot", "start"]
+    volumes:
+      - bellabotrix-data:/data
+
+volumes:
+  bellabotrix-data:
