@@ -1,0 +1,15 @@
+**/node_modules
+**/.turbo
+**/.nuxt
+**/.output
+**/bin
+dist
+.git
+.env
+.env.*
+*.db
+*.db-*
+*.sqlite
+*.log
+Containerfile
+compose.yaml
