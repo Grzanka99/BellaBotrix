@@ -1,21 +1,152 @@
-# Next.js template
+# new-web
 
-This is a Next.js template with shadcn/ui.
+Next.js 16 (App Router, Turbopack) admin panel for the BellaBotrix Twitch bot.
+Replaces the Nuxt app in `apps/web`, which stays the source of truth for
+behaviour until the migration is finished. Page URLs are identical
+(`/login`, `/panel`, `/panel/timers`, ...).
 
-## Adding components
+Stack: React Server Components + Server Actions, Prisma 5 (shared schema in
+`prisma/schema.prisma` at the repo root), iron-session, zod 3, zustand,
+shadcn/ui (preset `base-sera`, **Base UI** primitives, not Radix), Tailwind 4,
+`lucide-react` icons.
 
-To add components to your app, run the following command:
+## Commands
 
-```bash
-npx shadcn@latest add button
+Run inside `apps/new-web` (bun workspaces; install from the repo root).
+
+| Command             | What                                       |
+| ------------------- | ------------------------------------------ |
+| `bun run dev`       | Dev server on http://localhost:3000        |
+| `bun run build`     | Production build                           |
+| `bun run start`     | Serve the production build                 |
+| `bun run typecheck` | `tsc --noEmit`                             |
+| `bun run lint`      | ESLint (see note below)                    |
+| `bun run format`    | Prettier (no semicolons, double quotes)    |
+
+The Prisma client is generated at the repo root (`bun install` runs
+`prisma generate` in the root `postinstall`).
+
+Lint note: the workspace packages pull TypeScript 7 to the repo root, which
+typescript-eslint can't load. `eslint.typescript-pin.mjs` (imported first by
+`eslint.config.mjs`) points it at this app's TypeScript 5.
+
+## Environment
+
+| Variable                              | Required     | Notes                                                                                                 |
+| ------------------------------------- | ------------ | ----------------------------------------------------------------------------------------------------- |
+| `REMOTE_DB_URL`                       | yes          | Postgres URL used by the Prisma schema. Locally it is read from the repo-root `.env` (see below).      |
+| `SESSION_PASSWORD`                    | yes in prod  | Random string, at least 32 chars, encrypts the session cookie. Dev falls back to a fixed insecure value. |
+| `REG_TOKEN`                           | for register | Registration token users must enter. Unset = registration disabled.                                   |
+| `APP_URL`                             | yes in prod  | Public origin, e.g. `https://panel.example.com`. Twitch redirect URI is `<APP_URL>/api/auth`.          |
+| `API_CLIENT_ID` / `API_CLIENT_SECRET` | for OAuth    | Twitch application credentials.                                                                       |
+| `SYNC_URL` / `SYNC_KEY`               | yes          | The `sup` sync service (defaults `http://localhost:5000` / `verysecurekey`, same as Nuxt).             |
+
+Local: put app values in `apps/new-web/.env.local`. `next.config.ts` also
+merges the repo-root `.env` (for `REMOTE_DB_URL`); app-level files and the
+real environment always win, and a missing root `.env` is fine.
+
+## Vercel
+
+- Root directory: `apps/new-web`. Framework: Next.js. Node.js 26.x.
+- Set every variable above (new compared to Nuxt: `SESSION_PASSWORD`).
+- `turbopack.root` and `outputFileTracingRoot` point at the monorepo root, so
+  workspace packages and the Prisma query engine
+  (`node_modules/.prisma/client/libquery_engine-*.so.node`) are traced into the
+  server functions. Check the `.next/server/**/*.nft.json` traces if Prisma
+  fails to start after a dependency change.
+- The Twitch app's OAuth redirect URI must be `<APP_URL>/api/auth`.
+
+## Architecture and conventions
+
+Follow these when porting a page. `features/timers` is the reference
+implementation; copy its shape.
+
+### Layout
+
+```
+app/                     routes only (thin)
+  login/page.tsx
+  panel/layout.tsx       auth gate + sidebar shell (requireSession)
+  panel/<route>/page.tsx
+  api/auth, api/auth-redirect   the only route handlers (Twitch OAuth)
+features/<feature>/
+  schema.ts              zod schemas + inferred types (port of apps/web/types/*.type.ts)
+  queries.ts             "server-only" reads; each one authenticates + authorizes
+  actions.ts             "use server" mutations returning ActionResult
+  store.ts               zustand (only when client state is needed)
+  components/*.tsx
+components/              shared, dumb UI (page-header, search-input, confirm-delete-dialog, ...)
+components/ui/           shadcn-generated, do not hand-edit
+components/panel/        the panel shell (sidebar, channel switcher, theme toggle)
+hooks/                   shared client hooks (use-auto-refresh)
+lib/                     client-safe helpers (perms, nav, action-result, notify, form, ...)
+lib/server/              server-only core: db, session, auth, action, sync, twitch
+proxy.ts                 optimistic redirect of cookie-less /panel requests
 ```
 
-This will place the ui components in the `components` directory.
+### Data flow
 
-## Using components
+- No REST API. Pages are async server components that read through
+  `features/<f>/queries.ts`; mutations are Server Actions in
+  `features/<f>/actions.ts`.
+- Route file stays thin: get the channel, load data, render the feature's
+  client component, export `metadata.title` (same title as the Nuxt `useHead`).
 
-To use the components in your app, import them as follows:
+  ```tsx
+  export const metadata: Metadata = { title: "Timers" }
+  export default async function Page() {
+    const channel = await getSelectedChannel()
+    if (!channel) return <NoChannelEmpty />
+    const timers = await getTimers(channel.id)
+    return <TimersView key={channel.id} channelId={channel.id} timers={timers} />
+  }
+  ```
 
-```tsx
-import { Button } from "@/components/ui/button";
-```
+- Selected channel = cookie `selectedChannel` (Channel DB id), always
+  re-validated against `ChannelAccess` by `getSelectedChannel()`. Pages pass
+  `channel.id` down; actions receive it as their first argument and re-check
+  it with `authorizeChannelAction(channelId)`.
+
+### Security rules (every query and action)
+
+- Server Actions are public HTTP endpoints. Each action, in order:
+  `authorizeAction()` / `authorizeChannelAction(channelId, { perms })` →
+  `parseInput(schema, input)` → DB work in `tryDb(...)` → `revalidatePath(...)`.
+  Return the guard's failure as-is: `if (!auth.ok) return auth`.
+- Scope every channel-owned row to the authorized channel:
+  `where: { id, channelId: auth.channel.id }` with `updateMany` / `deleteMany`
+  + `count === 0 → fail("... not found", 404)`, or fetch-then-check. Never
+  mutate by bare id (the Nuxt endpoints did; that's a deliberate fix).
+- Never throw to the client and never return Prisma errors; `tryDb` logs and
+  returns a generic message. Select only the columns the UI needs (never
+  `Channel.token`, never `WebuiUser.password`).
+- Perms: `hasPerms(user.perms, [...])` = server semantics (any of, no admin
+  shortcut, port of `checkPerms`). `canSeeWithPerms` / `<RequirePerms>` = UI
+  semantics (admin always passes, `[]` = admin only). Hiding UI is not
+  security.
+- Sync service calls (`lib/server/sync.ts`): keep each Nuxt call site's
+  semantics. Awaited ones fail the action; fire-and-forget ones go through
+  `syncInBackground(label, fn)`.
+
+### Client state and feedback
+
+- zustand only via `createStoreContext` (`lib/create-store-context.tsx`): a
+  store per mounted Provider, initialised from server props, re-synced when
+  fresh props arrive (`sync`). Never a module-global store holding per-user
+  server data. Purely client-side prefs may use a plain store with `persist`.
+- Feedback = toast via `notifySuccess` / `notifyError` / `notifyActionError`
+  (`lib/notify.ts`). Reuse the Nuxt popup wording where there was one.
+- Polling: `useAutoRefresh(ms)` (calls `router.refresh()`, paused while the
+  tab is hidden). Timers use 10 s like the Nuxt store.
+- Forms: shadcn `FieldGroup` / `Field` / `FieldError`, zod `safeParse` on every
+  render + `fieldErrors(result)`, submit disabled while invalid,
+  `useTransition` for pending state, `Spinner data-icon="inline-start"`.
+
+### UI
+
+- shadcn-idiomatic: Table, Dialog, AlertDialog (`ConfirmDeleteDialog`),
+  Empty, Card, Badge, Switch, Select, Tabs, Skeleton, Alert. Base UI uses
+  `render={<Button />}` instead of `asChild`; `Select` needs `items`.
+- Use `gap-*` (never `space-*`), semantic colors, icons with `data-icon`.
+- Links styled as buttons: `<Link className={buttonVariants(...)}>`.
+- Sidebar links live in `lib/nav.ts` only.

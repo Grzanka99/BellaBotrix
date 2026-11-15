@@ -2,6 +2,7 @@
 **/.turbo
 **/.nuxt
 **/.output
+**/.next
 **/bin
 dist
 .git

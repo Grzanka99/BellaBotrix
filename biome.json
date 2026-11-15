@@ -1,5 +1,8 @@
 {
 	"$schema": "https://biomejs.dev/schemas/1.1.2/schema.json",
+	"files": {
+		"ignore": ["apps/new-web"]
+	},
 	"organizeImports": {
 		"enabled": true
 	},
