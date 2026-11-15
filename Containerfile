@@ -14,7 +14,6 @@ COPY prisma ./prisma
 COPY apps/bot/package.json ./apps/bot/
 COPY apps/sup/package.json ./apps/sup/
 COPY apps/web/package.json ./apps/web/
-COPY apps/new-web/package.json ./apps/new-web/
 COPY packages/bellatrix/package.json ./packages/bellatrix/
 COPY packages/common/package.json ./packages/common/
 COPY packages/r6dle/package.json ./packages/r6dle/
