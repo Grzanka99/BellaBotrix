@@ -1,6 +1,6 @@
 import ky from "ky";
-import type { TResponse, TWrappedResponse } from "types";
-import { bearerTokenParams, logger } from "utils";
+import type { TResponse, TWrappedResponse } from "../types";
+import { bearerTokenParams, logger } from "../utils";
 import { z } from "zod";
 
 const SApiChatters = z.array(

@@ -30,11 +30,16 @@ export const CommandSchema = z.object({
   errorMessage: z.string(),
 });
 
+// Built-in command definitions (see BASE_COMMANDS). `paid`, `price` and `errorMessage` are not
+// part of them: the database defaults are used when the commands are created.
 export const MinimalCommandSchema = CommandSchema.omit({
   id: true,
   uniqueName: true,
   channelName: true,
   enabled: true,
+  paid: true,
+  price: true,
+  errorMessage: true,
 }).extend({
   subCommands: z
     .array(

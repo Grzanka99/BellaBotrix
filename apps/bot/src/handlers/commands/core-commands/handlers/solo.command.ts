@@ -5,7 +5,7 @@ import { prisma, prismaQueue } from "services/db";
 import { interpolate } from "utils/interpolate-string";
 
 function getUsername(original: string): TOption<[string, string]> {
-  const username = original.match(/\@\S+/);
+  const username = original.match(/@\S+/);
 
   if (!username) {
     return undefined;
@@ -71,7 +71,7 @@ export const startSoloCoreCommand = new CoreCommand(async (ctx) => {
     });
   }
 
-  prismaQueue
+  void prismaQueue
     .enqueue(() =>
       prisma.solo.create({
         data: {
@@ -86,7 +86,7 @@ export const startSoloCoreCommand = new CoreCommand(async (ctx) => {
     )
     .then((res) => {
       setTimeout(() => {
-        prismaQueue.enqueue(() =>
+        void prismaQueue.enqueue(() =>
           prisma.solo.update({
             where: { id: res.id },
             data: { inProgress: false },
@@ -122,7 +122,7 @@ export const soloNopeCoreCommand = new CoreCommand(async (ctx) => {
     return undefined;
   }
 
-  prismaQueue.enqueue(() =>
+  void prismaQueue.enqueue(() =>
     prisma.solo.update({
       where: {
         id: foundSolo.id,

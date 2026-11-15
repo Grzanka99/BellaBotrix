@@ -148,7 +148,7 @@ export class CommandHandler {
 
       if (user.points < parsedCommand.price) {
         const res = interpolate(parsedCommand.errorMessage, {
-          username: `@${args.tags.username}` || "",
+          username: `@${args.tags.username}`,
           points: parsedCommand.price,
         });
 

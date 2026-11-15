@@ -25,8 +25,6 @@ export async function setDefaultCommandsForChannel(channel: string) {
         create: {
           uniqueName: getUniqueName(command.name, channel),
           name: command.name,
-          // TODO: it is correct type, some ts error I think, but need to fix that
-          // @ts-expect-error
           message: command.message,
           alias: command.alias,
           enabled: true,
@@ -53,8 +51,6 @@ export async function setDefaultCommandsForChannel(channel: string) {
             create: {
               uniqueName: getUniqueName(parentCommand.name + subcmd.name, channel),
               name: subcmd.name,
-              // TODO: it is correct type, some ts error I think, but need to fix that
-              // @ts-expect-error
               message: subcmd.message,
               alias: subcmd.alias,
               channelName: channel,

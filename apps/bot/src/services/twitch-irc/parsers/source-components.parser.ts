@@ -1,5 +1,5 @@
-import { TOption } from "bellatrix";
-import { TTwitchIrcSource } from "services/types";
+import type { TOption } from "bellatrix";
+import type { TTwitchIrcSource } from "services/types";
 
 export function parseSourceComponent(rawSource: TOption<string>): TOption<TTwitchIrcSource> {
   if (!rawSource) {

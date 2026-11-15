@@ -12,7 +12,6 @@
     "noEmit": true,
     "composite": true,
     "strict": true,
-    "downlevelIteration": true,
     "skipLibCheck": true,
     "allowSyntheticDefaultImports": true,
     "forceConsistentCasingInFileNames": true,
@@ -20,6 +19,8 @@
     "types": [
       "bun-types" // add Bun global
     ],
-    "baseUrl": "src"
+    "paths": {
+      "*": ["./src/*"]
+    }
   }
 }

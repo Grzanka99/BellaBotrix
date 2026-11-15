@@ -31,7 +31,7 @@ export const gambleCoreCommand = new CoreCommand(async (ctx) => {
     return undefined;
   }
 
-  const [resUsername, formattedUsername] = getUsername(ctx.message, ctx.tags.username);
+  const [resUsername] = getUsername(ctx.message, ctx.tags.username);
 
   const startPosition = ctx.message.indexOf("!gamble") + 8;
   const points = ctx.message.substring(startPosition);

@@ -53,7 +53,7 @@ export class R6Stats {
       }
 
       return false;
-    } catch (_) {
+    } catch {
       this.logger.info("Something went wrong while setting up tracker API");
       return false;
     }
@@ -85,7 +85,7 @@ export class R6Stats {
       }
 
       return stats.data.profiles[profilesIds[0]];
-    } catch (_) {
+    } catch {
       this.logger.error(`Something went wrong while wetching data for profile ${username}`);
       return undefined;
     }

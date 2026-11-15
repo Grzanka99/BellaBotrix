@@ -1,16 +1,14 @@
 export class AsyncQueue {
-  private queue: Array<
-    // biome-ignore lint/suspicious/noExplicitAny: <explanation>
-    [() => Promise<unknown>, (v: any) => void, (v: string) => void]
-  > = [];
+  private queue: Array<[() => Promise<unknown>, (v: unknown) => void, (v: string) => void]> = [];
   private isRunning = false;
 
-  private resolver: (v: boolean) => void = (_) => {};
-  private rejecter: (v: boolean) => void = (_) => {};
+  private resolver: (v: boolean) => void = () => {};
+  private rejecter: (v: boolean) => void = () => {};
 
   public async enqueue<T>(callback: () => Promise<T>, autostart = true): Promise<T> {
     return new Promise((res, rej) => {
-      this.queue.push([callback, res, rej]);
+      // `v` is the value `callback`'s promise resolved with, so it is a `T`.
+      this.queue.push([callback, (v) => res(v as T), rej]);
       if (!this.isRunning && autostart) {
         this.start();
       }
@@ -45,7 +43,7 @@ export class AsyncQueue {
     this.isRunning = true;
     this.run();
 
-    new Promise((res, rej) => {
+    void new Promise((res, rej) => {
       this.resolver = res;
       this.rejecter = rej;
     });

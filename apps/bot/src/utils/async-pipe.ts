@@ -32,8 +32,8 @@ export class AsyncPipe<T extends Array<unknown> = [], R = void> {
     return this.curr + 1;
   }
 
-  private resolver: (v: number) => void = (_) => {};
-  private rejecter: (v: number) => void = (_) => {};
+  private resolver: (v: number) => void = () => {};
+  private rejecter: (v: number) => void = () => {};
 
   private done() {
     if (this.curr + 1 < this.total) {
@@ -47,7 +47,7 @@ export class AsyncPipe<T extends Array<unknown> = [], R = void> {
 
   private run() {
     this.logger.info(`Running ${this.curr + 1}/${this.total}`);
-    this.fn[this.curr]().then(() => {
+    void this.fn[this.curr]().then(() => {
       if (this.curr + 1 < this.total) {
         this.curr = this.curr + 1;
         this.run();

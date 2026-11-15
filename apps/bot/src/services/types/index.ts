@@ -1,5 +1,5 @@
 import type { TOption, TSettings } from "bellatrix";
-import type { AIConnector } from "services/ai-connectors/connector";
+import type { AIConnector } from "services/ai-connectors";
 import type { R6Dle } from "services/r6dle";
 import type { R6Stats } from "services/r6stats";
 import type { TwitchApi } from "services/twitch-api";

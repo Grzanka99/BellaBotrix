@@ -1,7 +1,7 @@
-import { ID_URL } from "env";
+import { ID_URL } from "../env";
 import ky from "ky";
-import { SWrappedResponse, type TResponse, type TWrappedResponse } from "types";
-import { bearerTokenParams, interpolate, logger } from "utils";
+import { SWrappedResponse, type TResponse, type TWrappedResponse } from "../types";
+import { bearerTokenParams, interpolate, logger } from "../utils";
 import { z } from "zod";
 
 const STwitchUser = z.object({

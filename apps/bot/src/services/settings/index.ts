@@ -78,7 +78,7 @@ export async function getSettings(unameorid: number | string): Promise<TSettings
     }
 
     return parsed.data;
-  } catch (err) {
+  } catch {
     return defaults;
   }
 }

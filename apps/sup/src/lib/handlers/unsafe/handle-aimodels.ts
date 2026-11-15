@@ -12,13 +12,13 @@ export const AIModelsSyncValidation = {
 export function HandleAIModelsSync(
   ctx: TUnsafeRouteContext<typeof UNSAFE_AIMODELS_SYNC, typeof AIModelsSyncValidation>,
 ) {
-  const { error, body } = ctx;
+  const { status, body } = ctx;
 
   if (body.key !== SYNC_KEY) {
-    return error(401);
+    return status(401);
   }
 
-  (async () => {
+  void (async () => {
     const models = await prisma.ollamaAIModels.findMany();
 
     storage.set("ollamamodels", models);

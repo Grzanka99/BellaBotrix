@@ -1,7 +1,6 @@
-import { API_CLIENT_ID } from "env";
 import ky from "ky";
-import { SWrappedResponse, type TResponse, type TWrappedResponse } from "types";
-import { bearerTokenParams, logger } from "utils";
+import { SWrappedResponse, type TResponse, type TWrappedResponse } from "../types";
+import { bearerTokenParams, logger } from "../utils";
 import { z } from "zod";
 
 const SApiChatter = z.object({

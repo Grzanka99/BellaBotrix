@@ -1,4 +1,4 @@
-import { API_CLIENT_ID } from "env";
+import { API_CLIENT_ID } from "./env";
 
 type TReplacingKeys = Record<string, string | number>;
 
@@ -7,10 +7,9 @@ export function interpolate(base: string, args: TReplacingKeys) {
   if (!args) return base;
 
   let newString: string = base;
-  // biome-ignore lint/complexity/noForEach: <explanation>
-  Object.entries(args).forEach(([key, value]) => {
+  for (const [key, value] of Object.entries(args)) {
     newString = newString.replaceAll(`$${key}`, String(value));
-  });
+  }
 
   return newString;
 }

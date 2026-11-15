@@ -15,15 +15,15 @@ export const SettingsSyncValidation = {
 export function HandleSettingsSync(
   ctx: TUnsafeRouteContext<typeof UNSAFE_SETTINGS_SYNC, typeof SettingsSyncValidation>,
 ) {
-  const { params, error, body } = ctx;
+  const { params, status, body } = ctx;
 
   if (body.key !== SYNC_KEY) {
-    return error(401);
+    return status(401);
   }
 
   const channelId = params.channel;
 
-  (async () => {
+  void (async () => {
     const [settings, channel] = await Promise.all([
       prisma.webuiUser.findFirst({
         where: { channelId },

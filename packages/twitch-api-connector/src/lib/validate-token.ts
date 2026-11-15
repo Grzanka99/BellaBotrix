@@ -1,6 +1,6 @@
 import ky from "ky";
-import type { TResponse } from "types";
-import { logger } from "utils";
+import type { TResponse } from "../types";
+import { logger } from "../utils";
 import { z } from "zod";
 
 const SValidateToken = z.object({

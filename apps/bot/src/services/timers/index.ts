@@ -14,7 +14,7 @@ export class ChannelTimer {
     this.channelName = channel.replaceAll("#", "");
     this.send = sendFn;
 
-    prisma.channel.findUnique({ where: { name: this.channelName } }).then((res) => {
+    void prisma.channel.findUnique({ where: { name: this.channelName } }).then((res) => {
       if (!res) {
         logger.error(`Something went wrong while settings timers for channel: ${channel}`);
         return;
@@ -22,7 +22,7 @@ export class ChannelTimer {
 
       logger.info(`Starting timers for channel: ${channel}`);
       this.id = res.id;
-      this.syncTimersWithDB();
+      void this.syncTimersWithDB();
       this.startSyncInterval();
     });
   }
@@ -58,9 +58,7 @@ export class ChannelTimer {
   }
 
   private startSyncInterval(): void {
-    this.syncInterval = setInterval(async () => {
-      await this.syncTimersWithDB();
-    }, 30_000);
+    this.syncInterval = setInterval(() => void this.syncTimersWithDB(), 30_000);
   }
 
   private stopFetchTimersTimer(): void {

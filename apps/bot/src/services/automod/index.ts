@@ -43,8 +43,8 @@ export class AutomodService {
         `[AUTOMOD] [${handler}] [${action}] target: ${userid} ${JSON.stringify(additional)}`,
       );
 
-      prismaQueue.enqueue(async () => {
-        const res = await prisma.automodEvents.create({
+      void prismaQueue.enqueue(async () => {
+        await prisma.automodEvents.create({
           data: {
             timestamp,
             action,
@@ -57,7 +57,7 @@ export class AutomodService {
           },
         });
       });
-    } catch (_) {}
+    } catch {}
   }
 
   public static getInstance(ch: string): AutomodService {
@@ -80,10 +80,10 @@ export class AutomodService {
     }
 
     if (settings.firstMessageFilter.enabled.value && ctx.tags?.firstMessage) {
-      this.antispam.isMessageSpam(ctx.message).then((res) => {
+      void this.antispam.isMessageSpam(ctx.message).then((res) => {
         const userId = ctx.tags?.userId;
         if (res && userId) {
-          this.api.banUserById(userId, "spam or scam").then(() => {
+          void this.api.banUserById(userId, "spam or scam").then(() => {
             this.log(EAutomodActions.Ban, userId, EAutomodHandlers.Antispam, {
               message: ctx.message,
             });

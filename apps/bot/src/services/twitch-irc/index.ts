@@ -38,7 +38,7 @@ export class TwitchIrc {
       const lastping = Number(storage.get("lastping")?.value);
       const now = Date.now();
       if (now - lastping > PING_TRESHHOLD) {
-        this.reconnect();
+        void this.reconnect();
       }
     }, 60_000);
   }
@@ -50,7 +50,7 @@ export class TwitchIrc {
           this.onOpen(resolve);
         });
         this.ws.addEventListener("message", (result) => this.onMessage(result));
-      } catch (err) {
+      } catch {
         resolve(undefined);
       }
     });
