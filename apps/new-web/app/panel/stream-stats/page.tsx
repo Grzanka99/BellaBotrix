@@ -7,7 +7,7 @@ import {
   getSelectedStreamStats,
   getStreamsOverview,
 } from "@/features/stream-stats/queries"
-import { SStreamParam } from "@/features/stream-stats/schema"
+import { pickStream, SStreamParam } from "@/features/stream-stats/schema"
 import { firstParam, type RawSearchParams } from "@/lib/list-params"
 import { getSelectedChannel } from "@/lib/server/auth"
 
@@ -32,10 +32,7 @@ export default async function StreamStatsPage({
   ])
 
   // `?stream=` must be one of this channel's streams; default = latest.
-  const stream =
-    requested === undefined
-      ? overview.streams[0]
-      : overview.streams.find((item) => item.id === requested)
+  const stream = pickStream(overview, requested)
   const selected = await getSelectedStreamStats(channel.id, stream)
 
   return (

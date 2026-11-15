@@ -121,3 +121,16 @@ export function reduceSamples(samples: StatSample[]): StatSample[] {
 export function formatAvg(value: number | null): string | undefined {
   return value ? value.toFixed(2) : undefined
 }
+
+/**
+ * The stream `?stream=` points at. It must be one of the channel's streams;
+ * without the parameter it is the latest one.
+ */
+export function pickStream(
+  overview: StreamsOverview,
+  requested: number | undefined
+): StreamSummary | undefined {
+  return requested === undefined
+    ? overview.streams[0]
+    : overview.streams.find((stream) => stream.id === requested)
+}

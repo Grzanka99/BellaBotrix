@@ -1,5 +1,7 @@
 import "server-only"
 
+import { cache } from "react"
+
 import { requireChannelAccess } from "@/lib/server/auth"
 import { prisma } from "@/lib/server/db"
 import { isLive } from "@/lib/server/sync"
@@ -47,7 +49,7 @@ export async function getLiveStatus(channelId: number): Promise<LiveStatus> {
  * Month average = all samples of streams whose `unique_id` starts with the
  * month (Nuxt `startsWith`), i.e. sum / count over those streams.
  */
-export async function getStreamsOverview(
+async function loadStreamsOverview(
   channelId: number
 ): Promise<StreamsOverview> {
   const { channel } = await requireChannelAccess(channelId)
@@ -153,3 +155,6 @@ export async function getSelectedStreamStats(
     points: reduceSamples(samples),
   }
 }
+
+/** Cached per request: the page and the picker slot both need it. */
+export const getStreamsOverview = cache(loadStreamsOverview)

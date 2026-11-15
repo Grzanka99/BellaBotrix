@@ -9,7 +9,7 @@ import {
   SidebarContent,
   SidebarGroup,
   SidebarGroupContent,
-  SidebarGroupLabel,
+  SidebarHeader,
   SidebarMenu,
   SidebarMenuBadge,
   SidebarMenuButton,
@@ -25,16 +25,21 @@ const BASE = "/panel/stream-stats"
 /**
  * Port of the two `ScrollableList`s of `pages/panel/stream-stats.vue`,
  * built from shadcn Sidebar primitives as two nested sidebars (months, then
- * the streams of the selected month) next to the main one. Each item shows
+ * the streams of the selected month). On large screens the `@aside` slot of
+ * the panel layout puts them next to the main sidebar, full height; smaller
+ * screens show them inside the page. Each item shows
  * its average viewers (`avgViewers.vue`). Items are links to `?stream=<id>`;
  * picking a month opens its latest stream, like the Nuxt watcher did.
  */
 export function StreamPicker({
   overview,
   selectedId,
+  className,
 }: {
   overview: StreamsOverview
   selectedId: number | undefined
+  /** Layout of the pair: where it sits and how tall it is. */
+  className?: string
 }) {
   const selectedMonth =
     overview.streams.find((stream) => stream.id === selectedId)?.month ??
@@ -47,10 +52,7 @@ export function StreamPicker({
   const selectedStreamRef = useScrollIntoView(selectedId)
 
   return (
-    <nav
-      aria-label="Stream picker"
-      className="flex h-64 shrink-0 border-b lg:h-full lg:border-b-0"
-    >
+    <nav aria-label="Stream picker" className={cn("flex shrink-0", className)}>
       <PickerSidebar label="Months">
         {overview.months.map((month) => {
           const first = overview.streams.find(
@@ -118,9 +120,12 @@ function PickerSidebar({
       collapsible="none"
       className="w-auto min-w-0 flex-1 border-r last:border-r-0 lg:w-60 lg:flex-none lg:last:border-r"
     >
+      {/* Same height as the panel header, so its bottom line carries across. */}
+      <SidebarHeader className="h-14 justify-center border-b px-4">
+        <span className="text-sm font-medium">{label}</span>
+      </SidebarHeader>
       <SidebarContent>
         <SidebarGroup>
-          <SidebarGroupLabel>{label}</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>{children}</SidebarMenu>
           </SidebarGroupContent>

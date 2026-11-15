@@ -53,45 +53,42 @@ export function StreamStatsView({
   // one 10 s refresh reloads all of them.
   useAutoRefresh(10_000)
 
-  const hasStreams = overview.streams.length > 0
-
-  // `data-page-bleed` drops the panel layout's padding, so the two picker
-  // drawers sit flush against the sidebar and run the full height (below the
-  // 3.5rem header) with their own scrolling, like the Nuxt page.
   return (
-    <div
-      data-page-bleed
-      className="flex flex-1 flex-col lg:h-[calc(100svh-3.5rem)] lg:flex-none lg:flex-row"
-    >
-      {hasStreams && (
-        <StreamPicker overview={overview} selectedId={selected?.stream.id} />
+    <>
+      <PageHeader
+        title="Stream Stats"
+        description="Viewers and chat activity of the channel's streams."
+      >
+        <LiveIndicator status={liveStatus} />
+      </PageHeader>
+      {overview.streams.length === 0 ? (
+        <Empty className="border">
+          <EmptyHeader>
+            <EmptyMedia variant="icon">
+              <ChartColumnIcon />
+            </EmptyMedia>
+            <EmptyTitle>No streams yet</EmptyTitle>
+            <EmptyDescription>
+              Stats appear here once the bot has recorded a stream.
+            </EmptyDescription>
+          </EmptyHeader>
+        </Empty>
+      ) : (
+        <>
+          {/* Large screens get the picker as sidebars (the `@aside` slot). */}
+          <StreamPicker
+            overview={overview}
+            selectedId={selected?.stream.id}
+            className="h-64 border lg:hidden"
+          />
+          {selected ? (
+            <SelectedStream selected={selected} />
+          ) : (
+            <StreamNotFound missing={requestedMissing} />
+          )}
+        </>
       )}
-      <div className="flex min-w-0 flex-1 flex-col gap-6 p-4 md:p-6 lg:overflow-y-auto">
-        <PageHeader
-          title="Stream Stats"
-          description="Viewers and chat activity of the channel's streams."
-        >
-          <LiveIndicator status={liveStatus} />
-        </PageHeader>
-        {!hasStreams ? (
-          <Empty className="border">
-            <EmptyHeader>
-              <EmptyMedia variant="icon">
-                <ChartColumnIcon />
-              </EmptyMedia>
-              <EmptyTitle>No streams yet</EmptyTitle>
-              <EmptyDescription>
-                Stats appear here once the bot has recorded a stream.
-              </EmptyDescription>
-            </EmptyHeader>
-          </Empty>
-        ) : selected ? (
-          <SelectedStream selected={selected} />
-        ) : (
-          <StreamNotFound missing={requestedMissing} />
-        )}
-      </div>
-    </div>
+    </>
   )
 }
 

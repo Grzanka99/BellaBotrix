@@ -30,11 +30,14 @@ export async function generateMetadata(): Promise<Metadata> {
   }
 }
 
+/**
+ * `aside` is the parallel route `@aside`: extra sidebars a page puts next to
+ * the main one (stream stats does).
+ */
 export default async function PanelLayout({
   children,
-}: {
-  children: React.ReactNode
-}) {
+  aside,
+}: LayoutProps<"/panel">) {
   const user = await requireSession()
   const [channels, selected, cookieStore] = await Promise.all([
     getAccessibleChannels(),
@@ -50,10 +53,14 @@ export default async function PanelLayout({
     >
       <SidebarProvider defaultOpen={sidebarOpen}>
         <AppSidebar channelName={selected?.name ?? null} />
+        {aside}
         <SidebarInset>
           <header className="flex h-14 shrink-0 items-center gap-2 border-b px-4">
             <SidebarTrigger className="-ml-1" />
-            <Separator orientation="vertical" className="mr-2 h-4" />
+            <Separator
+              orientation="vertical"
+              className="mr-2 h-4 data-vertical:self-center"
+            />
             <ChannelSwitcher
               channels={channels.map(({ id, name }) => ({ id, name }))}
               selectedId={selected?.id ?? null}
@@ -71,8 +78,7 @@ export default async function PanelLayout({
               <ThemeToggle />
             </div>
           </header>
-          {/* A page can opt out of the padding with `data-page-bleed`. */}
-          <div className="flex flex-1 flex-col gap-6 p-4 has-[[data-page-bleed]]:p-0 md:p-6">
+          <div className="flex flex-1 flex-col gap-6 p-4 md:p-6">
             {children}
           </div>
         </SidebarInset>
