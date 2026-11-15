@@ -71,7 +71,8 @@ export default async function PanelLayout({
               <ThemeToggle />
             </div>
           </header>
-          <div className="flex flex-1 flex-col gap-6 p-4 md:p-6">
+          {/* A page can opt out of the padding with `data-page-bleed`. */}
+          <div className="flex flex-1 flex-col gap-6 p-4 has-[[data-page-bleed]]:p-0 md:p-6">
             {children}
           </div>
         </SidebarInset>
