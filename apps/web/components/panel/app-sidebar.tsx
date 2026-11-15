@@ -130,7 +130,8 @@ function NavUser({ username }: { username: string }) {
             </DropdownMenuGroup>
             <DropdownMenuSeparator />
             <DropdownMenuGroup>
-              {/* Plain navigation: the route handler redirects to Twitch. */}
+              {/* Plain navigation: this is a route handler that redirects to Twitch, not a page. The label comes from the menu item. */}
+              {/* oxlint-disable-next-line nextjs/no-html-link-for-pages, jsx-a11y/control-has-associated-label */}
               <DropdownMenuItem render={<a href="/api/auth-redirect" />}>
                 <ShieldCheckIcon />
                 Authorize

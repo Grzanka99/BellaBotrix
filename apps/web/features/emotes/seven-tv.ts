@@ -100,7 +100,8 @@ export function getSevenTvEmotes(twitchChannelId: string): Promise<EmoteMap> {
 
 /** Splits a message like the Nuxt `MessageWithEmotes` (on single spaces). */
 export type MessagePart =
-  { kind: "text"; text: string } | { kind: "emote"; name: string; src: string }
+  | { kind: "text"; text: string }
+  | { kind: "emote"; name: string; src: string }
 
 export function splitMessage(message: string, emotes: EmoteMap): MessagePart[] {
   return message.split(" ").map((word) => {

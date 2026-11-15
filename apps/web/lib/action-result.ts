@@ -8,7 +8,8 @@
  * 403 missing perms, 404 not found, 409 conflict, 500 server error).
  */
 export type ActionResult<T = void> =
-  { ok: true; data: T } | { ok: false; error: string; status?: number }
+  | { ok: true; data: T }
+  | { ok: false; error: string; status?: number }
 
 export type ActionFailure = Extract<ActionResult<never>, { ok: false }>
 

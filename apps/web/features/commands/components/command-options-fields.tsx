@@ -18,7 +18,8 @@ import {
 } from "@/components/ui/select"
 import { Switch } from "@/components/ui/switch"
 
-import { ETimeoutType, TIMEOUT_TYPE_ITEMS } from "../schema"
+import type { ETimeoutType } from "../schema"
+import { TIMEOUT_TYPE_ITEMS } from "../schema"
 
 /** Form state shared by the new / edit command dialogs (paid + timeout). */
 export type CommandOptions = {
@@ -169,7 +170,7 @@ export function CommandOptionsFields({
               value={value.timeoutType}
               onValueChange={(timeoutType) => {
                 if (timeoutType) {
-                  onChange({ timeoutType: timeoutType as ETimeoutType })
+                  onChange({ timeoutType })
                 }
               }}
             >
