@@ -46,7 +46,9 @@ real environment always win, and a missing root `.env` is fine.
 
 ## Vercel
 
-- Root directory: `apps/web`. Framework: Next.js. Node.js 26.x.
+- Root directory: `apps/web`. Node.js 26.x comes from `engines` in
+  `package.json`, and `vercel.json` sets the framework to Next.js, so both
+  apply even if the project settings still say otherwise.
 - Set every variable above (new compared to Nuxt: `SESSION_PASSWORD`).
 - `turbopack.root` and `outputFileTracingRoot` point at the monorepo root, so
   workspace packages and the Prisma query engine
