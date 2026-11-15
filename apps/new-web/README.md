@@ -56,6 +56,37 @@ real environment always win, and a missing root `.env` is fine.
   fails to start after a dependency change.
 - The Twitch app's OAuth redirect URI must be `<APP_URL>/api/auth`.
 
+## Replacing apps/web
+
+The app is a drop-in replacement: same page URLs, same database, same sync
+service, same Twitch redirect URI (`<APP_URL>/api/auth`).
+
+1. Delete `apps/web` and rename `apps/new-web` to `apps/web`; set
+   `"name": "web"` in its `package.json`.
+2. Root `package.json`: drop the `dev:new-web` script (`dev:web` then starts
+   this app). `Containerfile`: drop the `apps/new-web/package.json` COPY line.
+   `biome.json`: change the ignore entry to `apps/web`. `build.sh` copies the
+   Nuxt `.output` folder and needs adjusting or removing.
+3. Run `bun install` to refresh `bun.lock`.
+4. Vercel: framework Next.js, Node.js 26.x, root directory `apps/web`, and add
+   `SESSION_PASSWORD`.
+
+Users have to log in again once (new session cookie); passwords are unchanged.
+
+### Differences from the Nuxt app
+
+- The `/api/*` REST endpoints are gone except `/api/auth` and
+  `/api/auth-redirect`; data goes through Server Components and Server Actions.
+- The selected channel is a cookie instead of localStorage, and defaults to the
+  first channel the user can access.
+- Every read and write is scoped to a channel the user has access to (the Nuxt
+  endpoints updated and deleted rows by bare id), and the stream-stats queries
+  check that the stream belongs to the channel.
+- Users, solo and automod events are searched and paginated on the server.
+- The session secret comes from `SESSION_PASSWORD` instead of a value in the
+  repository; the Twitch OAuth flow carries a `state` parameter.
+- Subcommand editing and overlay element resizing work (both were broken).
+
 ## Architecture and conventions
 
 Follow these when porting a page. `features/timers` is the reference
