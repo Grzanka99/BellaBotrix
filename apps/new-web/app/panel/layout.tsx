@@ -67,7 +67,7 @@ export default async function PanelLayout({
             />
             <div className="ml-auto flex items-center gap-3">
               {isAdmin && (
-                <div className="hidden flex-wrap items-center gap-2 md:flex">
+                <div className="hidden items-center gap-2 xl:flex">
                   {user.perms.map((perm) => (
                     <Badge key={perm} variant="secondary">
                       {perm}

@@ -3,6 +3,7 @@
 import {
   BotIcon,
   ChevronsUpDownIcon,
+  CircleUserIcon,
   LogOutIcon,
   ShieldCheckIcon,
 } from "lucide-react"
@@ -53,7 +54,10 @@ export function AppSidebar({ channelName }: { channelName: string | null }) {
         <SidebarMenu>
           <SidebarMenuItem>
             <SidebarMenuButton size="lg" render={<Link href="/panel" />}>
-              <BotIcon />
+              {/* The square fills the collapsed (icon-only) button, so the name is clipped away. */}
+              <div className="flex aspect-square size-8 items-center justify-center">
+                <BotIcon />
+              </div>
               <span className="truncate font-semibold">BellaBotrix</span>
             </SidebarMenuButton>
           </SidebarMenuItem>
@@ -109,6 +113,9 @@ function NavUser({ username }: { username: string }) {
             render={<SidebarMenuButton size="lg" />}
             disabled={pending}
           >
+            <div className="flex aspect-square size-8 items-center justify-center">
+              <CircleUserIcon />
+            </div>
             <span className="flex min-w-0 flex-1 flex-col text-left">
               <span className="truncate font-medium">{username}</span>
               <span className="truncate text-xs text-muted-foreground">
