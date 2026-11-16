@@ -155,7 +155,7 @@ function ModelRow({ model }: { model: AIModel }) {
       <TableCell>
         <Badge variant="secondary">{model.provider}</Badge>
       </TableCell>
-      <TableCell className="max-w-0 whitespace-normal">
+      <TableCell className="max-w-0 min-w-64 whitespace-normal">
         <span className="line-clamp-3 break-words">{model.description}</span>
       </TableCell>
       <TableCell>

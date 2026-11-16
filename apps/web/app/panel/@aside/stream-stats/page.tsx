@@ -31,7 +31,7 @@ export default async function StreamStatsAside({
       key={channel.id}
       overview={overview}
       selectedId={pickStream(overview, requested)?.id}
-      className="sticky top-0 hidden h-svh lg:flex"
+      className="sticky top-0 hidden h-dvh lg:flex"
     />
   )
 }
