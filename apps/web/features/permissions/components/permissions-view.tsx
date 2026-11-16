@@ -34,54 +34,60 @@ export function PermissionsView(props: PermissionsProps) {
       <PageHeader
         title="Permissions"
         description="Panel users, their permissions and their own channel."
+        toolbar={<PermissionsSearch />}
       />
       <PermissionsContent />
     </permissionsStore.Provider>
   )
 }
 
+function PermissionsSearch() {
+  const query = permissionsStore.useStore((state) => state.query)
+  const setQuery = permissionsStore.useStore((state) => state.setQuery)
+
+  return (
+    <SearchInput
+      value={query}
+      onChange={setQuery}
+      placeholder="Search by username..."
+    />
+  )
+}
+
 function PermissionsContent() {
   const entries = permissionsStore.useStore((state) => state.entries)
   const query = permissionsStore.useStore((state) => state.query)
-  const setQuery = permissionsStore.useStore((state) => state.setQuery)
   const filtered = filterEntries(entries, query)
 
   return (
-    <div className="flex flex-col gap-4">
-      <SearchInput
-        value={query}
-        onChange={setQuery}
-        placeholder="Search by username..."
-      />
-      <Table>
-        <TableHeader>
+    <Table>
+      <TableHeader>
+        <TableRow>
+          <TableHead className="w-16">Id</TableHead>
+          <TableHead>Username</TableHead>
+          <TableHead>Permissions</TableHead>
+          <TableHead>Channel</TableHead>
+          <TableHead className="w-48">
+            <span className="sr-only">Actions</span>
+          </TableHead>
+        </TableRow>
+      </TableHeader>
+      <TableBody>
+        {filtered.map((entry) => (
+          <PermissionRow key={entry.id} entry={entry} />
+        ))}
+        {filtered.length === 0 && (
           <TableRow>
-            <TableHead className="w-16">Id</TableHead>
-            <TableHead>Username</TableHead>
-            <TableHead>Permissions</TableHead>
-            <TableHead>Channel</TableHead>
-            <TableHead className="w-48">
-              <span className="sr-only">Actions</span>
-            </TableHead>
+            <TableCell
+              colSpan={5}
+              className="h-24 text-center text-muted-foreground"
+            >
+              Found 0 users
+            </TableCell>
           </TableRow>
-        </TableHeader>
-        <TableBody>
-          {filtered.map((entry) => (
-            <PermissionRow key={entry.id} entry={entry} />
-          ))}
-          {filtered.length === 0 && (
-            <TableRow>
-              <TableCell
-                colSpan={5}
-                className="h-24 text-center text-muted-foreground"
-              >
-                Found 0 users
-              </TableCell>
-            </TableRow>
-          )}
-        </TableBody>
-      </Table>
-    </div>
+        )}
+      </TableBody>
+    </Table>
   )
 }
 

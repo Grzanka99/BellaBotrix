@@ -13,17 +13,21 @@ const EXPAND_HYSTERESIS_PX = 64
 
 /**
  * Title row of a panel page: heading, optional description, actions on the
- * right. Sticks below the top bar; once the page scrolls, it collapses into a
- * single compact line (smaller title, no description) and keeps the actions
- * in reach.
+ * right, and an optional toolbar (search, sort) below them. Sticks below the
+ * top bar; once the page scrolls, it collapses into a compact bar (smaller
+ * title, no description; title, toolbar and actions on one line when the header is 56rem+ wide)
+ * and keeps the actions and the toolbar in reach.
  */
 export function PageHeader({
   title,
   description,
+  toolbar,
   children,
 }: {
   title: string
   description?: React.ReactNode
+  /** Controls for the content below (search, sort), kept visible on scroll. */
+  toolbar?: React.ReactNode
   /** Actions (buttons) rendered on the right. */
   children?: React.ReactNode
 }) {
@@ -43,9 +47,13 @@ export function PageHeader({
       const stickTop = Number.parseFloat(getComputedStyle(header).top) || 0
       const sentinelTop = sentinel.getBoundingClientRect().top
       setCollapsed((was) =>
-        was
-          ? sentinelTop < stickTop + EXPAND_HYSTERESIS_PX
-          : sentinelTop < stickTop
+        // At the very top (e.g. a search shortened the page) always expand:
+        // there is no scroll position left that could collapse it again.
+        window.scrollY <= 0
+          ? false
+          : was
+            ? sentinelTop < stickTop + EXPAND_HYSTERESIS_PX
+            : sentinelTop < stickTop
       )
     }
     const schedule = () => {
@@ -79,43 +87,70 @@ export function PageHeader({
         ref={headerRef}
         data-collapsed={collapsed || undefined}
         className={cn(
-          "sticky top-14 z-[9] -mx-4 flex items-end justify-between gap-4 px-4 transition-[padding] duration-200 md:-mx-6 md:px-6",
+          // The sticky outer box is the size container for the layout below.
+          "@container sticky top-14 z-[9] -mx-4 px-4 transition-[padding] duration-200 md:-mx-6 md:px-6",
           collapsed
             ? // One backdrop from the top of the viewport (behind the top bar) to this header's bottom.
-              "flex-nowrap items-center py-2 before:pointer-events-none before:absolute before:inset-x-0 before:-top-14 before:bottom-0 before:-z-10 before:border-b before:border-border before:bg-background/95 before:backdrop-blur supports-backdrop-filter:before:bg-background/80"
-            : "flex-wrap bg-background"
+              "py-2 before:pointer-events-none before:absolute before:inset-x-0 before:-top-14 before:bottom-0 before:-z-10 before:border-b before:border-border before:bg-background/95 before:backdrop-blur supports-backdrop-filter:before:bg-background/80"
+            : "bg-background"
         )}
       >
-        <div className="flex min-w-0 flex-col">
-          <h1
-            className={cn(
-              "truncate font-semibold tracking-tight transition-[font-size,line-height] duration-200",
-              collapsed ? "text-base" : "text-2xl"
+        <div
+          className={cn(
+            "flex flex-wrap justify-between gap-x-4",
+            collapsed
+              ? "items-center gap-y-2 @4xl:flex-nowrap"
+              : "items-end gap-y-6"
+          )}
+        >
+          <div className="flex min-w-0 flex-col">
+            <h1
+              className={cn(
+                "truncate font-semibold tracking-tight transition-[font-size,line-height] duration-200",
+                collapsed ? "text-base" : "text-2xl"
+              )}
+            >
+              {title}
+            </h1>
+            {description && (
+              <div
+                className={cn(
+                  "grid transition-[grid-template-rows,opacity] duration-200",
+                  // Collapsed: no height, and no width either, so the hidden
+                  // text doesn't push the toolbar away from the title.
+                  collapsed
+                    ? "max-w-0 grid-rows-[0fr] opacity-0"
+                    : "grid-rows-[1fr] opacity-100"
+                )}
+                aria-hidden={collapsed || undefined}
+              >
+                <div className="min-h-0 overflow-hidden">
+                  <p className="pt-1 text-sm text-muted-foreground">
+                    {description}
+                  </p>
+                </div>
+              </div>
             )}
-          >
-            {title}
-          </h1>
-          {description && (
+          </div>
+          {toolbar && (
             <div
               className={cn(
-                "grid transition-[grid-template-rows,opacity] duration-200",
+                "flex min-w-0 flex-wrap items-center gap-4",
+                // Expanded: a row of its own below the title. Collapsed: between
+                // the title and the actions once the header is wide enough
+                // (container query: depends on the sidebar, not the viewport).
                 collapsed
-                  ? "grid-rows-[0fr] opacity-0"
-                  : "grid-rows-[1fr] opacity-100"
+                  ? "order-last basis-full @4xl:order-none @4xl:flex-1 @4xl:basis-auto @4xl:flex-nowrap"
+                  : "order-last basis-full"
               )}
-              aria-hidden={collapsed || undefined}
             >
-              <div className="min-h-0 overflow-hidden">
-                <p className="pt-1 text-sm text-muted-foreground">
-                  {description}
-                </p>
-              </div>
+              {toolbar}
             </div>
           )}
+          {children && (
+            <div className="flex shrink-0 items-center gap-2">{children}</div>
+          )}
         </div>
-        {children && (
-          <div className="flex shrink-0 items-center gap-2">{children}</div>
-        )}
       </div>
     </>
   )

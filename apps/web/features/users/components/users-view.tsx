@@ -62,14 +62,16 @@ export function UsersView(props: UsersProps) {
       <PageHeader
         title="Users"
         description="Chatters the bot has seen in this channel."
+        toolbar={
+          <>
+            <UrlSearchInput placeholder="Search by username..." />
+            <SortSelect sort={props.sort} />
+          </>
+        }
       >
         <UsersTotals />
       </PageHeader>
       <div className="flex flex-col gap-4">
-        <div className="flex flex-wrap items-center gap-4">
-          <UrlSearchInput placeholder="Search by username..." />
-          <SortSelect sort={props.sort} />
-        </div>
         <UsersTable />
         <UsersFooter />
       </div>
