@@ -1,3 +1,4 @@
+import { onEvery } from "bus/ticker";
 import { SSettings, type TSettings } from "bellatrix";
 import type { ChatOutbox } from "bus/chat-outbox";
 import { bus } from "bus/event-bus";
@@ -19,7 +20,6 @@ import { ChannelTimer } from "services/timers";
 import { TwitchApi } from "services/twitch-api";
 import type { TwitchIrc } from "services/twitch-irc";
 import type { TOption } from "types";
-import { every } from "utils/every";
 import { interpolate } from "utils/interpolate-string";
 import { logger } from "utils/logger";
 import type { TTwitchIrcContext } from "../types";
@@ -249,7 +249,7 @@ export class ChannelConnection {
     new ChannelTimer(this.channelName, (msg) => this.send(msg), signal);
 
     // NOTE: Chatters time
-    every(30_000, () => void chatterTimeHandler(this.channelName, this.api.chatters), signal);
+    onEvery(30_000, () => chatterTimeHandler(this.channelName, this.api.chatters), signal);
 
     // NOTE: Stats gathering
     await this.streamStatsGatherer.start(event, signal);

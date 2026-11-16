@@ -1,7 +1,7 @@
+import { onEvery } from "bus/ticker";
 import { bus } from "bus/event-bus";
 import { storage } from "services/db";
 import type { TwitchApi } from "services/twitch-api";
-import { every } from "utils/every";
 import { logger } from "utils/logger";
 
 const POLL_INTERVAL = 60_000;
@@ -20,7 +20,7 @@ export class StreamWatcher {
 
   public start(): void {
     void this.poll();
-    every(POLL_INTERVAL, () => void this.poll(), this.signal);
+    onEvery(POLL_INTERVAL, () => this.poll(), this.signal);
   }
 
   private async poll(): Promise<void> {

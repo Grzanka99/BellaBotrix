@@ -1,7 +1,7 @@
+import { onEvery } from "bus/ticker";
 import { bus } from "bus/event-bus";
 import { prisma, storage } from "services/db";
 import { CK_CHANNELS_SYNC } from "sqlite-storage";
-import { every } from "utils/every";
 import { logger } from "utils/logger";
 
 const POLL_INTERVAL = 30_000;
@@ -17,7 +17,7 @@ export class ChannelListWatcher {
 
   public start(): void {
     void this.load();
-    every(POLL_INTERVAL, () => void this.poll(), this.signal);
+    onEvery(POLL_INTERVAL, () => this.poll(), this.signal);
   }
 
   private async poll(): Promise<void> {

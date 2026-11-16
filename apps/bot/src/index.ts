@@ -1,5 +1,6 @@
 import { ChatOutbox } from "bus/chat-outbox";
 import { bus } from "bus/event-bus";
+import { startTicker } from "bus/ticker";
 import { ChannelConnection } from "services/channel-connection";
 import { ChannelListWatcher } from "services/channel-list-watcher";
 import { TwitchApi } from "services/twitch-api";
@@ -13,6 +14,7 @@ export async function startBot(): Promise<void> {
   const connections: Record<string, ChannelConnection> = {};
 
   logger.info("Bootstrap");
+  startTicker();
 
   logger.info("Obtaining main OAuth token");
   const oauthTokenRes = await getOAuthToken();
@@ -104,6 +106,4 @@ export async function startBot(): Promise<void> {
 }
 
 void startBot().catch((e) => logger.error(`Bootstrap failed: ${e}`));
-
-// NOTE: Keep Alive xD
-setInterval(() => {}, 100_000);
+// NOTE: the ticker's setInterval keeps the process alive

@@ -1,4 +1,5 @@
 import { bus } from "bus/event-bus";
+import { onEvery } from "bus/ticker";
 import type { TOption } from "types";
 import { logger } from "utils/logger";
 import { type MessageEvent, WebSocket } from "ws";
@@ -33,14 +34,19 @@ export class TwitchIrc {
     return TwitchIrc._instance;
   }
 
+  // NOTE: runs for the whole process lifetime, the signal is never aborted
   public startPingCheck() {
-    setInterval(() => {
-      const lastping = Number(storage.get("lastping")?.value);
-      const now = Date.now();
-      if (now - lastping > PING_TRESHHOLD) {
-        void this.reconnect();
-      }
-    }, 60_000);
+    onEvery(
+      60_000,
+      () => {
+        const lastping = Number(storage.get("lastping")?.value);
+        const now = Date.now();
+        if (now - lastping > PING_TRESHHOLD) {
+          void this.reconnect();
+        }
+      },
+      new AbortController().signal,
+    );
   }
 
   public async connect(): Promise<void> {

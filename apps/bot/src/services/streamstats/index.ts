@@ -1,8 +1,8 @@
+import { onEvery } from "bus/ticker";
 import type { TBotEventOf } from "bus/events";
 import { prisma, prismaQueue, storage } from "services/db";
 import type { TwitchApi } from "services/twitch-api";
 import type { TTwitchApiChatter, TTwitchIrcContext } from "services/types";
-import { every } from "utils/every";
 import { logger } from "utils/logger";
 
 export class StreamStatsGatherer {
@@ -43,7 +43,7 @@ export class StreamStatsGatherer {
 
     this._activeStreamId = res.id;
 
-    every(interval, () => void this.handleGathering(), signal);
+    onEvery(interval, () => this.handleGathering(), signal);
   }
 
   // NOTE: called on stream.ended

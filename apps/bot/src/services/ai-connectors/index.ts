@@ -1,10 +1,10 @@
+import { onEvery } from "bus/ticker";
 import { logger } from "utils/logger";
 import { OllamaAIProvider } from "./providers/ollama";
 import { prisma, prismaQueue, storage } from "services/db";
 import type { TOption } from "bellatrix";
 import type { THistoryItem } from "./types";
 import type { OllamaAIModels } from "@prisma/client";
-import { every } from "utils/every";
 import { interpolate } from "utils/interpolate-string";
 import { GeminiAIProvider } from "./providers/gemini";
 import { OpenrouterAIProvider } from "./providers/openrouter";
@@ -110,7 +110,7 @@ export class AIConnector {
       history.shift();
       storage.set(this.historyStorageKey, history);
     };
-    every(180_000, cleanHistory, signal);
+    onEvery(180_000, cleanHistory, signal);
   }
 
   private getAllowdModel(model: string): string {

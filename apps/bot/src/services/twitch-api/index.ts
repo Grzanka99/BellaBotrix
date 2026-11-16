@@ -1,3 +1,4 @@
+import { onEvery } from "bus/ticker";
 import { prisma } from "services/db";
 import type { TTwitchApiChatter, TTwitchApiStream } from "services/types";
 import {
@@ -11,7 +12,6 @@ import {
   unbanUser,
 } from "twitch-api-connector";
 import type { TOption } from "types";
-import { every } from "utils/every";
 import { logger } from "utils/logger";
 
 export class TwitchApi {
@@ -189,7 +189,7 @@ export class TwitchApi {
     const refreshChatters = async () => {
       this.chattersList = await this.getChannelChattersList();
     };
-    every(timeout, () => void refreshChatters(), signal);
+    onEvery(timeout, refreshChatters, signal);
 
     return true;
   }

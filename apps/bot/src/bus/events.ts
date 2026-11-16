@@ -7,7 +7,9 @@ export type TBotEvent =
   | { type: "stream.started"; channel: string; startedAt: string; streamerId: string }
   | { type: "stream.ended"; channel: string }
   // NOTE: one type with a flag, so one subscription orders enable/disable of the same channel
-  | { type: "channel.changed"; channel: string; enabled: boolean };
+  | { type: "channel.changed"; channel: string; enabled: boolean }
+  // NOTE: tick is not per channel, "global" is only there because bus lanes need a channel key
+  | { type: "tick"; channel: "global"; now: number };
 
 export type TBotEventType = TBotEvent["type"];
 
