@@ -20,6 +20,7 @@
     "format:check": "oxfmt --check",
     "prisma:version": "prisma --version",
     "prisma:generate": "prisma generate",
+    "prisma:migrate:deploy": "prisma migrate deploy",
     "twitch:mock": "twitch event websocket start-server",
     "twitch:trigger:subscription": "twitch event trigger channel.subscribe --transport=websocket",
     "twitch:trigger:online": "twitch event trigger stream.online --transport=websocket",

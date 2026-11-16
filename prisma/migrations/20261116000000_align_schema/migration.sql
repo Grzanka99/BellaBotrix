@@ -1,0 +1,172 @@
+-- All or nothing: a failure leaves the database as it was.
+BEGIN;
+
+-- AlterTable
+ALTER TABLE "AutomodEvents" RENAME CONSTRAINT "idx_32769_PRIMARY" TO "AutomodEvents_pkey";
+ALTER TABLE "AutomodEvents"
+ALTER COLUMN "timestamp" SET DATA TYPE TEXT,
+ALTER COLUMN "action" SET DATA TYPE TEXT,
+ALTER COLUMN "handler" SET DATA TYPE TEXT,
+ALTER COLUMN "target" SET DATA TYPE TEXT,
+ALTER COLUMN "channel" SET DATA TYPE TEXT,
+ALTER COLUMN "message" SET DATA TYPE TEXT;
+
+-- AlterTable
+ALTER TABLE "Channel" RENAME CONSTRAINT "idx_32778_PRIMARY" TO "Channel_pkey";
+ALTER TABLE "Channel"
+ALTER COLUMN "name" SET DATA TYPE TEXT,
+ALTER COLUMN "channel_id" SET DATA TYPE TEXT,
+ALTER COLUMN "token" SET DATA TYPE TEXT;
+
+-- AlterTable
+ALTER TABLE "ChannelAccess" RENAME CONSTRAINT "idx_32786_PRIMARY" TO "ChannelAccess_pkey";
+ALTER TABLE "ChannelAccess"
+ALTER COLUMN "accessLevel" SET DATA TYPE TEXT;
+
+-- AlterTable
+ALTER TABLE "Commands" RENAME CONSTRAINT "idx_32792_PRIMARY" TO "Commands_pkey";
+ALTER TABLE "Commands"
+ALTER COLUMN "uniqueName" SET DATA TYPE TEXT,
+ALTER COLUMN "name" SET DATA TYPE TEXT,
+ALTER COLUMN "message" SET DATA TYPE JSONB,
+ALTER COLUMN "alias" SET DATA TYPE TEXT,
+ALTER COLUMN "channelName" SET DATA TYPE TEXT,
+ALTER COLUMN "errorMessage" SET DATA TYPE TEXT,
+ALTER COLUMN "timeout" SET NOT NULL,
+ALTER COLUMN "timeoutEnabled" SET NOT NULL,
+ALTER COLUMN "timeoutType" SET NOT NULL;
+
+-- AlterTable
+ALTER TABLE "OllamaAIHistory" RENAME CONSTRAINT "idx_32805_PRIMARY" TO "OllamaAIHistory_pkey";
+ALTER TABLE "OllamaAIHistory"
+ALTER COLUMN "model" SET DATA TYPE TEXT,
+ALTER COLUMN "username" SET DATA TYPE TEXT,
+ALTER COLUMN "channel" SET DATA TYPE TEXT,
+ALTER COLUMN "language" SET DATA TYPE TEXT;
+
+-- AlterTable
+ALTER TABLE "OllamaAIModels" RENAME CONSTRAINT "idx_32812_PRIMARY" TO "OllamaAIModels_pkey";
+ALTER TABLE "OllamaAIModels"
+ALTER COLUMN "name" SET DATA TYPE TEXT,
+ALTER COLUMN "provider" SET DATA TYPE TEXT;
+
+-- AlterTable
+ALTER TABLE "OllamaAISetupPrompts" RENAME CONSTRAINT "idx_32820_PRIMARY" TO "OllamaAISetupPrompts_pkey";
+ALTER TABLE "OllamaAISetupPrompts"
+ALTER COLUMN "name" SET DATA TYPE TEXT;
+
+-- AlterTable
+ALTER TABLE "R6DleGame" RENAME CONSTRAINT "idx_32827_PRIMARY" TO "R6DleGame_pkey";
+ALTER TABLE "R6DleGame"
+ALTER COLUMN "operator" SET DATA TYPE TEXT,
+ALTER COLUMN "winner" SET DATA TYPE TEXT,
+ALTER COLUMN "channel" SET DATA TYPE TEXT;
+
+-- AlterTable
+ALTER TABLE "R6DleGuessHistory" RENAME CONSTRAINT "idx_32834_PRIMARY" TO "R6DleGuessHistory_pkey";
+ALTER TABLE "R6DleGuessHistory"
+ALTER COLUMN "guess" SET DATA TYPE TEXT,
+ALTER COLUMN "player" SET DATA TYPE TEXT;
+
+-- AlterTable
+ALTER TABLE "R6DleOperators" RENAME CONSTRAINT "idx_32839_PRIMARY" TO "R6DleOperators_pkey";
+ALTER TABLE "R6DleOperators"
+ALTER COLUMN "name" SET DATA TYPE TEXT,
+ALTER COLUMN "role" SET DATA TYPE TEXT,
+ALTER COLUMN "side" SET DATA TYPE TEXT,
+ALTER COLUMN "country" SET DATA TYPE TEXT,
+ALTER COLUMN "org" SET DATA TYPE TEXT,
+ALTER COLUMN "squad" SET DATA TYPE TEXT,
+ALTER COLUMN "region" SET DATA TYPE TEXT,
+ALTER COLUMN "gender" SET DATA TYPE TEXT;
+
+-- AlterTable
+ALTER TABLE "Solo" RENAME CONSTRAINT "idx_32848_PRIMARY" TO "Solo_pkey";
+ALTER TABLE "Solo"
+ALTER COLUMN "user1" SET DATA TYPE TEXT,
+ALTER COLUMN "user2" SET DATA TYPE TEXT,
+ALTER COLUMN "channel" SET DATA TYPE TEXT,
+ALTER COLUMN "winner" SET DATA TYPE TEXT;
+
+-- AlterTable
+ALTER TABLE "StreamStats" RENAME CONSTRAINT "idx_32855_PRIMARY" TO "StreamStats_pkey";
+ALTER TABLE "StreamStats"
+ALTER COLUMN "timestamp" SET DATA TYPE TEXT;
+
+-- AlterTable
+ALTER TABLE "Streams" RENAME CONSTRAINT "idx_32865_PRIMARY" TO "Streams_pkey";
+ALTER TABLE "Streams"
+ALTER COLUMN "unique_id" SET DATA TYPE TEXT,
+ALTER COLUMN "streamer_id" SET DATA TYPE TEXT,
+ALTER COLUMN "channel" SET DATA TYPE TEXT,
+ALTER COLUMN "started_at" SET DATA TYPE TEXT,
+ALTER COLUMN "finished_at" SET DATA TYPE TEXT;
+
+-- AlterTable
+ALTER TABLE "SubCommands" RENAME CONSTRAINT "idx_32872_PRIMARY" TO "SubCommands_pkey";
+ALTER TABLE "SubCommands"
+ALTER COLUMN "uniqueName" SET DATA TYPE TEXT,
+ALTER COLUMN "name" SET DATA TYPE TEXT,
+ALTER COLUMN "parentCommand" SET DATA TYPE TEXT,
+ALTER COLUMN "message" SET DATA TYPE JSONB,
+ALTER COLUMN "alias" SET DATA TYPE TEXT,
+ALTER COLUMN "channelName" SET DATA TYPE TEXT,
+ALTER COLUMN "timeout" SET NOT NULL,
+ALTER COLUMN "timeoutEnabled" SET NOT NULL,
+ALTER COLUMN "timeoutType" SET NOT NULL;
+
+-- AlterTable
+ALTER TABLE "Timers" RENAME CONSTRAINT "idx_32883_PRIMARY" TO "Timers_pkey";
+ALTER TABLE "Timers"
+ALTER COLUMN "message" SET DATA TYPE TEXT;
+
+-- AlterTable
+ALTER TABLE "TriggerWords" RENAME CONSTRAINT "idx_32889_PRIMARY" TO "TriggerWords_pkey";
+ALTER TABLE "TriggerWords"
+ALTER COLUMN "triggers" SET DATA TYPE TEXT,
+ALTER COLUMN "response" SET DATA TYPE TEXT;
+
+-- AlterTable
+ALTER TABLE "User" RENAME CONSTRAINT "idx_32894_PRIMARY" TO "User_pkey";
+ALTER TABLE "User"
+ALTER COLUMN "userid" SET DATA TYPE TEXT,
+ALTER COLUMN "username" SET DATA TYPE TEXT,
+ALTER COLUMN "channel" SET DATA TYPE TEXT;
+
+-- AlterTable
+ALTER TABLE "WebuiUser" RENAME CONSTRAINT "idx_32904_PRIMARY" TO "WebuiUser_pkey";
+ALTER TABLE "WebuiUser"
+ALTER COLUMN "username" SET DATA TYPE TEXT,
+ALTER COLUMN "password" SET DATA TYPE TEXT,
+ALTER COLUMN "token" SET DATA TYPE TEXT,
+ALTER COLUMN "settings" SET DATA TYPE JSONB,
+ALTER COLUMN "perms" SET DATA TYPE TEXT;
+
+-- RenameIndex
+ALTER INDEX "idx_32778_Channel_channel_id_key" RENAME TO "Channel_channel_id_key";
+
+-- RenameIndex
+ALTER INDEX "idx_32778_Channel_name_key" RENAME TO "Channel_name_key";
+
+-- RenameIndex
+ALTER INDEX "idx_32778_Channel_token_key" RENAME TO "Channel_token_key";
+
+-- RenameIndex
+ALTER INDEX "idx_32792_Commands_uniqueName_key" RENAME TO "Commands_uniqueName_key";
+
+-- RenameIndex
+ALTER INDEX "idx_32839_R6DleOperators_name_key" RENAME TO "R6DleOperators_name_key";
+
+-- RenameIndex
+ALTER INDEX "idx_32865_Streams_unique_id_key" RENAME TO "Streams_unique_id_key";
+
+-- RenameIndex
+ALTER INDEX "idx_32872_SubCommands_uniqueName_key" RENAME TO "SubCommands_uniqueName_key";
+
+-- RenameIndex
+ALTER INDEX "idx_32894_User_userid_key" RENAME TO "User_userid_key";
+
+-- RenameIndex
+ALTER INDEX "idx_32904_WebuiUser_username_key" RENAME TO "WebuiUser_username_key";
+
+COMMIT;
