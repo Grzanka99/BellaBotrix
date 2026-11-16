@@ -1,7 +1,7 @@
 import { NextResponse, type NextRequest } from "next/server"
 
 import { getCurrentUser } from "@/lib/server/auth"
-import { prisma } from "@/lib/server/db"
+import { isUniqueViolation, prisma } from "@/lib/server/db"
 import { indicateChannelsListUpdate, syncInBackground } from "@/lib/server/sync"
 import {
   getChannelRefreshKey,
@@ -70,9 +70,14 @@ export async function GET(request: NextRequest) {
     })
 
     if (!existingAccess) {
-      await prisma.channelAccess.create({
-        data: { userid: user.id, channelId: channel.id },
-      })
+      try {
+        await prisma.channelAccess.create({
+          data: { userid: user.id, channelId: channel.id },
+        })
+      } catch (error) {
+        // A concurrent callback already created it (unique userid + channelId).
+        if (!isUniqueViolation(error)) throw error
+      }
     }
   } catch (dbError) {
     console.error("[auth] storing Twitch channel failed", dbError)

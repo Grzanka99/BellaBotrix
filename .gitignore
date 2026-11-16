@@ -27,7 +27,6 @@ logs
 
 # Prisma
 prisma/dev.db
-prisma/migrations/*/
 prisma/*-journal
 
 # Logs

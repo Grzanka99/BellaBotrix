@@ -10,7 +10,7 @@ import {
   tryDb,
   type ActionResult,
 } from "@/lib/server/action"
-import { prisma } from "@/lib/server/db"
+import { isUniqueViolation, prisma } from "@/lib/server/db"
 
 import { getOwnChannel } from "./queries"
 import { SGrantAccess, SRevokeAccess } from "./schema"
@@ -61,10 +61,16 @@ export async function grantAccess(input: unknown): Promise<ActionResult> {
     })
     if (existing > 0) return null
 
-    return prisma.channelAccess.create({
-      data: { userid, channelId: auth.channel.id, accessLevel },
-      select: { id: true },
-    })
+    try {
+      return await prisma.channelAccess.create({
+        data: { userid, channelId: auth.channel.id, accessLevel },
+        select: { id: true },
+      })
+    } catch (error) {
+      // A concurrent grant won the race (unique userid + channelId).
+      if (isUniqueViolation(error)) return null
+      throw error
+    }
   }, "Error occurred while granting access")
   if (!created.ok) return created
   if (!created.data) return fail("This user already has access", 409)

@@ -42,7 +42,7 @@
       "name": "sup",
       "dependencies": {
         "@prisma/client": "^5.9.0",
-        "elysia": "latest",
+        "elysia": "1.4.30",
         "sqlite-storage": "workspace:*",
         "zod": "^3.22.4",
       },

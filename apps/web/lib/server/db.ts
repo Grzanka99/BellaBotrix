@@ -1,6 +1,6 @@
 import "server-only"
 
-import { PrismaClient } from "@prisma/client"
+import { Prisma, PrismaClient } from "@prisma/client"
 
 /**
  * One PrismaClient per server process. In development the module is
@@ -13,4 +13,12 @@ export const prisma = globalForPrisma.prisma ?? new PrismaClient()
 
 if (process.env.NODE_ENV !== "production") {
   globalForPrisma.prisma = prisma
+}
+
+/** True for a unique-constraint violation (Prisma P2002), e.g. a concurrent duplicate insert. */
+export function isUniqueViolation(error: unknown): boolean {
+  return (
+    error instanceof Prisma.PrismaClientKnownRequestError &&
+    error.code === "P2002"
+  )
 }
