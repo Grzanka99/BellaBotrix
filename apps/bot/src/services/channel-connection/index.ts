@@ -1,5 +1,7 @@
 import { SSettings, type TSettings } from "bellatrix";
 import { gc } from "bun";
+import type { ChatOutbox } from "bus/chat-outbox";
+import { bus } from "bus/event-bus";
 import { activityHandler } from "handlers/activity-handler";
 import { chatterTimeHandler } from "handlers/activity-handler/chatters-time";
 import { CommandHandler } from "handlers/commands";
@@ -21,6 +23,7 @@ import type { TTwitchIrcContext } from "../types";
 
 type TArgs = {
   ircClient: TwitchIrc;
+  outbox: ChatOutbox;
   channelName: `#${string}`;
   ownerId: number;
   authToken: string;
@@ -29,6 +32,8 @@ type TArgs = {
 export class ChannelConnection {
   private _api: TwitchApi;
   private _irc: TwitchIrc;
+  private outbox: ChatOutbox;
+  private subscriptions = new AbortController();
   private channelName: string;
   private channelId: number | undefined = undefined;
   private ownerId: number;
@@ -60,6 +65,7 @@ export class ChannelConnection {
   constructor(args: TArgs) {
     logger.info(`Creating channel connection for channel: ${args.channelName}`);
     this._irc = args.ircClient;
+    this.outbox = args.outbox;
     this._api = TwitchApi.getInstance(args.channelName);
     this.channelName = args.channelName;
     this.ownerId = args.ownerId;
@@ -92,7 +98,7 @@ export class ChannelConnection {
       this.automsgTimer = undefined;
     } else if (!this.automsgTimer) {
       this.automsgTimer = new ChannelTimer(this.channelName, (msg) => {
-        this.irc.send(this.channelName, msg);
+        this.send(msg);
       });
     }
   }
@@ -129,7 +135,7 @@ export class ChannelConnection {
     return res.value;
   }
 
-  private async ircHandler(ctx: TTwitchIrcContext): Promise<void> {
+  private async onChatMessage(ctx: TTwitchIrcContext): Promise<void> {
     if (ctx.self) {
       return;
     }
@@ -139,83 +145,96 @@ export class ChannelConnection {
       throw "Cannot sync user settings";
     }
 
-    switch (ctx.type) {
-      case "PRIVMSG": {
-        if (!ctx.channel || !ctx.tags || !ctx.message || !this.channelId || !this.api) {
-          break;
-        }
+    if (!ctx.channel || !ctx.tags || !ctx.message || !this.channelId || !this.api) {
+      return;
+    }
 
-        if (this.settings.automod.enabled.value) {
-          void this.automod.handle(this.settings.automod, ctx);
-        }
+    if (this.settings.automod.enabled.value) {
+      void this.automod.handle(this.settings.automod, ctx);
+    }
 
-        this.streamStatsGatherer.reportMessage(ctx);
-        void activityHandler(ctx);
+    this.streamStatsGatherer.reportMessage(ctx);
+    void activityHandler(ctx);
 
-        void this.commandHandler.handle({
-          ...ctx,
-          api: this.api,
-          settings: this.settings,
-          send: this.send.bind(this),
-          r6dle: this.r6dle,
-          r6stats: this.r6stats,
-          ollamaAi: this.aiConnector,
-        });
+    void this.commandHandler.handle({
+      ...ctx,
+      api: this.api,
+      settings: this.settings,
+      send: this.send.bind(this),
+      r6dle: this.r6dle,
+      r6stats: this.r6stats,
+      ollamaAi: this.aiConnector,
+    });
 
-        const { triggerWords, ollamaAI } = this.settings;
+    if (this.settings.triggerWords.enabled.value) {
+      void triggerWordsHandler({
+        ...ctx,
+        channelId: this.channelId,
+        send: this.send.bind(this),
+      });
+    }
+  }
 
-        if (triggerWords.enabled.value) {
-          void triggerWordsHandler({
-            ...ctx,
-            channelId: this.channelId,
-            send: this.send.bind(this),
-          });
-        }
+  // NOTE: separate subscription, so a slow AI answer never delays commands for next messages
+  private async onChatMessageForAI(ctx: TTwitchIrcContext): Promise<void> {
+    if (ctx.self || !this.settings) {
+      return;
+    }
 
-        if (ollamaAI.enabled.value && this.aiConnector) {
-          const shouldRun = this.aiConnector.shouldRunOnThatMessage(ctx.message);
-          if (!shouldRun) {
-            break;
-          }
+    if (!ctx.channel || !ctx.tags || !ctx.message || !this.channelId || !this.api) {
+      return;
+    }
 
-          this.aiConnector.setHistorySize(ollamaAI.keepHistory.value);
-          const res = await this.aiConnector.ask(ctx.message, ctx.tags.username, {
-            language: ollamaAI.language.value,
-            model: ollamaAI.model.value,
-            defaultPrompt: ollamaAI.entryPrompt.value,
-          });
+    const { ollamaAI } = this.settings;
+    if (!ollamaAI.enabled.value || !this.aiConnector) {
+      return;
+    }
 
-          if (res) {
-            this.send(`@${ctx.tags.username}, ${res}`);
-          }
-        }
+    if (!this.aiConnector.shouldRunOnThatMessage(ctx.message)) {
+      return;
+    }
 
-        break;
-      }
-      case "JOIN": {
-        const { forAllUsers, forSpecificUsers } = this.settings.joinMessage;
-        if (forAllUsers.enabled.value) {
-          this.send(
-            interpolate(forAllUsers.message.value, {
-              username: ctx.tags?.displayName || ctx.source?.username || "",
-            }),
-          );
-        }
+    this.aiConnector.setHistorySize(ollamaAI.keepHistory.value);
+    const res = await this.aiConnector.ask(ctx.message, ctx.tags.username, {
+      language: ollamaAI.language.value,
+      model: ollamaAI.model.value,
+      defaultPrompt: ollamaAI.entryPrompt.value,
+    });
 
-        if (
-          forSpecificUsers.enabled.value &&
-          ctx.source?.username &&
-          forSpecificUsers.users.value.includes(ctx.tags?.displayName || ctx.source.username)
-        ) {
-          this.send(
-            interpolate(forSpecificUsers.message.value, {
-              username: ctx.tags?.displayName || ctx.source.username,
-            }),
-          );
-        }
+    if (res) {
+      this.send(`@${ctx.tags.username}, ${res}`);
+    }
+  }
 
-        break;
-      }
+  private onUserJoined(ctx: TTwitchIrcContext): void {
+    if (ctx.self) {
+      return;
+    }
+
+    if (!this.settings) {
+      this.logger.error("Cannot sync user settings");
+      throw "Cannot sync user settings";
+    }
+
+    const { forAllUsers, forSpecificUsers } = this.settings.joinMessage;
+    if (forAllUsers.enabled.value) {
+      this.send(
+        interpolate(forAllUsers.message.value, {
+          username: ctx.tags?.displayName || ctx.source?.username || "",
+        }),
+      );
+    }
+
+    if (
+      forSpecificUsers.enabled.value &&
+      ctx.source?.username &&
+      forSpecificUsers.users.value.includes(ctx.tags?.displayName || ctx.source.username)
+    ) {
+      this.send(
+        interpolate(forSpecificUsers.message.value, {
+          username: ctx.tags?.displayName || ctx.source.username,
+        }),
+      );
     }
   }
 
@@ -259,7 +278,11 @@ export class ChannelConnection {
     this.aiConnector.startHistoryCleaner(this.channelName);
     this.aiConnector.setHistorySize(this.settings?.ollamaAI.keepHistory.value || 5);
 
-    this.irc.addHandler(this.channelName, (ctx) => void this.ircHandler(ctx));
+    const opts = { channel: this.channelName, signal: this.subscriptions.signal };
+    bus.on("chat.message", (e) => this.onChatMessage(e.ctx), opts);
+    bus.on("chat.message", (e) => this.onChatMessageForAI(e.ctx), opts);
+    bus.on("user.joined", (e) => this.onUserJoined(e.ctx), opts);
+    this.irc.join(this.channelName);
 
     this.isSetup = true;
     this.logger.info("Connection set up");
@@ -276,7 +299,9 @@ export class ChannelConnection {
     this.automsgTimer = undefined;
     this.isSetup = false;
 
-    this._irc.removeHandler(this.channelName);
+    this.subscriptions.abort();
+    this.subscriptions = new AbortController();
+    this._irc.part(this.channelName);
     // @ts-ignore-next-line
     this._irc = undefined;
     // @ts-ignore-next-line
@@ -301,7 +326,7 @@ export class ChannelConnection {
   }
 
   public send(msg: string): void {
-    this.irc.send(this.channelName, msg);
+    this.outbox.say(this.channelName, msg);
   }
 
   public get api(): TwitchApi {

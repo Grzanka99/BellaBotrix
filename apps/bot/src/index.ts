@@ -1,5 +1,6 @@
 import type { Channel } from "@prisma/client";
 import { gc } from "bun";
+import { ChatOutbox } from "bus/chat-outbox";
 import { ChannelConnection } from "services/channel-connection";
 import { prisma, storage } from "services/db";
 import { TwitchApi } from "services/twitch-api";
@@ -44,6 +45,8 @@ export async function startBot(): Promise<void> {
 
   ircClient.startPingCheck();
 
+  const outbox = new ChatOutbox(ircClient);
+
   TwitchApi.globalToken = mainOAuthToken;
 
   async function updateConnection(ch: Channel): Promise<void> {
@@ -54,6 +57,7 @@ export async function startBot(): Promise<void> {
 
     connections[ch.name] = new ChannelConnection({
       ircClient,
+      outbox,
       // NOTE: this weird is thing is done, to make sure that version with one # is passed
       channelName: `#${ch.name.replaceAll("#", "")}`,
       ownerId: user.id,
