@@ -1,18 +1,20 @@
-import type { Channel } from "@prisma/client";
-import { gc } from "bun";
+import { ChatOutbox } from "bus/chat-outbox";
+import { bus } from "bus/event-bus";
+import { startTicker } from "bus/ticker";
 import { ChannelConnection } from "services/channel-connection";
-import { prisma, storage } from "services/db";
+import { ChannelListWatcher } from "services/channel-list-watcher";
 import { TwitchApi } from "services/twitch-api";
 import { TwitchIrc } from "services/twitch-irc";
-import { CK_CHANNELS_SYNC } from "sqlite-storage";
 import { getOAuthToken } from "twitch-api-connector";
 import { logger } from "utils/logger";
 
 export async function startBot(): Promise<void> {
   console.time("bootstrap");
+  // NOTE: keyed by the "#name" form, same as event.channel
   const connections: Record<string, ChannelConnection> = {};
 
   logger.info("Bootstrap");
+  startTicker();
 
   logger.info("Obtaining main OAuth token");
   const oauthTokenRes = await getOAuthToken();
@@ -25,10 +27,7 @@ export async function startBot(): Promise<void> {
 
   logger.info("Main OAuth token obtained");
 
-  logger.info("Getting enabled channels from DB");
-  const channels = await prisma.channel.findMany({ where: { enabled: true } });
-
-  logger.info(`Creating Twitch IRC client for ${channels.length} channel`);
+  logger.info("Creating Twitch IRC client");
 
   const ircClient = TwitchIrc.instance(
     "wss://irc-ws.chat.twitch.tv",
@@ -44,81 +43,67 @@ export async function startBot(): Promise<void> {
 
   ircClient.startPingCheck();
 
+  const outbox = new ChatOutbox(ircClient);
+
   TwitchApi.globalToken = mainOAuthToken;
 
-  async function updateConnection(ch: Channel): Promise<void> {
-    const user = await prisma.webuiUser.findFirst({ where: { channelId: ch.id } });
-    if (!user || !!connections[ch.name] || !ircClient || !mainOAuthToken) {
+  async function enableChannel(channel: `#${string}`): Promise<void> {
+    if (connections[channel]) {
       return;
     }
 
-    connections[ch.name] = new ChannelConnection({
+    const connection = new ChannelConnection({
       ircClient,
-      // NOTE: this weird is thing is done, to make sure that version with one # is passed
-      channelName: `#${ch.name.replaceAll("#", "")}`,
-      ownerId: user.id,
+      outbox,
+      channelName: channel,
       authToken: mainOAuthToken,
     });
 
-    await connections[ch.name].setup();
-  }
-
-  logger.info(`Setting up initial connections: ${channels.length}`);
-  for (const ch of channels) {
-    await updateConnection(ch);
-  }
-
-  logger.info("Setting interval to refresh channels list");
-
-  let lastUpdateTimestamp: number = Date.now();
-  const refreshConnections = async () => {
-    if (!storage.has(CK_CHANNELS_SYNC)) {
-      storage.set(CK_CHANNELS_SYNC, lastUpdateTimestamp);
-    }
-
-    const updateFromStorage = storage.get<number>(CK_CHANNELS_SYNC);
-
-    if (!updateFromStorage) {
-      storage.set(CK_CHANNELS_SYNC, lastUpdateTimestamp);
-      return;
-    }
-
-    if (updateFromStorage.value === lastUpdateTimestamp) {
-      return;
-    }
-
-    logger.info(
-      `Refreshing channel connections: ${lastUpdateTimestamp} -> ${updateFromStorage.value}`,
-    );
-
-    lastUpdateTimestamp = updateFromStorage.value;
-
-    const res = await prisma.channel.findMany({ where: { enabled: true } });
-
-    for (const ch of res) {
-      await updateConnection(ch);
-    }
-
-    const mappedIds = res.map((el) => el.name);
-    for (const con of Object.keys(connections)) {
-      if (mappedIds.includes(con)) {
-        continue;
+    // NOTE: stored before setup, so a disable during a slow setup (bus timeout) sets this one down
+    connections[channel] = connection;
+    try {
+      await connection.setup();
+    } catch (e) {
+      // NOTE: removed, so the next channel list sync retries it
+      logger.error(`[${channel}] setup failed: ${e}`);
+      connection.setdown();
+      if (connections[channel] === connection) {
+        delete connections[channel];
       }
-
-      logger.info(`Disabling connection for channel: ${con}`);
-      await connections[con].setdown();
-      // @ts-ignore-next-line
-      connections[con] = undefined;
-      delete connections[con];
-      gc(true);
+      return;
     }
-  };
-  setInterval(() => void refreshConnections(), 30_000);
+
+    // NOTE: disabled while setup was running
+    if (connections[channel] !== connection) {
+      connection.setdown();
+    }
+  }
+
+  function disableChannel(channel: string): void {
+    const connection = connections[channel];
+    if (!connection) {
+      return;
+    }
+
+    logger.info(`Disabling connection for channel: ${channel}`);
+    connection.setdown();
+    delete connections[channel];
+  }
+
+  // NOTE: a single subscription, so enable and disable of the same channel never run concurrently
+  bus.on("channel.changed", async (event) => {
+    if (event.enabled) {
+      await enableChannel(event.channel as `#${string}`);
+    } else {
+      disableChannel(event.channel);
+    }
+  });
+
+  logger.info("Watching enabled channels list");
+  new ChannelListWatcher(new AbortController().signal).start();
 
   console.timeEnd("bootstrap");
 }
 
-void startBot();
-
-// NOTE: Keep Alive xD
-setInterval(() => {}, 100_000);
+void startBot().catch((e) => logger.error(`Bootstrap failed: ${e}`));
+// NOTE: the ticker's setInterval keeps the process alive

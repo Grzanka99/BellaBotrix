@@ -1,4 +1,5 @@
-import type { TTwitchIrcContext } from "services/types";
+import { bus } from "bus/event-bus";
+import { onEvery } from "bus/ticker";
 import type { TOption } from "types";
 import { logger } from "utils/logger";
 import { type MessageEvent, WebSocket } from "ws";
@@ -12,7 +13,7 @@ type TResType = (value: TOption<boolean> | PromiseLike<TOption<boolean>>) => voi
 
 export class TwitchIrc {
   private ws: WebSocket;
-  private handlers: Map<string, (ctx: TTwitchIrcContext) => void> = new Map();
+  private channels = new Set<string>();
 
   private static _instance: TwitchIrc | undefined;
 
@@ -33,14 +34,19 @@ export class TwitchIrc {
     return TwitchIrc._instance;
   }
 
+  // NOTE: runs for the whole process lifetime, the signal is never aborted
   public startPingCheck() {
-    setInterval(() => {
-      const lastping = Number(storage.get("lastping")?.value);
-      const now = Date.now();
-      if (now - lastping > PING_TRESHHOLD) {
-        void this.reconnect();
-      }
-    }, 60_000);
+    onEvery(
+      60_000,
+      () => {
+        const lastping = Number(storage.get("lastping")?.value);
+        const now = Date.now();
+        if (now - lastping > PING_TRESHHOLD) {
+          void this.reconnect();
+        }
+      },
+      new AbortController().signal,
+    );
   }
 
   public async connect(): Promise<void> {
@@ -64,7 +70,7 @@ export class TwitchIrc {
     this.ws = new WebSocket(this.url);
 
     await this.connect();
-    this.restoreHandlers();
+    this.rejoinChannels();
   }
 
   private onOpen(res: TResType): void {
@@ -75,11 +81,11 @@ export class TwitchIrc {
     res(true);
   }
 
-  private handlePingMessage(msg: string): void {
-    if (msg.startsWith("PING")) {
+  private handlePingMessage(line: string): void {
+    if (line.startsWith("PING")) {
       storage.set("lastping", Date.now());
-      logger.info(`Received ping: ${msg.substring("PING".length)}`);
-      const pong = `PONG${msg.substring("PING".length)}`;
+      logger.info(`Received ping: ${line.substring("PING".length)}`);
+      const pong = `PONG${line.substring("PING".length)}`;
       logger.info(`Sending pong: ${pong}`);
       this.ws.send(pong);
     }
@@ -90,9 +96,18 @@ export class TwitchIrc {
       return;
     }
 
-    this.handlePingMessage(res.data);
+    // NOTE: twitch can batch several IRC lines into one frame
+    for (const line of res.data.split("\r\n")) {
+      if (line) {
+        this.handleLine(line);
+      }
+    }
+  }
 
-    const ctx = parseMessage(res.data);
+  private handleLine(line: string): void {
+    this.handlePingMessage(line);
+
+    const ctx = parseMessage(line);
 
     if (!ctx || !ctx.channel) {
       return;
@@ -101,72 +116,39 @@ export class TwitchIrc {
     switch (ctx.type) {
       case "PRIVMSG": {
         logger.message(`[${ctx.channel}] ${ctx.tags?.displayName}: ${ctx.message}`);
-        const handler = this.handlers.get(ctx.channel);
-
-        if (!handler) {
-          return;
-        }
-
-        handler(ctx);
+        bus.publish({ type: "chat.message", channel: ctx.channel, ctx });
         break;
       }
       case "JOIN": {
         logger.message(`[${ctx.channel}] [JOIN]: ${ctx.source?.username}`);
-        const handler = this.handlers.get(ctx.channel);
-
-        if (!handler) {
-          return;
-        }
-
-        handler(ctx);
+        bus.publish({ type: "user.joined", channel: ctx.channel, ctx });
         break;
       }
     }
   }
 
-  public addHandler(channel: string, handler: (ctx: TTwitchIrcContext) => void) {
+  public join(channel: string): void {
     logger.info(`Joining room: ${channel}`);
-    if (this.handlers.has(channel)) {
-      this.handlers.delete(channel);
-    }
-
     this.ws.send(`JOIN ${channel}`);
-    this.handlers.set(channel, handler);
+    this.channels.add(channel);
     logger.info(`Joined room: ${channel}`);
   }
 
-  public restoreHandlers() {
-    const oldHandlers = new Map();
-
-    for (const [key, handler] of this.handlers) {
-      oldHandlers.set(key, handler);
-    }
-
-    this.handlers.clear();
-
-    for (const [key, handler] of oldHandlers) {
-      this.handlers.delete(key);
-      this.addHandler(key, handler);
-    }
-  }
-
-  public removeHandler(channel: string) {
+  public part(channel: string): void {
     logger.info(`Parting room: ${channel}`);
-    this.handlers.delete(channel);
+    this.channels.delete(channel);
     this.ws.send(`PART ${channel}`);
     logger.info(`Parted room: ${channel}`);
   }
 
-  public send(channel: string, message: string): void {
-    const chunkSize = 500;
-    if (message.length > chunkSize) {
-      let currentChunk = "";
-      for (let i = 0; i < message.length; i += chunkSize) {
-        currentChunk = message.slice(i, i + chunkSize);
-        this.ws.send(`PRIVMSG ${channel} :${currentChunk}`);
-      }
-    } else {
-      this.ws.send(`PRIVMSG ${channel} :${message}`);
+  private rejoinChannels(): void {
+    for (const channel of this.channels) {
+      this.join(channel);
     }
+  }
+
+  // NOTE: raw single line writer, use ChatOutbox.say instead, it handles splitting and rate limits
+  public sendRaw(channel: string, line: string): void {
+    this.ws.send(`PRIVMSG ${channel} :${line}`);
   }
 }

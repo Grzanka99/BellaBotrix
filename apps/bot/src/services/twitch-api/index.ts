@@ -1,3 +1,4 @@
+import { onEvery } from "bus/ticker";
 import { prisma } from "services/db";
 import type { TTwitchApiChatter, TTwitchApiStream } from "services/types";
 import {
@@ -21,24 +22,9 @@ export class TwitchApi {
 
   public static globalToken: string;
 
-  private constructor(channel: string) {
+  constructor(channel: string) {
     logger.info("Creating new api connector");
     this.channelName = channel.replace("#", "");
-  }
-
-  private static instances = new Map<string, TwitchApi>();
-
-  public static getInstance(ch: string): TwitchApi {
-    const instance = TwitchApi.instances.get(ch);
-
-    if (instance) {
-      return instance;
-    }
-
-    const newInstance = new TwitchApi(ch);
-    TwitchApi.instances.set(ch, newInstance);
-
-    return newInstance;
   }
 
   public async init(): Promise<void> {
@@ -196,15 +182,14 @@ export class TwitchApi {
     }
   }
 
-  private refreshInterval: Timer | undefined = undefined;
   private chattersList: TTwitchApiChatter[] = [];
 
-  public startChattersAutorefresh(timeout: number): boolean {
+  public startChattersAutorefresh(timeout: number, signal: AbortSignal): boolean {
     logger.info(`Setting timer for channel: ${this.channelName} each ${timeout}ms`);
     const refreshChatters = async () => {
       this.chattersList = await this.getChannelChattersList();
     };
-    this.refreshInterval = setInterval(() => void refreshChatters(), timeout);
+    onEvery(timeout, refreshChatters, signal);
 
     return true;
   }
@@ -223,11 +208,6 @@ export class TwitchApi {
     }
 
     return res.data.data[0];
-  }
-
-  public stopChattersAutorefresh(): boolean {
-    clearInterval(this.refreshInterval);
-    return true;
   }
 
   public get chatters() {

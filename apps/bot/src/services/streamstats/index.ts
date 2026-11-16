@@ -1,15 +1,11 @@
+import { onEvery } from "bus/ticker";
+import type { TBotEventOf } from "bus/events";
 import { prisma, prismaQueue, storage } from "services/db";
-import { TwitchApi } from "services/twitch-api";
+import type { TwitchApi } from "services/twitch-api";
 import type { TTwitchApiChatter, TTwitchIrcContext } from "services/types";
 import { logger } from "utils/logger";
 
-const STANDBY_TIMEOUT = 60_000;
-
 export class StreamStatsGatherer {
-  public static instances = new Map<string, StreamStatsGatherer>();
-
-  private api: TwitchApi;
-
   private activeStream: string | undefined = undefined;
   private _activeStreamId = -1;
 
@@ -17,59 +13,41 @@ export class StreamStatsGatherer {
     return this._activeStreamId;
   }
 
-  constructor(private channel: string) {
-    this.api = TwitchApi.getInstance(channel);
-  }
+  constructor(
+    private channel: string,
+    private api: TwitchApi,
+  ) {}
 
-  public static getInstance(ch: string): StreamStatsGatherer {
-    const instance = StreamStatsGatherer.instances.get(ch);
-
-    if (instance) {
-      return instance;
-    }
-
-    const newInstance = new StreamStatsGatherer(ch);
-
-    StreamStatsGatherer.instances.set(ch, newInstance);
-    return newInstance;
-  }
-
-  private statsInterval: Timer | undefined = undefined;
-  private standbyInterval: Timer | undefined = undefined;
-
-  private async startGathering(startedAt: string, streamerId: string, interval = 30_000) {
-    logger.info(`${this.channel} is now live, starting gathering stats`);
-    storage.set(`${this.channel}_is_live`, true);
+  // NOTE: called on stream.started, sampling stops when signal (the live stream scope) is aborted
+  public async start(
+    event: TBotEventOf<"stream.started">,
+    signal: AbortSignal,
+    interval = 30_000,
+  ): Promise<void> {
+    logger.info(`${this.channel} starting gathering stats`);
 
     storage.set(this.messagesKey, 0);
     storage.set(this.newChattersKey, 0);
-    this.activeStream = `${startedAt}@${this.channel}`;
+    this.activeStream = `${event.startedAt}@${this.channel}`;
 
     const res = await prisma.streams.upsert({
       where: { unique_id: this.activeStream },
       create: {
-        started_at: startedAt,
+        started_at: event.startedAt,
         channel: this.channel,
         unique_id: this.activeStream,
-        streamer_id: streamerId,
+        streamer_id: event.streamerId,
       },
-      update: { started_at: startedAt },
+      update: { started_at: event.startedAt },
     });
 
     this._activeStreamId = res.id;
 
-    this.statsInterval = setInterval(() => {
-      void this.handleGathering();
-    }, interval);
+    onEvery(interval, () => this.handleGathering(), signal);
   }
 
-  public async startStandby() {
-    logger.info(`${this.channel} is now offline, standby mode`);
-    storage.set(`${this.channel}_is_live`, false);
-    clearInterval(this.statsInterval);
-
-    this.standbyInterval = setInterval(() => void this.handleStandby(), STANDBY_TIMEOUT);
-
+  // NOTE: called on stream.ended
+  public async finish(): Promise<void> {
     if (!this.activeStream) {
       return;
     }
@@ -123,15 +101,9 @@ export class StreamStatsGatherer {
   private async handleGathering() {
     const info = await this.api.getStreamInfo();
 
+    // NOTE: StreamWatcher publishes stream.ended when the stream is really gone
     if (!info) {
-      storage.set(this.messagesKey, 0);
-      storage.set(this.newChattersKey, 0);
-      void this.startStandby();
       return;
-    }
-
-    if (!this.activeStream) {
-      this.activeStream = `${info.started_at}@${this.channel}`;
     }
 
     const tmpmsg = storage.get<number>(this.messagesKey)?.value || 0;
@@ -152,31 +124,5 @@ export class StreamStatsGatherer {
         },
       }),
     );
-  }
-
-  private async handleStandby() {
-    const info = await this.api.getStreamInfo();
-
-    if (!info) {
-      return;
-    }
-
-    void this.startGathering(info.started_at, info.user_id);
-    clearInterval(this.standbyInterval);
-  }
-
-  public async init() {
-    const info = await this.api.getStreamInfo();
-    if (!info) {
-      void this.startStandby();
-    } else {
-      void this.startGathering(info.started_at, info.user_id);
-    }
-  }
-
-  public destroy() {
-    clearInterval(this.statsInterval);
-    clearInterval(this.standbyInterval);
-    StreamStatsGatherer.instances.delete(this.channel);
   }
 }
