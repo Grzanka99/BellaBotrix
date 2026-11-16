@@ -1,6 +1,7 @@
 import { SSettings, type TSettings } from "bellatrix";
 import type { ChatOutbox } from "bus/chat-outbox";
 import { bus } from "bus/event-bus";
+import type { TBotEventOf } from "bus/events";
 import { activityHandler } from "handlers/activity-handler";
 import { chatterTimeHandler } from "handlers/activity-handler/chatters-time";
 import { CommandHandler } from "handlers/commands";
@@ -12,6 +13,7 @@ import { prisma, storage } from "services/db";
 import { R6Dle } from "services/r6dle";
 import { R6Stats } from "services/r6stats";
 import { getSettings } from "services/settings";
+import { StreamWatcher } from "services/stream-watcher";
 import { StreamStatsGatherer } from "services/streamstats";
 import { ChannelTimer } from "services/timers";
 import { TwitchApi } from "services/twitch-api";
@@ -41,8 +43,8 @@ export class ChannelConnection {
   private channelId: number | undefined = undefined;
   private ownerId: number;
   private isSetup = false;
-
-  private automsgTimer: ChannelTimer | undefined;
+  // NOTE: one per live stream, created on stream.started and aborted on stream.ended (or setdown)
+  private live: AbortController | undefined;
 
   private commandHandler: CommandHandler;
 
@@ -50,6 +52,7 @@ export class ChannelConnection {
   private r6stats: R6Stats;
   private aiConnector: AIConnector;
   private streamStatsGatherer: StreamStatsGatherer;
+  private streamWatcher: StreamWatcher;
   private automod: AutomodService;
 
   private settingsKey: string;
@@ -75,11 +78,8 @@ export class ChannelConnection {
     this.r6dle = new R6Dle(this.channelName);
     this.r6stats = R6Stats.instance;
     this.aiConnector = new AIConnector(this.channelName);
-    this.streamStatsGatherer = new StreamStatsGatherer(
-      this.channelName,
-      this._api,
-      this.scope.signal,
-    );
+    this.streamStatsGatherer = new StreamStatsGatherer(this.channelName, this._api);
+    this.streamWatcher = new StreamWatcher(this.channelName, this._api, this.scope.signal);
     this.automod = new AutomodService(this.channelName, this._api, this.streamStatsGatherer);
 
     this.settingsKey = `${args.channelName}-settings`;
@@ -93,22 +93,6 @@ export class ChannelConnection {
           this.channelId = res?.id;
         }
       });
-  }
-
-  private async automsgChecker(): Promise<void> {
-    const info = await this.api.getStreamInfo();
-    if (!info) {
-      this.automsgTimer?.stop();
-      this.automsgTimer = undefined;
-    } else if (!this.automsgTimer) {
-      this.automsgTimer = new ChannelTimer(
-        this.channelName,
-        (msg) => {
-          this.send(msg);
-        },
-        this.scope.signal,
-      );
-    }
   }
 
   private async fetchSettings() {
@@ -131,16 +115,6 @@ export class ChannelConnection {
     }
 
     return parsed.data;
-  }
-
-  public get isLive(): boolean {
-    const res = storage.get<boolean>(`${this.channelName}_is_live`);
-
-    if (!res) {
-      return false;
-    }
-
-    return res.value;
   }
 
   // NOTE: settings for a chat message, undefined when the message should be ignored
@@ -267,6 +241,28 @@ export class ChannelConnection {
     }
   }
 
+  private async onStreamStarted(event: TBotEventOf<"stream.started">): Promise<void> {
+    this.live?.abort();
+    this.live = new AbortController();
+    const { signal } = this.live;
+
+    // NOTE: Automsg
+    new ChannelTimer(this.channelName, (msg) => this.send(msg), signal);
+
+    // NOTE: Chatters time
+    every(30_000, () => void chatterTimeHandler(this.channelName, this.api.chatters), signal);
+
+    // NOTE: Stats gathering
+    await this.streamStatsGatherer.start(event, signal);
+  }
+
+  private async onStreamEnded(): Promise<void> {
+    this.live?.abort();
+    this.live = undefined;
+
+    await this.streamStatsGatherer.finish();
+  }
+
   public async setup(): Promise<void> {
     if (this.isSetup) {
       return;
@@ -282,19 +278,13 @@ export class ChannelConnection {
 
     // NOTE: Chatters
     this.api.startChattersAutorefresh(5000, signal);
-    const updateChattersTime = async () => {
-      if (!this.isLive) {
-        return;
-      }
-      await chatterTimeHandler(this.channelName, this.api.chatters);
-    };
-    every(30_000, () => void updateChattersTime(), signal);
 
-    // NOTE: Stats gathering;
-    await this.streamStatsGatherer.init();
-
-    // NOTE: Automsg
-    every(300_000, () => void this.automsgChecker(), signal);
+    // NOTE: Live stream work (automsg, chatters time, stats). Registered before the settings
+    // check like before, and before the watcher starts so an already live stream is not missed.
+    const opts = { channel: this.channelName, signal };
+    bus.on("stream.started", (e) => this.onStreamStarted(e), opts);
+    bus.on("stream.ended", () => this.onStreamEnded(), opts);
+    this.streamWatcher.start();
 
     // NOTE: Settings
     this.logger.info("Syncing settings with database");
@@ -310,7 +300,6 @@ export class ChannelConnection {
     this.aiConnector.setHistorySize(this.settings.ollamaAI.keepHistory.value || 5);
 
     // NOTE: every feature gets its own bus lane, so a slow one never delays the others
-    const opts = { channel: this.channelName, signal };
     bus.on("chat.message", (e) => this.runAutomod(e.ctx), opts);
     bus.on("chat.message", (e) => this.reportStats(e.ctx), opts);
     bus.on("chat.message", (e) => this.trackActivity(e.ctx), opts);
@@ -327,6 +316,7 @@ export class ChannelConnection {
   public setdown(): void {
     this.logger.info("Setting down connection");
     this.scope.abort();
+    this.live?.abort();
     this.irc.part(this.channelName);
   }
 
