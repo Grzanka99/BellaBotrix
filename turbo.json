@@ -11,8 +11,9 @@
       ],
       "outputs": [
         "bin/bellatrix",
-        ".output/**",
-        "bin/sup"
+        "bin/sup",
+        ".next/**",
+        "!.next/cache/**"
       ]
     },
     "db:generate": {
