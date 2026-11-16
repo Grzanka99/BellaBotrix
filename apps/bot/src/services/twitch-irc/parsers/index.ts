@@ -1,5 +1,5 @@
-import { TOption } from "bellatrix";
-import { TTwitchIrcContext } from "services/types";
+import type { TOption } from "bellatrix";
+import type { TTwitchIrcContext } from "services/types";
 import { parseCommandComponent } from "./command-component.parse";
 import { parseSourceComponent } from "./source-components.parser";
 import { parseTags } from "./tags.parser";

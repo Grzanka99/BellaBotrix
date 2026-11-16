@@ -98,22 +98,23 @@ export class TwitchApi {
       return [];
     }
 
-    if (firstBatch.total <= firstBatch.data.length) {
-      return firstBatch.data;
+    const first = firstBatch.data;
+    if (first.total !== undefined && first.total <= first.data.length) {
+      return first.data;
     }
 
-    let all = firstBatch.data;
-    let pagination = firstBatch.pagination.cursor;
+    let all = first.data;
+    let pagination = first.pagination?.cursor;
 
     for (;;) {
       const newBatch = await getChannelFollowers(this.userId, this.channelToken, pagination);
-      if (!newBatch) {
+      if (!newBatch.success) {
         break;
       }
 
-      pagination = newBatch.pagination.cursor;
-      all = [...all, ...newBatch.data];
-      if (newBatch.total <= all.length) {
+      pagination = newBatch.data.pagination?.cursor;
+      all = [...all, ...newBatch.data.data];
+      if (newBatch.data.total !== undefined && newBatch.data.total <= all.length) {
         break;
       }
     }
@@ -200,9 +201,10 @@ export class TwitchApi {
 
   public startChattersAutorefresh(timeout: number): boolean {
     logger.info(`Setting timer for channel: ${this.channelName} each ${timeout}ms`);
-    this.refreshInterval = setInterval(async () => {
+    const refreshChatters = async () => {
       this.chattersList = await this.getChannelChattersList();
-    }, timeout);
+    };
+    this.refreshInterval = setInterval(() => void refreshChatters(), timeout);
 
     return true;
   }

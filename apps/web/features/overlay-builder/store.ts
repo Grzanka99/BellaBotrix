@@ -9,13 +9,8 @@ import {
   legacyOverlayStorage,
   type PersistedOverlayState,
 } from "./legacy-storage"
-import {
-  EElementType,
-  elementSize,
-  toPx,
-  px,
-  type TOverlayLocalStorageSave,
-} from "./schema"
+import type { EElementType } from "./schema"
+import { elementSize, toPx, px, type TOverlayLocalStorageSave } from "./schema"
 
 /**
  * Port of the `useStorage` refs in `pages/panel/overlay/builder.vue` and

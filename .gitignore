@@ -33,6 +33,9 @@ prisma/*-journal
 # Logs
 *.log
 
+# TypeScript
+*.tsbuildinfo
+
 # Turbo
 .turbo
 .vercel

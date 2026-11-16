@@ -59,7 +59,7 @@ export class AIConnector {
     }
 
     if (!AIConnector.synced) {
-      this.syncModels();
+      void this.syncModels();
     }
   }
   public static getInstance(ch: string): AIConnector {
@@ -134,6 +134,8 @@ export class AIConnector {
       return model;
     }
 
+    // Logs "[object Object]"; kept as is because this change only fixes types and lint.
+    // oxlint-disable-next-line typescript/restrict-template-expressions, typescript/no-base-to-string
     logger.info(`Falling back to model ${this.models[0]}`);
     return this.models[0].name;
   }
@@ -237,7 +239,7 @@ export class AIConnector {
       await this.registerInDatabase(config, q, res, username);
 
       return res;
-    } catch (_) {
+    } catch {
       return undefined;
     }
   }

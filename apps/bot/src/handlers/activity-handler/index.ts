@@ -7,7 +7,7 @@ export async function activityHandler({ tags, channel }: TTwitchIrcContext) {
   }
 
   const { username } = tags;
-  prismaQueue.enqueue(async () => {
+  void prismaQueue.enqueue(async () => {
     const user = await prisma.user.findUnique({
       where: {
         channel,

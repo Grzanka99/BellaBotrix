@@ -7,7 +7,6 @@ import {
   type TSubCommand,
   type TCommand,
   type TCommandFromDB,
-  type TDbInterfaceCommand,
   type TMinimalCommand,
 } from "types/schema/commands.schema";
 
@@ -66,9 +65,11 @@ export function commandToDbCommand(command: TCommand): TOption<TCommandFromDB> {
   return res.data;
 }
 
-export function minimalCommandToMinimalDbCommand(
-  command: Omit<TMinimalCommand, "isCore">,
-): TOption<TDbInterfaceCommand> {
+type TMinimalCommandInput = Pick<TMinimalCommand, "name" | "message" | "alias">;
+
+export function minimalCommandToMinimalDbCommand<T extends TMinimalCommandInput>(
+  command: T,
+): TOption<Omit<T, "message" | "alias"> & { message: string; alias: string }> {
   return {
     ...command,
     message: JSON.stringify(command.message) as string,

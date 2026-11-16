@@ -1,4 +1,4 @@
-import { TParsedCommandType, TTwitchIrcCommand } from "services/types";
+import type { TParsedCommandType, TTwitchIrcCommand } from "services/types";
 
 export function parseCommandComponent(rawComponent: string): TParsedCommandType {
   const parsedCommand: TParsedCommandType = {

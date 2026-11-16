@@ -39,7 +39,7 @@ export class TwitchEventSub {
           this.logger.info("connection is open");
         });
         this.ws.addEventListener("message", (r) => this.onMessage(r));
-      } catch (_) {
+      } catch {
         resolve(undefined);
       }
     });
@@ -78,7 +78,7 @@ export class TwitchEventSub {
     this.keepAliveInterval = setInterval(() => {
       this.lastevent = this.lastevent + 1;
       if (this.lastevent > this.keepaliveTimeout) {
-        this.reconnect();
+        void this.reconnect();
       }
     }, 1000);
   }
@@ -127,9 +127,9 @@ export class TwitchEventSub {
         }
 
         if (!("reconnect_url" in data.payload.session)) {
-          this.reconnect(data.payload.session.reconnect_url);
+          void this.reconnect(data.payload.session.reconnect_url);
         } else {
-          this.reconnect();
+          void this.reconnect();
         }
 
         break;

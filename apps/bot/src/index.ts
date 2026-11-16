@@ -71,7 +71,7 @@ export async function startBot(): Promise<void> {
   logger.info("Setting interval to refresh channels list");
 
   let lastUpdateTimestamp: number = Date.now();
-  setInterval(async () => {
+  const refreshConnections = async () => {
     if (!storage.has(CK_CHANNELS_SYNC)) {
       storage.set(CK_CHANNELS_SYNC, lastUpdateTimestamp);
     }
@@ -112,12 +112,13 @@ export async function startBot(): Promise<void> {
       delete connections[con];
       gc(true);
     }
-  }, 30_000);
+  };
+  setInterval(() => void refreshConnections(), 30_000);
 
   console.timeEnd("bootstrap");
 }
 
-startBot();
+void startBot();
 
 // NOTE: Keep Alive xD
 setInterval(() => {}, 100_000);

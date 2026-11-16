@@ -1,6 +1,6 @@
 import ky from "ky";
-import { SWrappedResponse, type TResponse, type TWrappedResponse } from "types";
-import { bearerTokenParams, logger } from "utils";
+import { SWrappedResponse, type TResponse, type TWrappedResponse } from "../types";
+import { bearerTokenParams, logger } from "../utils";
 import { z } from "zod";
 
 const SStream = z.object({

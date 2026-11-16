@@ -45,9 +45,9 @@ export class R6Dle {
 
   constructor(channel: string) {
     this.channel = channel;
-    this.fetchOperators()
+    void this.fetchOperators()
       .then(() => {
-        this.loadGame().then(([operator, gameid]) => {
+        void this.loadGame().then(([operator, gameid]) => {
           this._currentOperator = operator;
           this._gameId = gameid;
         });
@@ -167,7 +167,7 @@ export class R6Dle {
           data: { inProgress: false, winner: player },
         }),
       );
-    } catch (_) {}
+    } catch {}
   }
 
   public async guess(
@@ -215,7 +215,7 @@ export class R6Dle {
       };
     }
 
-    prismaQueue.enqueue(async () => {
+    void prismaQueue.enqueue(async () => {
       if (!this.gameId) {
         return;
       }

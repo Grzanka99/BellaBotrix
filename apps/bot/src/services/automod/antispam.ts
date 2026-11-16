@@ -1,5 +1,4 @@
 import { AutomodAIGemini } from "./aiautomod";
-import * as console from "node:console";
 
 const truescams = [
   "Bͦest vie̟wers on streamboo .com ( remove the space ) @d3z2PHZO",
@@ -54,7 +53,7 @@ export class AntispamAI {
       "L4 is sick leave and its fine",
       "Memes and emojis and things like LUL, XD etc are fine",
       "Do not mark provocative messages or troll messages as scams",
-      `Example scam and spam messages: ${truescams}`,
+      `Example scam and spam messages: ${truescams.join(",")}`,
     ];
 
     const res = await this.automodai.ask(msg, system);

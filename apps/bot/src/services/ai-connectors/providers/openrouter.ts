@@ -76,7 +76,7 @@ export class OpenrouterAIProvider implements TAIProvider {
         }),
       });
 
-      const data = (await res.json()) as any;
+      const data = (await res.json()) as { choices: Array<{ message: { content: string } }> };
 
       const textres = data.choices[0].message.content;
       return textres;

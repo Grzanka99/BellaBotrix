@@ -28,7 +28,8 @@ export function NoChannelEmpty() {
         </EmptyDescription>
       </EmptyHeader>
       <EmptyContent>
-        {/* Plain navigation: the route handler redirects to Twitch. */}
+        {/* Plain navigation: this is a route handler that redirects to Twitch, not a page. */}
+        {/* oxlint-disable-next-line nextjs/no-html-link-for-pages */}
         <a href="/api/auth-redirect" className={buttonVariants()}>
           <ShieldCheckIcon data-icon="inline-start" />
           Authorize Twitch channel

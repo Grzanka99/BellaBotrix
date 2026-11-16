@@ -1,6 +1,5 @@
-import { TwitchIrc } from "services/twitch-irc";
-import { TTwitchMessageInfo } from "services/types";
-import { TSettings } from "types/schema/settings.schema";
+import type { TSettings } from "bellatrix";
+import type { TTwitchMessageInfo } from "services/types";
 
 export type TChatMessage = {
   author: string;

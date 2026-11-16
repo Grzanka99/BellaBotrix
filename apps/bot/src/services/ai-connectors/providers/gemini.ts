@@ -75,7 +75,7 @@ export class GeminiAIProvider implements TAIProvider {
       const res = await chatSession.sendMessage(text);
 
       return res.response.text().trim();
-    } catch (_) {
+    } catch {
       logger.error("[GEMINI_AI_PROVIDER] Error occured while calling");
       return undefined;
     }

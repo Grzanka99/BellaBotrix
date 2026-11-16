@@ -17,7 +17,7 @@ import { TwitchApi } from "services/twitch-api";
 import type { TwitchIrc } from "services/twitch-irc";
 import { interpolate } from "utils/interpolate-string";
 import { logger } from "utils/logger";
-import { TTwitchIrcContext } from "../types";
+import type { TTwitchIrcContext } from "../types";
 
 type TArgs = {
   ircClient: TwitchIrc;
@@ -74,7 +74,7 @@ export class ChannelConnection {
 
     this.settingsKey = `${args.channelName}-settings`;
 
-    prisma.channel
+    void prisma.channel
       .findUnique({
         where: { name: args.channelName.replace("#", "") },
       })
@@ -99,7 +99,6 @@ export class ChannelConnection {
 
   private async fetchSettings() {
     this.settings = await getSettings(this.ownerId);
-    this.settings;
   }
 
   private set settings(v: TSettings) {
@@ -147,13 +146,13 @@ export class ChannelConnection {
         }
 
         if (this.settings.automod.enabled.value) {
-          this.automod.handle(this.settings.automod, ctx);
+          void this.automod.handle(this.settings.automod, ctx);
         }
 
         this.streamStatsGatherer.reportMessage(ctx);
-        activityHandler(ctx);
+        void activityHandler(ctx);
 
-        this.commandHandler.handle({
+        void this.commandHandler.handle({
           ...ctx,
           api: this.api,
           settings: this.settings,
@@ -166,7 +165,7 @@ export class ChannelConnection {
         const { triggerWords, ollamaAI } = this.settings;
 
         if (triggerWords.enabled.value) {
-          triggerWordsHandler({
+          void triggerWordsHandler({
             ...ctx,
             channelId: this.channelId,
             send: this.send.bind(this),
@@ -233,18 +232,19 @@ export class ChannelConnection {
 
     // NOTE: Chatters
     this.api.startChattersAutorefresh(5000);
-    this.chattersInterval = setInterval(async () => {
+    const updateChattersTime = async () => {
       if (!this.isLive) {
         return;
       }
       await chatterTimeHandler(this.channelName, this.api.chatters);
-    }, 30_000);
+    };
+    this.chattersInterval = setInterval(() => void updateChattersTime(), 30_000);
 
     // NOTE: Stats gathering;
     await this.streamStatsGatherer.init();
 
     // NOTE: Automsg
-    this.automsgInterval = setInterval(() => this.automsgChecker(), 300_000);
+    this.automsgInterval = setInterval(() => void this.automsgChecker(), 300_000);
 
     // NOTE: Settings
     this.logger.info("Syncing settings with database");
@@ -259,7 +259,7 @@ export class ChannelConnection {
     this.aiConnector.startHistoryCleaner(this.channelName);
     this.aiConnector.setHistorySize(this.settings?.ollamaAI.keepHistory.value || 5);
 
-    this.irc.addHandler(this.channelName, this.ircHandler.bind(this));
+    this.irc.addHandler(this.channelName, (ctx) => void this.ircHandler(ctx));
 
     this.isSetup = true;
     this.logger.info("Connection set up");

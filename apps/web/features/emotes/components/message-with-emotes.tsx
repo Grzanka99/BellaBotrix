@@ -26,7 +26,7 @@ export function MessageWithEmotes({
       {parts.map((part, index) =>
         part.kind === "emote" ? (
           // 7TV CDN images; next/image would need a remotePatterns entry.
-          // eslint-disable-next-line @next/next/no-img-element
+          // oxlint-disable-next-line nextjs/no-img-element
           <img
             key={index}
             src={part.src}

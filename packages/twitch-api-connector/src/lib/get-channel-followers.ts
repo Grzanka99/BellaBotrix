@@ -1,6 +1,6 @@
 import ky from "ky";
-import { SWrappedResponse, type TResponse, type TWrappedResponse } from "types";
-import { bearerTokenParams, logger } from "utils";
+import { SWrappedResponse, type TResponse, type TWrappedResponse } from "../types";
+import { bearerTokenParams, logger } from "../utils";
 import { z } from "zod";
 
 const SFollower = z.object({
@@ -15,7 +15,7 @@ type TFollower = z.infer<typeof SFollower>;
 export async function getChannelFollowers(
   userid: string,
   token: string,
-  startAt: string | undefined = undefined,
+  startAt?: string,
 ): Promise<TResponse<TWrappedResponse<TFollower[]>>> {
   const url = `https://api.twitch.tv/helix/channels/followers?broadcaster_id=${userid}&moderator_id=${userid}&first=100&after=${
     startAt || ""

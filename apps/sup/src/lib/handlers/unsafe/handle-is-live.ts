@@ -11,12 +11,12 @@ export const IsLiveValidation = {
 export function HandleIsLive(
   ctx: TUnsafeRouteContext<typeof UNSAFE_IS_LIVE, typeof IsLiveValidation>,
 ) {
-  const { params, error } = ctx;
+  const { params, status } = ctx;
 
   const channel = String(params.channel);
 
   if (!channel.length) {
-    return error(404);
+    return status(404);
   }
 
   const chName = `#${channel.replaceAll("#", "")}`;
@@ -24,7 +24,7 @@ export function HandleIsLive(
   const res = storage.get<boolean>(`${chName}_is_live`);
 
   if (!res) {
-    return error(404);
+    return status(404);
   }
 
   return {

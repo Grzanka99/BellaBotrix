@@ -1,4 +1,4 @@
-import { TTwitchMessageInfo as TTwitchTags } from "services/types";
+import type { TTwitchMessageInfo as TTwitchTags } from "services/types";
 import { parseBadges } from "./badges.parser";
 import { parseEmotes } from "./emotes.parser";
 

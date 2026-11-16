@@ -88,7 +88,7 @@ export const addPointsCoreCommand = new CoreCommand(async (ctx) => {
     });
 
     if (!user) {
-      prisma.user.create({
+      void prisma.user.create({
         data: {
           username: formattedUsername,
           userid: `${targetUserId}@${ctx.channel}`,

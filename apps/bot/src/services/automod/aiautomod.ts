@@ -52,7 +52,7 @@ export class AutomodAIGemini {
       const res = await chatSEssion.sendMessage(q);
 
       return res.response.text().trim();
-    } catch (_) {
+    } catch {
       return undefined;
     }
   }
@@ -108,7 +108,7 @@ export class AutomodAI {
       const trimmed = res.message.content.trim();
 
       return trimmed;
-    } catch (_) {
+    } catch {
       return undefined;
     }
   }

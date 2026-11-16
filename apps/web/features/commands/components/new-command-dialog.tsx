@@ -92,9 +92,10 @@ function NewCommandForm({ onDone }: { onDone: () => void }) {
   useEffect(() => {
     if (!name) return
     let cancelled = false
-    const timer = window.setTimeout(async () => {
-      const result = await isCommandNameTaken(channelId, { name })
-      if (!cancelled && result.ok) setTaken({ name, taken: result.data })
+    const timer = window.setTimeout(() => {
+      void isCommandNameTaken(channelId, { name }).then((result) => {
+        if (!cancelled && result.ok) setTaken({ name, taken: result.data })
+      })
     }, 1000)
     return () => {
       cancelled = true

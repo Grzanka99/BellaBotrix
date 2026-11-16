@@ -13,7 +13,7 @@ export class StreamStatsGatherer {
   private activeStream: string | undefined = undefined;
   private _activeStreamId = -1;
 
-  public get activeStreamId(): number | -1 {
+  public get activeStreamId(): number {
     return this._activeStreamId;
   }
 
@@ -59,7 +59,7 @@ export class StreamStatsGatherer {
     this._activeStreamId = res.id;
 
     this.statsInterval = setInterval(() => {
-      this.handleGathering();
+      void this.handleGathering();
     }, interval);
   }
 
@@ -68,9 +68,7 @@ export class StreamStatsGatherer {
     storage.set(`${this.channel}_is_live`, false);
     clearInterval(this.statsInterval);
 
-    this.standbyInterval = setInterval(async () => {
-      await this.handleStandby();
-    }, STANDBY_TIMEOUT);
+    this.standbyInterval = setInterval(() => void this.handleStandby(), STANDBY_TIMEOUT);
 
     if (!this.activeStream) {
       return;
@@ -98,13 +96,11 @@ export class StreamStatsGatherer {
 
   public reportMessage(ctx: TTwitchIrcContext) {
     let messages = storage.get<number>(this.messagesKey)?.value || 0;
-    let newChatters = storage.get<number>(this.newChattersKey)?.value || 0;
 
     messages = messages + 1;
     storage.set(this.messagesKey, messages);
 
     if (ctx.tags?.firstMessage) {
-      newChatters = newChatters + 1;
       storage.set(this.newChattersKey, this.newChattersKey);
     }
   }
@@ -130,7 +126,7 @@ export class StreamStatsGatherer {
     if (!info) {
       storage.set(this.messagesKey, 0);
       storage.set(this.newChattersKey, 0);
-      this.startStandby();
+      void this.startStandby();
       return;
     }
 
@@ -165,16 +161,16 @@ export class StreamStatsGatherer {
       return;
     }
 
-    this.startGathering(info.started_at, info.user_id);
+    void this.startGathering(info.started_at, info.user_id);
     clearInterval(this.standbyInterval);
   }
 
   public async init() {
     const info = await this.api.getStreamInfo();
     if (!info) {
-      this.startStandby();
+      void this.startStandby();
     } else {
-      this.startGathering(info.started_at, info.user_id);
+      void this.startGathering(info.started_at, info.user_id);
     }
   }
 

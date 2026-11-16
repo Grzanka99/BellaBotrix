@@ -81,7 +81,7 @@ export class SqliteStorage {
     const query = this.db.query(READ_QUERY);
     const res = query.get(key) as Store<string>;
 
-    const data = JSON.parse(res.value);
+    const data = JSON.parse(res.value) as { data: T };
 
     return {
       key,

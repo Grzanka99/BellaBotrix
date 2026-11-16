@@ -2,13 +2,13 @@
   "name": "sup",
   "type": "module",
   "scripts": {
+    "typecheck": "tsc --noEmit",
     "start": "bun --bun run ./src/index.ts",
     "dev": "bun --watch ./src/index.ts",
     "build": "bun build ./src/index.ts --target=bun --outfile=./bin/sup --compile",
     "compile:settings": "bun build ./src/index.ts --target=bun --outfile=./bin/sup --compile"
   },
   "devDependencies": {
-    "@biomejs/biome": "1.1.2",
     "@total-typescript/ts-reset": "^0.5.1",
     "prisma": "^5.2.0",
     "bun-types": "latest"

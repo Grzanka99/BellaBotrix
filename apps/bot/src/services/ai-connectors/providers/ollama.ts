@@ -57,7 +57,7 @@ export class OllamaAIProvider implements TAIProvider {
       const trimmed = res.message.content.trim();
 
       return trimmed;
-    } catch (_) {
+    } catch {
       logger.error("[OLLAMA_AI_PROVIDER] Error occured while calling");
       return undefined;
     }

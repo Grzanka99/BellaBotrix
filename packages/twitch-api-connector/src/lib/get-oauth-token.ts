@@ -1,7 +1,7 @@
-import { API_CLIENT_ID, API_CLIENT_SECRET, OAUTH_URL } from "env";
+import { API_CLIENT_ID, API_CLIENT_SECRET, OAUTH_URL } from "../env";
 import ky from "ky";
-import type { TResponse } from "types";
-import { logger, URL_ENCODED_PARAMS } from "utils";
+import type { TResponse } from "../types";
+import { logger, URL_ENCODED_PARAMS } from "../utils";
 import { z } from "zod";
 
 const SAccessToken = z.object({

@@ -1,6 +1,6 @@
 import ky from "ky";
-import type { TResponse } from "types";
-import { bearerTokenParams, logger } from "utils";
+import type { TResponse } from "../types";
+import { bearerTokenParams, logger } from "../utils";
 import { z } from "zod";
 
 const SApiBan = z.object({

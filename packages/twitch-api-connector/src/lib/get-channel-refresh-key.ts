@@ -1,7 +1,7 @@
-import { API_CLIENT_ID, API_CLIENT_SECRET, APP_URL, OAUTH_URL } from "env";
+import { API_CLIENT_ID, API_CLIENT_SECRET, APP_URL, OAUTH_URL } from "../env";
 import ky from "ky";
-import type { TResponse } from "types";
-import { logger } from "utils";
+import type { TResponse } from "../types";
+import { logger } from "../utils";
 import { z } from "zod";
 
 const SOAuthRefresh = z.object({
