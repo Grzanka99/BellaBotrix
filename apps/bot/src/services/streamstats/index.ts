@@ -1,15 +1,12 @@
 import { prisma, prismaQueue, storage } from "services/db";
-import { TwitchApi } from "services/twitch-api";
+import type { TwitchApi } from "services/twitch-api";
 import type { TTwitchApiChatter, TTwitchIrcContext } from "services/types";
+import { every } from "utils/every";
 import { logger } from "utils/logger";
 
 const STANDBY_TIMEOUT = 60_000;
 
 export class StreamStatsGatherer {
-  public static instances = new Map<string, StreamStatsGatherer>();
-
-  private api: TwitchApi;
-
   private activeStream: string | undefined = undefined;
   private _activeStreamId = -1;
 
@@ -17,22 +14,11 @@ export class StreamStatsGatherer {
     return this._activeStreamId;
   }
 
-  constructor(private channel: string) {
-    this.api = TwitchApi.getInstance(channel);
-  }
-
-  public static getInstance(ch: string): StreamStatsGatherer {
-    const instance = StreamStatsGatherer.instances.get(ch);
-
-    if (instance) {
-      return instance;
-    }
-
-    const newInstance = new StreamStatsGatherer(ch);
-
-    StreamStatsGatherer.instances.set(ch, newInstance);
-    return newInstance;
-  }
+  constructor(
+    private channel: string,
+    private api: TwitchApi,
+    private signal: AbortSignal,
+  ) {}
 
   private statsInterval: Timer | undefined = undefined;
   private standbyInterval: Timer | undefined = undefined;
@@ -58,9 +44,7 @@ export class StreamStatsGatherer {
 
     this._activeStreamId = res.id;
 
-    this.statsInterval = setInterval(() => {
-      void this.handleGathering();
-    }, interval);
+    this.statsInterval = every(interval, () => void this.handleGathering(), this.signal);
   }
 
   public async startStandby() {
@@ -68,7 +52,7 @@ export class StreamStatsGatherer {
     storage.set(`${this.channel}_is_live`, false);
     clearInterval(this.statsInterval);
 
-    this.standbyInterval = setInterval(() => void this.handleStandby(), STANDBY_TIMEOUT);
+    this.standbyInterval = every(STANDBY_TIMEOUT, () => void this.handleStandby(), this.signal);
 
     if (!this.activeStream) {
       return;
@@ -172,11 +156,5 @@ export class StreamStatsGatherer {
     } else {
       void this.startGathering(info.started_at, info.user_id);
     }
-  }
-
-  public destroy() {
-    clearInterval(this.statsInterval);
-    clearInterval(this.standbyInterval);
-    StreamStatsGatherer.instances.delete(this.channel);
   }
 }

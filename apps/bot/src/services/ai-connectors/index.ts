@@ -4,6 +4,7 @@ import { prisma, prismaQueue, storage } from "services/db";
 import type { TOption } from "bellatrix";
 import type { THistoryItem } from "./types";
 import type { OllamaAIModels } from "@prisma/client";
+import { every } from "utils/every";
 import { interpolate } from "utils/interpolate-string";
 import { GeminiAIProvider } from "./providers/gemini";
 import { OpenrouterAIProvider } from "./providers/openrouter";
@@ -48,12 +49,10 @@ export class AIConnector {
   private static geminiProvider = GeminiAIProvider.instance;
   private static openrouterProvider = OpenrouterAIProvider.instance;
 
-  public static instances = new Map<string, AIConnector>();
-
   private static skeymodels = "aimodels";
   private static synced = false;
 
-  private constructor(private channel: string) {
+  constructor(private channel: string) {
     if (!storage.has(this.historyStorageKey)) {
       storage.set(this.historyStorageKey, []);
     }
@@ -61,18 +60,6 @@ export class AIConnector {
     if (!AIConnector.synced) {
       void this.syncModels();
     }
-  }
-  public static getInstance(ch: string): AIConnector {
-    const instance = AIConnector.instances.get(ch);
-
-    if (instance) {
-      return instance;
-    }
-
-    const newInstance = new AIConnector(ch);
-
-    AIConnector.instances.set(ch, newInstance);
-    return newInstance;
   }
 
   private get historyStorageKey() {
@@ -113,20 +100,17 @@ export class AIConnector {
     storage.set(this.historyStorageKey, history);
   }
 
-  private isCleanerRunning = false;
-  public startHistoryCleaner(channel: string) {
-    logger.info(`[${channel}] Starting history cleaner for instance of AIConnector`);
-    if (this.isCleanerRunning) {
-      return;
-    }
+  public startHistoryCleaner(signal: AbortSignal) {
+    logger.info(`[${this.channel}] Starting history cleaner for instance of AIConnector`);
 
     // NOTE: Auto removing context/old messages after 5 minutes, calling shift twice to remove also responses;
-    setInterval(() => {
+    const cleanHistory = () => {
       const history = (storage.get(this.historyStorageKey)?.value || []) as THistoryItem[];
       history.shift();
       history.shift();
       storage.set(this.historyStorageKey, history);
-    }, 180_000);
+    };
+    every(180_000, cleanHistory, signal);
   }
 
   private getAllowdModel(model: string): string {

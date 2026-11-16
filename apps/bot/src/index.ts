@@ -1,5 +1,4 @@
 import type { Channel } from "@prisma/client";
-import { gc } from "bun";
 import { ChatOutbox } from "bus/chat-outbox";
 import { ChannelConnection } from "services/channel-connection";
 import { prisma, storage } from "services/db";
@@ -110,11 +109,8 @@ export async function startBot(): Promise<void> {
       }
 
       logger.info(`Disabling connection for channel: ${con}`);
-      await connections[con].setdown();
-      // @ts-ignore-next-line
-      connections[con] = undefined;
+      connections[con].setdown();
       delete connections[con];
-      gc(true);
     }
   };
   setInterval(() => void refreshConnections(), 30_000);

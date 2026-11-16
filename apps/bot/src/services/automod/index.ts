@@ -1,8 +1,8 @@
 import type { TAutomodSettings } from "bellatrix";
-import { TwitchApi } from "services/twitch-api";
+import type { TwitchApi } from "services/twitch-api";
 import type { TTwitchIrcContext } from "services/types";
 import { AntispamAI } from "./antispam";
-import { StreamStatsGatherer } from "services/streamstats";
+import type { StreamStatsGatherer } from "services/streamstats";
 import { prisma, prismaQueue } from "services/db";
 import { logger } from "utils/logger";
 
@@ -16,17 +16,13 @@ enum EAutomodHandlers {
 }
 
 export class AutomodService {
-  private static _instances: Map<string, AutomodService> = new Map();
-
   private antispam = AntispamAI.instance;
 
-  private api: TwitchApi;
-  private stats: StreamStatsGatherer;
-
-  private constructor(private channel: string) {
-    this.api = TwitchApi.getInstance(channel);
-    this.stats = StreamStatsGatherer.getInstance(channel);
-  }
+  constructor(
+    private channel: string,
+    private api: TwitchApi,
+    private stats: StreamStatsGatherer,
+  ) {}
 
   private log(
     action: EAutomodActions,
@@ -58,20 +54,6 @@ export class AutomodService {
         });
       });
     } catch {}
-  }
-
-  public static getInstance(ch: string): AutomodService {
-    const instance = AutomodService._instances.get(ch);
-
-    if (instance) {
-      return instance;
-    }
-
-    logger.info(`[automod] Setting automode instance for channel: ${ch}`);
-    const newInstance = new AutomodService(ch);
-
-    AutomodService._instances.set(ch, newInstance);
-    return newInstance;
   }
 
   public async handle(settings: TAutomodSettings, ctx: TTwitchIrcContext) {

@@ -1,5 +1,6 @@
 import { gc } from "bun";
 import { prisma } from "services/db";
+import { every } from "utils/every";
 import { logger } from "utils/logger";
 import { SingleTimer, type TTimerSender } from "./single-timer";
 
@@ -10,11 +11,20 @@ export class ChannelTimer {
   private timers: Record<number, SingleTimer> = {};
   private send: TTimerSender;
 
-  constructor(channel: string, sendFn: TTimerSender) {
+  constructor(
+    channel: string,
+    sendFn: TTimerSender,
+    private signal: AbortSignal,
+  ) {
     this.channelName = channel.replaceAll("#", "");
     this.send = sendFn;
+    signal.addEventListener("abort", () => this.stop(), { once: true });
 
     void prisma.channel.findUnique({ where: { name: this.channelName } }).then((res) => {
+      if (signal.aborted) {
+        return;
+      }
+
       if (!res) {
         logger.error(`Something went wrong while settings timers for channel: ${channel}`);
         return;
@@ -38,6 +48,11 @@ export class ChannelTimer {
       },
     });
 
+    // NOTE: channel may have been disabled while waiting for DB, don't start timers after stop()
+    if (this.signal.aborted) {
+      return;
+    }
+
     for (const t of timers) {
       if (this.timers[t.id]) {
         this.timers[t.id].update(t.timeout * 1000, t.message);
@@ -58,7 +73,7 @@ export class ChannelTimer {
   }
 
   private startSyncInterval(): void {
-    this.syncInterval = setInterval(() => void this.syncTimersWithDB(), 30_000);
+    this.syncInterval = every(30_000, () => void this.syncTimersWithDB(), this.signal);
   }
 
   private stopFetchTimersTimer(): void {
