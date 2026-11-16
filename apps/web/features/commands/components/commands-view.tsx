@@ -31,6 +31,8 @@ export function CommandsView(props: CommandsProps) {
         <PageHeader
           title="Commands"
           description="Chat commands of the channel and what the bot answers."
+
+          toolbar={<CommandsSearch />}
         >
           <NewCommandButton />
         </PageHeader>
@@ -54,12 +56,29 @@ function NewCommandButton() {
   )
 }
 
+/** Search box for the header toolbar; hidden while there is nothing to search. */
+function CommandsSearch() {
+  const hasItems = commandsStore.useStore((state) => state.commands.length > 0)
+  const query = commandsStore.useStore((state) => state.query)
+  const setQuery = commandsStore.useStore((state) => state.setQuery)
+
+  if (!hasItems) {
+    return null
+  }
+
+  return (
+    <SearchInput
+      value={query}
+      onChange={setQuery}
+      placeholder="Search by name..."
+    />
+  )
+}
+
 function CommandsContent() {
   const hasCommands = commandsStore.useStore(
     (state) => state.commands.length > 0
   )
-  const query = commandsStore.useStore((state) => state.query)
-  const setQuery = commandsStore.useStore((state) => state.setQuery)
 
   if (!hasCommands) {
     return (
@@ -80,14 +99,5 @@ function CommandsContent() {
     )
   }
 
-  return (
-    <div className="flex flex-col gap-4">
-      <SearchInput
-        value={query}
-        onChange={setQuery}
-        placeholder="Search by name..."
-      />
-      <CommandsTable />
-    </div>
-  )
+  return <CommandsTable />
 }

@@ -27,7 +27,11 @@ export function SoloView({ data }: { data: SolosPage }) {
 
   return (
     <>
-      <PageHeader title="Solo" description="Solo duels played in chat.">
+      <PageHeader
+        title="Solo"
+        description="Solo duels played in chat."
+        toolbar={<UrlSearchInput placeholder="Search by username..." />}
+      >
         <div className="flex flex-wrap gap-2">
           <Badge variant="secondary" className="tabular-nums">
             Total solos: {totals.total.toLocaleString("en-US")}
@@ -38,7 +42,6 @@ export function SoloView({ data }: { data: SolosPage }) {
         </div>
       </PageHeader>
       <div className="flex flex-col gap-4">
-        <UrlSearchInput placeholder="Search by username..." />
         <Table>
           <TableHeader>
             <TableRow>

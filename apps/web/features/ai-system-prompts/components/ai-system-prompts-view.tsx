@@ -199,7 +199,7 @@ function PromptRow({
       <TableCell className="font-medium whitespace-normal">
         {prompt.name || <span className="text-muted-foreground">-</span>}
       </TableCell>
-      <TableCell className="max-w-0 whitespace-normal">
+      <TableCell className="max-w-0 min-w-64 whitespace-normal">
         {prompt.text ? (
           <span className="line-clamp-3 break-words">{prompt.text}</span>
         ) : (

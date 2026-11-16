@@ -29,6 +29,8 @@ export function TimersView(props: TimersProps) {
       <PageHeader
         title="Timers"
         description="Messages the bot posts in chat on a fixed interval."
+
+        toolbar={<TimersSearch />}
       >
         <NewTimerButton />
       </PageHeader>
@@ -51,10 +53,27 @@ function NewTimerButton() {
   )
 }
 
-function TimersContent() {
-  const hasTimers = timersStore.useStore((state) => state.timers.length > 0)
+/** Search box for the header toolbar; hidden while there is nothing to search. */
+function TimersSearch() {
+  const hasItems = timersStore.useStore((state) => state.timers.length > 0)
   const query = timersStore.useStore((state) => state.query)
   const setQuery = timersStore.useStore((state) => state.setQuery)
+
+  if (!hasItems) {
+    return null
+  }
+
+  return (
+    <SearchInput
+      value={query}
+      onChange={setQuery}
+      placeholder="Search by message..."
+    />
+  )
+}
+
+function TimersContent() {
+  const hasTimers = timersStore.useStore((state) => state.timers.length > 0)
 
   if (!hasTimers) {
     return (
@@ -75,14 +94,5 @@ function TimersContent() {
     )
   }
 
-  return (
-    <div className="flex flex-col gap-4">
-      <SearchInput
-        value={query}
-        onChange={setQuery}
-        placeholder="Search by message..."
-      />
-      <TimersTable />
-    </div>
-  )
+  return <TimersTable />
 }

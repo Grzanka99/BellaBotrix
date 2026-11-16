@@ -92,7 +92,7 @@ function TimerRow({ timer }: { timer: Timer }) {
           aria-label={timer.enabled ? "Disable timer" : "Enable timer"}
         />
       </TableCell>
-      <TableCell className="max-w-0 whitespace-normal">
+      <TableCell className="max-w-0 min-w-64 whitespace-normal">
         <span className="line-clamp-3 break-words">{timer.message}</span>
       </TableCell>
       <TableCell className="text-right tabular-nums">{timer.timeout}</TableCell>

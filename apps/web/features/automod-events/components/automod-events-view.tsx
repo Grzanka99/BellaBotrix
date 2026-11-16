@@ -42,6 +42,11 @@ export function AutomodEventsView({ data }: { data: Paginated<AutomodEvent> }) {
       <PageHeader
         title="Automod Events"
         description="Actions the bot's automod took in chat."
+        toolbar={
+          total === 0 && !searching ? undefined : (
+            <UrlSearchInput placeholder="Search by message, target, action..." />
+          )
+        }
       >
         <Badge variant="secondary" className="tabular-nums">
           Total events: {total.toLocaleString("en-US")}
@@ -61,7 +66,6 @@ export function AutomodEventsView({ data }: { data: Paginated<AutomodEvent> }) {
         </Empty>
       ) : (
         <div className="flex flex-col gap-4">
-          <UrlSearchInput placeholder="Search by message, target, action..." />
           <Table>
             <TableHeader>
               <TableRow>

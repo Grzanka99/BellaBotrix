@@ -99,10 +99,10 @@ function TriggerWordRow({ triggerWord }: { triggerWord: TriggerWord }) {
           }
         />
       </TableCell>
-      <TableCell className="max-w-0 whitespace-normal">
+      <TableCell className="max-w-0 min-w-64 whitespace-normal">
         <span className="line-clamp-3 break-words">{triggerWord.triggers}</span>
       </TableCell>
-      <TableCell className="max-w-0 whitespace-normal">
+      <TableCell className="max-w-0 min-w-64 whitespace-normal">
         <span className="line-clamp-3 break-words">{triggerWord.response}</span>
       </TableCell>
       <TableCell>

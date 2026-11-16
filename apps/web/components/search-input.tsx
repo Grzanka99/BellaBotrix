@@ -29,6 +29,8 @@ export function SearchInput({
       </InputGroupAddon>
       <InputGroupInput
         type="search"
+        // The clear button below replaces the browser's own.
+        className="[&::-webkit-search-cancel-button]:appearance-none"
         aria-label={placeholder}
         placeholder={placeholder}
         value={value}

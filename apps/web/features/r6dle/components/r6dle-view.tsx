@@ -44,6 +44,7 @@ export function R6dleView(props: R6dleProps) {
       <PageHeader
         title="R6Dle Operators"
         description="Operators the r6dle chat game picks from."
+        toolbar={<OperatorsSearch />}
       >
         {props.canEdit && <NewOperatorButton />}
       </PageHeader>
@@ -73,10 +74,30 @@ function NewOperatorButton() {
   )
 }
 
+/** Search box for the header toolbar; hidden while there are no operators. */
+function OperatorsSearch() {
+  const hasOperators = r6dleStore.useStore(
+    (state) => state.operators.length > 0
+  )
+  const query = r6dleStore.useStore((state) => state.query)
+  const setQuery = r6dleStore.useStore((state) => state.setQuery)
+
+  if (!hasOperators) {
+    return null
+  }
+
+  return (
+    <SearchInput
+      value={query}
+      onChange={setQuery}
+      placeholder="Search by name..."
+    />
+  )
+}
+
 function R6dleContent() {
   const operators = r6dleStore.useStore((state) => state.operators)
   const query = r6dleStore.useStore((state) => state.query)
-  const setQuery = r6dleStore.useStore((state) => state.setQuery)
   const filtered = filterOperators(operators, query)
 
   if (operators.length === 0) {
@@ -94,47 +115,40 @@ function R6dleContent() {
   }
 
   return (
-    <div className="flex flex-col gap-4">
-      <SearchInput
-        value={query}
-        onChange={setQuery}
-        placeholder="Search by name..."
-      />
-      <Table>
-        <TableHeader>
+    <Table>
+      <TableHeader>
+        <TableRow>
+          <TableHead className="w-20">Enabled</TableHead>
+          <TableHead>Name</TableHead>
+          <TableHead>Gender</TableHead>
+          <TableHead>Role</TableHead>
+          <TableHead>Side</TableHead>
+          <TableHead>Country</TableHead>
+          <TableHead>Org</TableHead>
+          <TableHead>Squad</TableHead>
+          <TableHead className="text-right">Release</TableHead>
+          <TableHead className="text-right">Speed</TableHead>
+          <TableHead className="w-48">
+            <span className="sr-only">Actions</span>
+          </TableHead>
+        </TableRow>
+      </TableHeader>
+      <TableBody>
+        {filtered.map((operator) => (
+          <OperatorRow key={operator.id} operator={operator} />
+        ))}
+        {filtered.length === 0 && (
           <TableRow>
-            <TableHead className="w-20">Enabled</TableHead>
-            <TableHead>Name</TableHead>
-            <TableHead>Gender</TableHead>
-            <TableHead>Role</TableHead>
-            <TableHead>Side</TableHead>
-            <TableHead>Country</TableHead>
-            <TableHead>Org</TableHead>
-            <TableHead>Squad</TableHead>
-            <TableHead className="text-right">Release</TableHead>
-            <TableHead className="text-right">Speed</TableHead>
-            <TableHead className="w-48">
-              <span className="sr-only">Actions</span>
-            </TableHead>
+            <TableCell
+              colSpan={COLUMNS}
+              className="h-24 text-center text-muted-foreground"
+            >
+              No operators match &quot;{query}&quot;
+            </TableCell>
           </TableRow>
-        </TableHeader>
-        <TableBody>
-          {filtered.map((operator) => (
-            <OperatorRow key={operator.id} operator={operator} />
-          ))}
-          {filtered.length === 0 && (
-            <TableRow>
-              <TableCell
-                colSpan={COLUMNS}
-                className="h-24 text-center text-muted-foreground"
-              >
-                No operators match &quot;{query}&quot;
-              </TableCell>
-            </TableRow>
-          )}
-        </TableBody>
-      </Table>
-    </div>
+        )}
+      </TableBody>
+    </Table>
   )
 }
 

@@ -30,7 +30,7 @@ export function CommandsTable() {
   const filtered = filterCommands(commands, query)
 
   return (
-    <Table>
+    <Table className="min-w-3xl">
       <TableHeader>
         <TableRow>
           <TableHead className="w-20">Enabled</TableHead>
@@ -38,7 +38,7 @@ export function CommandsTable() {
           <TableHead className="w-28">Price</TableHead>
           <TableHead>Message</TableHead>
           <TableHead className="w-40">Aliases</TableHead>
-          <TableHead className="w-48">
+          <TableHead className="w-24 xl:w-48">
             <span className="sr-only">Actions</span>
           </TableHead>
         </TableRow>
@@ -103,7 +103,7 @@ function CommandRow({ command }: { command: Command }) {
       </TableCell>
       <TableCell className="align-top whitespace-normal">
         <div className="flex flex-wrap items-center gap-1.5">
-          <span className="font-medium break-all">{command.name}</span>
+          <span className="font-medium break-words">{command.name}</span>
           {command.subCommands.length > 0 && (
             <Badge variant="secondary">{command.subCommands.length} sub.</Badge>
           )}
@@ -112,10 +112,10 @@ function CommandRow({ command }: { command: Command }) {
       <TableCell className="align-top">
         {command.paid ? `${command.price} points` : "free"}
       </TableCell>
-      <TableCell className="max-w-0 align-top whitespace-normal">
+      <TableCell className="max-w-0 min-w-64 align-top whitespace-normal">
         <CommandMessage message={command.message} />
       </TableCell>
-      <TableCell className="align-top break-all whitespace-normal">
+      <TableCell className="align-top break-words whitespace-normal">
         {command.alias}
       </TableCell>
       <TableCell className="align-top">
@@ -126,7 +126,7 @@ function CommandRow({ command }: { command: Command }) {
             triggerLabel={
               <>
                 <PencilIcon data-icon="inline-start" />
-                Edit
+                <span className="max-xl:sr-only">Edit</span>
               </>
             }
           />
@@ -135,7 +135,7 @@ function CommandRow({ command }: { command: Command }) {
             triggerLabel={
               <>
                 <Trash2Icon data-icon="inline-start" />
-                Delete
+                <span className="max-xl:sr-only">Delete</span>
               </>
             }
             title={`Delete command ${command.name}?`}

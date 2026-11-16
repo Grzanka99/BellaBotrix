@@ -29,6 +29,8 @@ export function TriggerWordsView(props: TriggerWordsProps) {
       <PageHeader
         title="Trigger Words"
         description="Words or phrases in chat the bot answers automatically."
+
+        toolbar={<TriggerWordsSearch />}
       >
         <NewTriggerWordButton />
       </PageHeader>
@@ -51,12 +53,31 @@ function NewTriggerWordButton() {
   )
 }
 
-function TriggerWordsContent() {
-  const hasTriggerWords = triggerWordsStore.useStore(
+/** Search box for the header toolbar; hidden while there is nothing to search. */
+function TriggerWordsSearch() {
+  const hasItems = triggerWordsStore.useStore(
     (state) => state.triggerWords.length > 0
   )
   const query = triggerWordsStore.useStore((state) => state.query)
   const setQuery = triggerWordsStore.useStore((state) => state.setQuery)
+
+  if (!hasItems) {
+    return null
+  }
+
+  return (
+    <SearchInput
+      value={query}
+      onChange={setQuery}
+      placeholder="Search by trigger..."
+    />
+  )
+}
+
+function TriggerWordsContent() {
+  const hasTriggerWords = triggerWordsStore.useStore(
+    (state) => state.triggerWords.length > 0
+  )
 
   if (!hasTriggerWords) {
     return (
@@ -77,14 +98,5 @@ function TriggerWordsContent() {
     )
   }
 
-  return (
-    <div className="flex flex-col gap-4">
-      <SearchInput
-        value={query}
-        onChange={setQuery}
-        placeholder="Search by trigger..."
-      />
-      <TriggerWordsTable />
-    </div>
-  )
+  return <TriggerWordsTable />
 }
