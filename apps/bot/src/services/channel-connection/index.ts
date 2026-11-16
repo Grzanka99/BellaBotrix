@@ -28,7 +28,6 @@ type TArgs = {
   ircClient: TwitchIrc;
   outbox: ChatOutbox;
   channelName: `#${string}`;
-  ownerId: number;
   authToken: string;
 };
 
@@ -41,7 +40,8 @@ export class ChannelConnection {
   private readonly scope = new AbortController();
   private channelName: string;
   private channelId: number | undefined = undefined;
-  private ownerId: number;
+  // NOTE: looked up in setup(), so enabling a channel stores the connection before any await
+  private ownerId = 0;
   private isSetup = false;
   // NOTE: one per live stream, created on stream.started and aborted on stream.ended (or setdown)
   private live: AbortController | undefined;
@@ -71,7 +71,6 @@ export class ChannelConnection {
     this.outbox = args.outbox;
     this._api = new TwitchApi(args.channelName);
     this.channelName = args.channelName;
-    this.ownerId = args.ownerId;
     this.commandHandler = new CommandHandler(args.channelName);
 
     // TODO: Move it out of constructor maybe
@@ -268,6 +267,15 @@ export class ChannelConnection {
       return;
     }
 
+    const ch = await prisma.channel.findUnique({
+      where: { name: this.channelName.replace("#", "") },
+    });
+    const owner = ch && (await prisma.webuiUser.findFirst({ where: { channelId: ch.id } }));
+    if (!owner) {
+      throw new Error(`no owner for ${this.channelName}`);
+    }
+    this.ownerId = owner.id;
+
     this.logger.info("Setting up connection");
     await setDefaultCommandsForChannel(this.channelName);
 
@@ -307,6 +315,10 @@ export class ChannelConnection {
     bus.on("chat.message", (e) => this.runTriggerWords(e.ctx), opts);
     bus.on("chat.message", (e) => this.askAI(e.ctx), opts);
     bus.on("user.joined", (e) => this.sendJoinMessage(e.ctx), opts);
+    // NOTE: setdown() may have run during the awaits above, do not rejoin then
+    if (signal.aborted) {
+      return;
+    }
     this.irc.join(this.channelName);
 
     this.isSetup = true;
@@ -314,6 +326,11 @@ export class ChannelConnection {
   }
 
   public setdown(): void {
+    // NOTE: safe to call twice, e.g. disabled during setup and then again after it
+    if (this.scope.signal.aborted) {
+      return;
+    }
+
     this.logger.info("Setting down connection");
     this.scope.abort();
     this.live?.abort();
