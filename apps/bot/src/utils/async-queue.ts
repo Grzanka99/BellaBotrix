@@ -1,55 +1,12 @@
 export class AsyncQueue {
-  private queue: Array<[() => Promise<unknown>, (v: unknown) => void, (v: string) => void]> = [];
-  private isRunning = false;
+  private tail = Promise.resolve();
 
-  private resolver: (v: boolean) => void = () => {};
-  private rejecter: (v: boolean) => void = () => {};
-
-  public async enqueue<T>(callback: () => Promise<T>, autostart = true): Promise<T> {
-    return new Promise((res, rej) => {
-      // `v` is the value `callback`'s promise resolved with, so it is a `T`.
-      this.queue.push([callback, (v) => res(v as T), rej]);
-      if (!this.isRunning && autostart) {
-        this.start();
-      }
-    });
-  }
-
-  private run() {
-    if (!this.queue.length) {
-      this.done();
-      return;
-    }
-
-    const curr = this.queue.splice(0, 1)[0];
-
-    curr[0]()
-      .then((r) => {
-        curr[1](r);
-        this.run();
-      })
-      .catch((e) => {
-        curr[2](e);
-        this.rejecter(e);
-      });
-  }
-
-  private done() {
-    this.resolver(true);
-    this.isRunning = false;
-  }
-
-  public start() {
-    this.isRunning = true;
-    this.run();
-
-    void new Promise((res, rej) => {
-      this.resolver = res;
-      this.rejecter = rej;
-    });
-  }
-
-  public get enqueued(): number {
-    return this.queue.length;
+  public enqueue<T>(callback: () => Promise<T>): Promise<T> {
+    const task = this.tail.then(callback);
+    this.tail = task.then(
+      () => undefined,
+      () => undefined,
+    );
+    return task;
   }
 }
