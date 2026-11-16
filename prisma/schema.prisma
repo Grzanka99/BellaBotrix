@@ -86,6 +86,8 @@ model ChannelAccess {
   userid      Int
   channelId   Int
   accessLevel String @default("MOD")
+
+  @@unique([userid, channelId])
 }
 
 model Timers {

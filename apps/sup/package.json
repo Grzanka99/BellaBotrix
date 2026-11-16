@@ -19,7 +19,7 @@
   "dependencies": {
     "sqlite-storage": "workspace:*",
     "@prisma/client": "^5.9.0",
-    "elysia": "latest",
+    "elysia": "1.4.30",
     "zod": "^3.22.4"
   }
 }
